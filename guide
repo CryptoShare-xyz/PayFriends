@@ -1,0 +1,13 @@
+installation:
+node.js 20
+npm install --save-dev hardhat
+npx hardhat
+npm init -y
+npx hardhat --version = 2.22.6
+npm install --save-dev @nomicfoundation/hardhat-toolbox
+npx hardhat
+
+running:
+  - move contract to contracts dir
+  - npx hardhat node
+  
