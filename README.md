@@ -1,13 +1,20 @@
-# Sample Hardhat Project
+# CryptoShare
+A group payments app to split different payments among friends.
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+The App contains:
+* ExpenseSplitter.sol: a smart contract that operates expense creation and approval.
 
-Try running some of the following tasks:
+## Getting started
+### Install
+Use `npm i --include=dev` to install dev requirements.
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.ts
-```
+### Test
+Run `npx hardhat test` to test the contract
+
+
+## TODO
+- [ ] switch to hardhat environment and Sepolia
+- [ ] FrontEnd to interact with contract
+- [ ] move to the most convenient L2
+- [ ] consider supporting USDC instead of eth transfers
+- [ ] integration with metamask or another wallet
