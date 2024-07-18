@@ -23,4 +23,8 @@ Run `npx hardhat test` to test the contract
 - [ ] move to the most convenient L2
 - [ ] consider supporting USDC instead of eth transfers
 - [x] integration with metamask or another wallet
+- [ ] make code more type safe
+- [ ] make code more efficient
+
+
 
