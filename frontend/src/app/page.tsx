@@ -50,6 +50,22 @@ export default function Home() {
   const [expenses, setExpenses] = useState([]);
   const [activeExpenses, setActiveExpenses] = useState(0);
   const [cashFlow, setCashFlow] = useState(0);
+  const [contract, setContract] = useState();
+  const [owner, setOwner] = useState();
+
+  const createExpense = async () => {
+    const address1 = '0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2';
+    const address2 = '0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db';
+    const address3 = '0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB';
+    const amount = 9;
+
+    await contract.methods
+      .createExpense(amount, [address1, address2, address3])
+      .send({ from: owner });
+
+
+
+  }
 
   const getContractInfo = async () => {
     try {
@@ -59,6 +75,10 @@ export default function Home() {
         const web3 = new Web3(ethereum);
         const ExpenseSplitter = new web3.eth.Contract(Contract.abi, contractAddress);
 
+        setContract(ExpenseSplitter);
+        const accounts = await web3.eth.getAccounts();
+        setOwner(accounts[0]);
+
         let totalExpenses = await ExpenseSplitter.methods.getExpensesLength().call();
         setTotalExpenses(Number.parseInt(totalExpenses));
 
@@ -67,6 +87,17 @@ export default function Home() {
 
         let cashFlow = await ExpenseSplitter.methods.cashFlow().call();
         setCashFlow(Number.parseInt(cashFlow));
+
+        let expenses = await Promise.all(Array.from({ length: Number.parseInt(totalExpenses) }, async (v, index) => {
+          const expense = await ExpenseSplitter.methods.getExpense(index).call();
+          return {
+            from: expense[0],
+            amount: `${Number.parseInt(expense[1])} ETH`,
+            completed: expense[3] ? "COMPLETE" : "PENDING"
+          }
+        }))
+
+        setExpenses(expenses)
 
       } else {
         console.log("Ethereum object doesn't exist");
@@ -91,7 +122,7 @@ export default function Home() {
             <div className="my-auto">
               <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
               <h2 className="text-slate-400 my-2 w-[80%] mx-auto ">A group payments app to split different payments among friends</h2>
-              <Button variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Create Expense</Button>
+              <Button onClick={createExpense} variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Create Expense</Button>
             </div>
             <aside className="w-[80%] max-w-[480px] my-2 mx-auto">
               <Image src="/hero.svg" width={640} height={640} alt=" hero" />
@@ -136,8 +167,8 @@ export default function Home() {
                 {expenses.map((expense) => (
                   <TableRow key={expense.from}>
                     <TableCell className="font-medium">{formatAddress(expense.from)}</TableCell>
-                    <TableCell>{expense.paymentStatus}</TableCell>
-                    <TableCell className="text-right">{expense.totalAmount}</TableCell>
+                    <TableCell>{expense.completed}</TableCell>
+                    <TableCell className="text-right">{expense.amount}</TableCell>
                     <TableCell className="text-center"><Button size="sm" className="bg-[#6c63ff]">Approve</Button></TableCell>
                   </TableRow>
                 ))}
