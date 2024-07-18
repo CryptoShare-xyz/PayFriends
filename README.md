@@ -18,9 +18,9 @@ Run `npx hardhat test` to test the contract
 > Note it you compile the contract again replace `app/ExpenseSplitter.json` with the new one and if you deploy new maybe need to change contract address in code
 
 ## TODO
-- [ x ] switch to hardhat environment and Sepolia
+- [x] switch to hardhat environment and Sepolia
 - [ ] FrontEnd to interact with contract
 - [ ] move to the most convenient L2
 - [ ] consider supporting USDC instead of eth transfers
-- [ x ] integration with metamask or another wallet
+- [x] integration with metamask or another wallet
 
