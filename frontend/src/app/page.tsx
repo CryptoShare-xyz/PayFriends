@@ -54,17 +54,20 @@ export default function Home() {
   const [owner, setOwner] = useState();
 
   const createExpense = async () => {
-    const address1 = '0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2';
-    const address2 = '0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db';
-    const address3 = '0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB';
-    const amount = 9;
+    // const address1 = '0xdc10471e56D6a75FeBb540eB87865e586b03cA22';
+    // // const address2 = '0x1d16E380b2AE9683C8A78804e8186987E0C55Ae7'
+    // const amount = 1;
 
-    await contract.methods
-      .createExpense(amount, [address1, address2, address3])
-      .send({ from: owner });
+    // await contract.methods
+    //   .createExpense(amount, [address1,])
+    //   .send({ from: owner });
+    alert("unimplemented")
 
 
+  }
 
+  const approveExpense = async () => {
+    alert("unimplemented")
   }
 
   const getContractInfo = async () => {
@@ -169,7 +172,7 @@ export default function Home() {
                     <TableCell className="font-medium">{formatAddress(expense.from)}</TableCell>
                     <TableCell>{expense.completed}</TableCell>
                     <TableCell className="text-right">{expense.amount}</TableCell>
-                    <TableCell className="text-center"><Button size="sm" className="bg-[#6c63ff]">Approve</Button></TableCell>
+                    <TableCell className="text-center"><Button onClick={approveExpense} size="sm" className="bg-[#6c63ff]">Approve</Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
