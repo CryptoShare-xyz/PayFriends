@@ -21,6 +21,7 @@ const config: HardhatUserConfig = {
       accounts: [SEPOLIA_PRIVATE_KEY],
     },
   },
+
 };
 
 export default config;

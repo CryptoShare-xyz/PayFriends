@@ -134,6 +134,7 @@ contract ExpenseSplitter {
             approvalsArray,
             expense.collectedAmount
         );
+
     }
 
     function getExpensesLength() public view returns (uint256) {
