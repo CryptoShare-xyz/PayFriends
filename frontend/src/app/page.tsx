@@ -2,7 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Web3 from "web3";
 import { MetamaskProvider } from "../hooks/useMetamask";
+import Contract from "./ExpenseSplitter.json";
 import MetaMaskWallet from "./metamask";
 import { formatAddress } from "./utils";
 
@@ -15,32 +17,69 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
+const contractAddress = "0xF5e2a7e572094b035bfC1E6070ee98fB5Eb79a21";
 
-const expenses = [
-  {
-    from: "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097",
-    paymentStatus: "1/3",
-    totalAmount: "$250.00",
-  },
-  {
-    from: "0xcd3B766CCDd6AE721141F452C550Ca635964ce71",
-    paymentStatus: "2/4",
-    totalAmount: "$150.00",
-  },
-  {
-    from: " 0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
-    paymentStatus: "0/8",
-    totalAmount: "$350.00",
-  },
-  {
-    from: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
-    paymentStatus: "4/5",
-    totalAmount: "$450.00",
-  },
-]
+// const expenses = [
+//   {
+//     from: "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097",
+//     paymentStatus: "1/3",
+//     totalAmount: "$250.00",
+//   },
+//   {
+//     from: "0xcd3B766CCDd6AE721141F452C550Ca635964ce71",
+//     paymentStatus: "2/4",
+//     totalAmount: "$150.00",
+//   },
+//   {
+//     from: " 0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
+//     paymentStatus: "0/8",
+//     totalAmount: "$350.00",
+//   },
+//   {
+//     from: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
+//     paymentStatus: "4/5",
+//     totalAmount: "$450.00",
+//   },
+// ]
 
 export default function Home() {
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [expenses, setExpenses] = useState([]);
+  const [activeExpenses, setActiveExpenses] = useState(0);
+  const [cashFlow, setCashFlow] = useState(0);
+
+  const getContractInfo = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const web3 = new Web3(ethereum);
+        const ExpenseSplitter = new web3.eth.Contract(Contract.abi, contractAddress);
+
+        let totalExpenses = await ExpenseSplitter.methods.getExpensesLength().call();
+        setTotalExpenses(Number.parseInt(totalExpenses));
+
+        let activeExpenses = await ExpenseSplitter.methods.activeExpenses().call();
+        setActiveExpenses(Number.parseInt(activeExpenses));
+
+        let cashFlow = await ExpenseSplitter.methods.cashFlow().call();
+        setCashFlow(Number.parseInt(cashFlow));
+
+      } else {
+        console.log("Ethereum object doesn't exist");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    getContractInfo();
+  }, [])
+
   return (
     <MetamaskProvider>
       <div className="lg:max-w-[80%] mx-auto">
@@ -66,15 +105,15 @@ export default function Home() {
           <section id="stats" className="flex flex-col text-center lg:flex-row justify-evenly py-8 mx-auto gap-4 ">
             <article className="text-slate-700 lg:text-2xl text-xl" >
               <h1 className="uppercase ">cash flow</h1>
-              <small>{"32,434$"}</small>
+              <small>{`${cashFlow} ETH`}</small>
             </article>
             <article className="text-slate-700 lg:text-2xl text-xl" >
               <h1 className="uppercase">total expenses</h1>
-              <small>{"435"}</small>
+              <small>{totalExpenses}</small>
             </article>
             <article className="text-slate-700 lg:text-2xl text-xl" >
               <h1 className="uppercase">active expenses</h1>
-              <small>{"34"}</small>
+              <small>{activeExpenses}</small>
             </article>
           </section>
 
@@ -84,7 +123,7 @@ export default function Home() {
 
           <section id="Expenses" className="py-8 w-[90%] mx-auto">
             <Table>
-              <TableCaption >All active expenses</TableCaption>
+              <TableCaption >All active expenses on contract <Link target="_blank" className="hover:underline" href={`https://sepolia.etherscan.io/address/${contractAddress}`}>{formatAddress(contractAddress)}</Link></TableCaption>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[100px]">Request address</TableHead>
