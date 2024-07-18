@@ -14,16 +14,12 @@ Run `npx hardhat test` to test the contract
 
 ### UI
 1. Change folder to `fronend/` and run `npm i --include=dev`
-2. Run in some terminal `npx hardhat node`
-3. In another terminal run `npx hardhat ignition deploy ./ignition/modules/ExpenseSplitter.ts --network localhost`
-4. Copy the contact address to `app/page.tsx`.
-5. Then `cd` to `frontend/` and run `num run dev`
 
-> Note it you compile the contract again replace `app/ExpenseSplitter.json` with the new one
+> Note it you compile the contract again replace `app/ExpenseSplitter.json` with the new one and if you deploy new maybe need to change contract address in code
 
 ## TODO
-- [ ] switch to hardhat environment and Sepolia
+- [ x ] switch to hardhat environment and Sepolia
 - [ ] FrontEnd to interact with contract
 - [ ] move to the most convenient L2
 - [ ] consider supporting USDC instead of eth transfers
-- [ ] integration with metamask or another wallet
+- [ x ] integration with metamask or another wallet
