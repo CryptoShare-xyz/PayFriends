@@ -12,6 +12,8 @@ contract ExpenseSplitter {
     }
 
     Expense[] public expenses;
+    uint256 public activeExpenses = 0;
+    uint256 public cashFlow = 0;
 
     // Define events for logging
     event LogExpenseCreated(
@@ -47,6 +49,7 @@ contract ExpenseSplitter {
         newExpense.collectedAmount = 0;
 
         // Emit the event with the index
+        activeExpenses += 1;
         emit LogExpenseCreated(index, msg.sender, _amount, _splitAddresses);
     }
 
@@ -70,6 +73,7 @@ contract ExpenseSplitter {
 
         expense.approvals[msg.sender] = true;
         expense.collectedAmount += msg.value;
+        cashFlow += msg.value;
         emit LogExpenseApproved(_expenseId, msg.sender, msg.value);
 
         // Check if all approvals are received
@@ -83,6 +87,7 @@ contract ExpenseSplitter {
 
         if (allApproved) {
             expense.completed = true;
+            activeExpenses -= 1;
             uint256 amountToTransfer = expense.collectedAmount;
             expense.collectedAmount = 0;
             (bool success, ) = payable(expense.creator).call{
@@ -129,6 +134,15 @@ contract ExpenseSplitter {
             approvalsArray,
             expense.collectedAmount
         );
+
+    }
+
+    function getExpensesLength() public view returns (uint256) {
+        return expenses.length;
+    }
+
+    function getActiveExpenses() public view returns (uint256) {
+        return expenses.length;
     }
 
     receive() external payable {}

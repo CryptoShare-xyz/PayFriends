@@ -22,7 +22,8 @@ describe("ExpenseSplitter", function () {
     describe("Expenses", function () {
         describe("Sanity", async function () {
             it("Should compile and deploy", async function () {
-                await loadFixture(deployFixture);
+                const { expenseSplitter } = await loadFixture(deployFixture);
+                expect(await expenseSplitter.getExpensesLength()).equal(0)
             });
 
             it("Create an expense", async function () {
@@ -34,6 +35,8 @@ describe("ExpenseSplitter", function () {
                     .to.emit(expenseSplitter, "LogExpenseCreated")
                     .withArgs(0, owner.address, amount, splitAddresses);
 
+                expect(await expenseSplitter.getExpensesLength()).equal(1)
+              
                 const expense = await expenseSplitter.getExpense(0);
 
                 expect(expense[0]).to.equal(owner.address); // creator
@@ -52,6 +55,8 @@ describe("ExpenseSplitter", function () {
                 await expect(expenseSplitter.createExpense(amount, splitAddresses))
                     .to.emit(expenseSplitter, "LogExpenseCreated")
                     .withArgs(0, owner.address, amount, splitAddresses);
+
+                expect(await expenseSplitter.getExpensesLength()).equal(1)
 
                 await expect(
                     expenseSplitter.connect(user1).approveExpense(0, { value: 9 })
@@ -78,6 +83,8 @@ describe("ExpenseSplitter", function () {
                 await expect(expenseSplitter.createExpense(amount, splitAddresses))
                     .to.emit(expenseSplitter, "LogExpenseCreated")
                     .withArgs(0, owner.address, amount, splitAddresses);
+
+                expect(await expenseSplitter.getExpensesLength()).equal(1)
 
                 // need to check this here because the expense costs money
                 const ownerBalance = await ethers.provider.getBalance(owner)
