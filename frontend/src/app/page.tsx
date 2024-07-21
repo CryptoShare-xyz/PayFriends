@@ -2,9 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Web3 from "web3";
+import Web3, { Contract } from "web3";
 import { MetamaskProvider } from "../hooks/useMetamask";
-import Contract from "./ExpenseSplitter.json";
+import ExpenseContract from "./ExpenseSplitter.json";
 import MetaMaskWallet from "./metamask";
 import { formatAddress } from "./utils";
 
@@ -20,30 +20,9 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const contractAddress = "0xF5e2a7e572094b035bfC1E6070ee98fB5Eb79a21";
+import { ExpenseModal } from "./ExpenseModal";
 
-// const expenses = [
-//   {
-//     from: "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097",
-//     paymentStatus: "1/3",
-//     totalAmount: "$250.00",
-//   },
-//   {
-//     from: "0xcd3B766CCDd6AE721141F452C550Ca635964ce71",
-//     paymentStatus: "2/4",
-//     totalAmount: "$150.00",
-//   },
-//   {
-//     from: " 0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
-//     paymentStatus: "0/8",
-//     totalAmount: "$350.00",
-//   },
-//   {
-//     from: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
-//     paymentStatus: "4/5",
-//     totalAmount: "$450.00",
-//   },
-// ]
+const contractAddress = "0xF5e2a7e572094b035bfC1E6070ee98fB5Eb79a21";
 
 export default function Home() {
   const [totalExpenses, setTotalExpenses] = useState(0);
@@ -53,17 +32,13 @@ export default function Home() {
   const [contract, setContract] = useState();
   const [owner, setOwner] = useState();
 
-  const createExpense = async () => {
-    // const address1 = '0xdc10471e56D6a75FeBb540eB87865e586b03cA22';
-    // // const address2 = '0x1d16E380b2AE9683C8A78804e8186987E0C55Ae7'
-    // const amount = 1;
-
-    // await contract.methods
-    //   .createExpense(amount, [address1,])
-    //   .send({ from: owner });
-    alert("unimplemented")
-
-
+  const createExpenseFromOwner = (owner: string, contract: Contract) => {
+    return async (amount: number, addresses: string[]) => {
+      console.log(owner, amount, addresses)
+      await contract.methods
+        .createExpense(amount, addresses)
+        .send({ from: owner });
+    }
   }
 
   const approveExpense = async () => {
@@ -76,7 +51,7 @@ export default function Home() {
 
       if (ethereum) {
         const web3 = new Web3(ethereum);
-        const ExpenseSplitter = new web3.eth.Contract(Contract.abi, contractAddress);
+        const ExpenseSplitter = new web3.eth.Contract(ExpenseContract.abi, contractAddress);
 
         setContract(ExpenseSplitter);
         const accounts = await web3.eth.getAccounts();
@@ -125,7 +100,7 @@ export default function Home() {
             <div className="my-auto">
               <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
               <h2 className="text-slate-400 my-2 w-[80%] mx-auto ">A group payments app to split different payments among friends</h2>
-              <Button onClick={createExpense} variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Create Expense</Button>
+              <ExpenseModal createExpense={createExpenseFromOwner(owner, contract)} />
             </div>
             <aside className="w-[80%] max-w-[480px] my-2 mx-auto">
               <Image src="/hero.svg" width={640} height={640} alt=" hero" />
