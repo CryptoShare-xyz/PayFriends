@@ -28,6 +28,7 @@ Run `npx hardhat test` to test the contract
 - [x] integration with metamask or another wallet
 - [ ] make code more type safe
 - [ ] make code more efficient
+- [ ] probably need to make expenseID from each one created for uniqueness
 
 
 
