@@ -11,7 +11,7 @@ const INFURA_API_KEY = vars.get("INFURA_API_KEY", "");
 // To export your private key from Metamask, open Metamask and
 // go to Account Details > Export Private Key
 // Beware: NEVER put real Ether into testing accounts
-const SEPOLIA_PRIVATE_KEY = vars.get("SEPOLIA_PRIVATE_KEY", "");
+const SEPOLIA_PRIVATE_KEY = vars.get("SEPOLIA_PRIVATE_KEY", "0x0000000000000000000000000000000000000000000000000000000000000000");
 
 const config: HardhatUserConfig = {
   solidity: "0.8.24",
