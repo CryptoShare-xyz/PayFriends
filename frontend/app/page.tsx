@@ -39,7 +39,7 @@ export default function Home() {
           <div className="my-auto">
             <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
             <h2 className="text-slate-400 my-2 w-[80%] mx-auto ">A group payments app to split different payments among friends</h2>
-            <Button>Create expense </Button>
+            <Button variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Create Expense</Button>
           </div>
           <aside className="w-[80%] max-w-[480px] my-2 mx-auto">
             <Image src="/hero.svg" width={640} height={640} alt=" hero" />
