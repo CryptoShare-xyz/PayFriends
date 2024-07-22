@@ -13,9 +13,11 @@ import {
   TableRow
 } from "@/components/ui/table";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import ExpenseSplitter from "@/artifacts/contracts/ExpenseSplitter.sol/ExpenseSplitter.json";
 import { formatAddress } from "@/lib/utils";
+import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { ConnectKitButton } from "connectkit";
 
 type Expense = {
@@ -25,9 +27,34 @@ type Expense = {
 }
 
 const contractAddress = "0xF5e2a7e572094b035bfC1E6070ee98fB5Eb79a21";
+//TODO: probably dont want to expose NEXT_PUBLIC_ALCHEMY_API_KEY
+const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+const web3 = createAlchemyWeb3(alchemyKey);
+const expenseSplitterContract = new web3.eth.Contract(
+  ExpenseSplitter.abi,
+  contractAddress
+);
 
 export default function Home() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [cashFlow, setCashFlow] = useState(0);
+  const [activeExpenses, setActiveExpenses] = useState(0);
+
+  const getContractStats = async () => {
+    const totalExpenses = await expenseSplitterContract.methods.getExpensesLength().call();
+    setTotalExpenses(Number.parseInt(totalExpenses))
+
+    const cashFlow = await expenseSplitterContract.methods.cashFlow().call();
+    setCashFlow(cashFlow)
+
+    const activeExpenses = await expenseSplitterContract.methods.getActiveExpenses().call();
+    setActiveExpenses(activeExpenses)
+  }
+
+  useEffect(() => {
+    getContractStats()
+  }, [])
 
   return (
     <main className="lg:max-w-[80%] mx-auto">
@@ -51,15 +78,15 @@ export default function Home() {
         <section id="stats" className="flex flex-col text-center lg:flex-row justify-evenly py-8 mx-auto gap-4 ">
           <article className="text-slate-700 lg:text-2xl text-xl" >
             <h1 className="uppercase ">cash flow</h1>
-            <small>{0} ETH</small>
+            <small>{cashFlow} ETH</small>
           </article>
           <article className="text-slate-700 lg:text-2xl text-xl" >
             <h1 className="uppercase">total expenses</h1>
-            <small>{0}</small>
+            <small>{totalExpenses}</small>
           </article>
           <article className="text-slate-700 lg:text-2xl text-xl" >
             <h1 className="uppercase">active expenses</h1>
-            <small>{0}</small>
+            <small>{activeExpenses}</small>
           </article>
         </section>
 
