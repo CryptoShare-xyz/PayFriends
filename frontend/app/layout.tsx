@@ -5,10 +5,11 @@ import { Inter as FontSans } from "next/font/google";
 import { WagmiConfig, createConfig } from "wagmi";
 import "./globals.css";
 
+
 const config = createConfig(
   getDefaultConfig({
-    alchemyId: process.env.ALCHEMY_API_KEY,
-    walletConnectProjectId: process.env.WALLET_CONNECT_PROJECT_ID || "",
+    alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
+    walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
     appName: "CryptoShare",
   })
 );
