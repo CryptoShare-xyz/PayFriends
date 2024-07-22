@@ -19,6 +19,7 @@ import ExpenseSplitter from "@/artifacts/contracts/ExpenseSplitter.sol/ExpenseSp
 import { formatAddress } from "@/lib/utils";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { ConnectKitButton } from "connectkit";
+import { AbiItem } from 'web3-utils';
 
 type Expense = {
   id: string,
@@ -34,7 +35,7 @@ const contractGenesisBlock = 6333314
 const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
 const web3 = createAlchemyWeb3(alchemyKey);
 const expenseSplitterContract = new web3.eth.Contract(
-  ExpenseSplitter.abi,
+  ExpenseSplitter.abi as AbiItem[],
   contractAddress
 );
 
