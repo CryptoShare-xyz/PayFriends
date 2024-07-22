@@ -20,13 +20,11 @@ Run `npx hardhat test` to test the contract
 > Note it you compile the contract again replace `app/ExpenseSplitter.json` with the new one and if you deploy new maybe need to change contract address in code
 
 ## TODO
-- [ ] support wei/gwei
 - [x] switch to hardhat environment and Sepolia
 - [ ] FrontEnd to interact with contract
 - [ ] move to the most convenient L2
 - [ ] consider supporting USDC instead of eth transfers
 - [x] integration with metamask or another wallet
-- [ ] make code more type safe
 - [ ] make code more efficient
 - [ ] probably need to make expenseID from each one created for uniqueness
 
