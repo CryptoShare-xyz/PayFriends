@@ -26,8 +26,11 @@ type Expense = {
   from: string
 }
 
+// TODO: probably need to dynamically read this from somewhere
 const contractAddress = "0xF5e2a7e572094b035bfC1E6070ee98fB5Eb79a21";
-//TODO: probably dont want to expose NEXT_PUBLIC_ALCHEMY_API_KEY
+const contractGenesisBlock = 6333314
+
+// TODO: probably dont want to expose NEXT_PUBLIC_ALCHEMY_API_KEY
 const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
 const web3 = createAlchemyWeb3(alchemyKey);
 const expenseSplitterContract = new web3.eth.Contract(
@@ -52,8 +55,23 @@ export default function Home() {
     setActiveExpenses(activeExpenses)
   }
 
+  const getRecentExpenses = async () => {
+    await expenseSplitterContract.getPastEvents("LogExpenseCreated", {
+      fromBlock: contractGenesisBlock
+    }, (err, events) => {
+      const expenses = events.map(event => ({
+        from: event.returnValues.creator,
+        amount: event.returnValues.amount,
+        id: event.transactionHash,
+      }))
+      setExpenses(expenses)
+    }
+    )
+  }
+
   useEffect(() => {
-    getContractStats()
+    getContractStats();
+    getRecentExpenses();
   }, [])
 
   return (
