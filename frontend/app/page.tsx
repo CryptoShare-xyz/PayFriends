@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { formatAddress } from "@/lib/utils";
+import { ConnectKitButton } from "connectkit";
 
 type Expense = {
   id: string,
@@ -31,9 +32,9 @@ export default function Home() {
   return (
     <main className="lg:max-w-[80%] mx-auto">
       <section id="hero" className="bg-slate-700 px-4 py-4 lg:rounded-2xl">
-        {/* <nav className="flex mb-4 lg:mb-16">
-          <Button />
-        </nav> */}
+        <nav className="flex mb-4 lg:mb-16 justify-end">
+          <ConnectKitButton />
+        </nav>
         <div className="flex flex-wrap gap-8 justify-center text-center lg:mb-48 mb-8">
           <div className="my-auto">
             <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
