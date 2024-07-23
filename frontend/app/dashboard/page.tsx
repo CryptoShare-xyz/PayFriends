@@ -19,6 +19,17 @@ import { useMediaQuery } from 'react-responsive'
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn, formatAddress } from "@/lib/utils"
 import { Activity } from 'lucide-react'
@@ -45,6 +56,54 @@ const events = [
     amount: 4
   },
 ]
+
+export function CreateGroupDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="my-2 mr-auto bg-[#6c63ff] text-slate-100">
+          <span className="sm:hidden rounded-[50%]">+</span>
+          <span className="hidden sm:block">Create group</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create group</DialogTitle>
+          <DialogDescription>
+            Create group to share a common expense with friends by sending group link.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-left">
+              Group name
+            </Label>
+            <Input
+              id="name"
+              placeholder="Fun school trip"
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="description" className="text-left">
+              Description
+            </Label>
+            <Input
+              id="description"
+              placeholder="Gathering money for the best school trip ever!"
+              className="col-span-3"
+              maxLength={100}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit" className="bg-[#6c63ff]">Create</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 
 export function MainNav({
   className,
@@ -78,7 +137,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="flex-col md:flex px-8 lg:max-w-[80%] mx-auto bg-slate-100 min-h-screen lg:rounded-2xl">
+      <div className="flex-col md:flex px-8 lg:max-w-[70%] mx-auto bg-slate-100 min-h-screen lg:rounded-2xl">
         <div className="border-b">
           <div className="flex h-16 items-center px-4">
             <MainNav className="mx-6" />
@@ -91,10 +150,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between space-y-2">
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
             <div className="flex items-center space-x-2">
-              <Button className="my-2 mr-auto bg-[#6c63ff] text-slate-100">
-                <span className="sm:hidden rounded-[50%]">+</span>
-                <span className="hidden sm:block">Create group</span>
-              </Button>
+              <CreateGroupDialog />
             </div>
           </div>
           <div className="flex flex-wrap">
