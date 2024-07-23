@@ -13,12 +13,13 @@ import {
   TableRow
 } from "@/components/ui/table";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import ExpenseSplitter from "@/artifacts/contracts/ExpenseSplitter.sol/ExpenseSplitter.json";
 import { formatAddress } from "@/lib/utils";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { ConnectKitButton } from "connectkit";
+import { useAccount } from "wagmi";
 import { AbiItem } from 'web3-utils';
 
 type Expense = {
@@ -44,6 +45,7 @@ export default function Home() {
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [cashFlow, setCashFlow] = useState(0);
   const [activeExpenses, setActiveExpenses] = useState(0);
+  const { address, isConnected } = useAccount();
 
   const getContractStats = async () => {
     const totalExpenses = await expenseSplitterContract.methods.getExpensesLength().call();
@@ -70,22 +72,23 @@ export default function Home() {
     )
   }
 
-  useEffect(() => {
-    getContractStats();
-    getRecentExpenses();
-  }, [])
+  // useEffect(() => {
+  //   getContractStats();
+  //   getRecentExpenses();
+  // }, [])
 
   return (
     <main className="lg:max-w-[80%] mx-auto">
       <section id="hero" className="bg-slate-700 px-4 py-4 lg:rounded-2xl">
-        <nav className="flex mb-4 lg:mb-16 justify-end">
+        <nav className="flex mb-4 lg:mb-16 justify-end gap-4">
+          {isConnected && <Button variant="secondary" className="bg-[#6c63ff] text-slate-100"><Link href="dashboard">Dashboard</Link></Button>}
           <ConnectKitButton />
         </nav>
         <div className="flex flex-wrap gap-8 justify-center text-center lg:mb-48 mb-8">
           <div className="my-auto">
             <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
             <h2 className="text-slate-400 my-2 w-[80%] mx-auto ">A group payments app to split different payments among friends</h2>
-            <Button variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Create Expense</Button>
+            <Button variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Getting started</Button>
           </div>
           <aside className="w-[80%] max-w-[480px] my-2 mx-auto">
             <Image src="/hero.svg" width={640} height={640} alt=" hero" />
