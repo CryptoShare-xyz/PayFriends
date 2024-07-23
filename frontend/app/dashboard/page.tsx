@@ -14,6 +14,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import { ConnectKitButton } from "connectkit"
+import { redirect } from 'next/navigation'
 import { useMediaQuery } from 'react-responsive'
 
 import Link from "next/link"
@@ -33,6 +34,9 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn, formatAddress } from "@/lib/utils"
 import { Activity } from 'lucide-react'
+import { useEffect } from "react"
+import { useAccount } from 'wagmi'
+
 
 const events = [
   {
@@ -109,6 +113,19 @@ export function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
+  const { isConnected } = useAccount();
+
+  // TODO: probably should use middleware/nextauth
+  useEffect(() => {
+    if (!isConnected) {
+      redirect("/");
+    }
+  }, [isConnected])
+
+  if (!isConnected) {
+    return <></>
+  }
+
   return (
     <nav
       className={cn("flex items-center space-x-4 lg:space-x-6", className)}
@@ -134,6 +151,10 @@ export default function DashboardPage() {
   const notMobile = useMediaQuery({
     query: '(min-width: 640px)'
   })
+
+  const account = useAccount()
+  console.log(account)
+  console.log(account.isConnected)
 
   return (
     <>
