@@ -61,7 +61,7 @@ const events = [
   },
 ]
 
-export function CreateGroupDialog() {
+function CreateGroupDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -109,23 +109,10 @@ export function CreateGroupDialog() {
 }
 
 
-export function MainNav({
+function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const { isConnected } = useAccount();
-
-  // TODO: probably should use middleware/nextauth
-  useEffect(() => {
-    if (!isConnected) {
-      redirect("/");
-    }
-  }, [isConnected])
-
-  if (!isConnected) {
-    return <></>
-  }
-
   return (
     <nav
       className={cn("flex items-center space-x-4 lg:space-x-6", className)}
@@ -152,9 +139,18 @@ export default function DashboardPage() {
     query: '(min-width: 640px)'
   })
 
-  const account = useAccount()
-  console.log(account)
-  console.log(account.isConnected)
+  const { isConnected } = useAccount();
+
+  // TODO: probably should use middleware/nextauth
+  useEffect(() => {
+    if (!isConnected) {
+      redirect("/");
+    }
+  }, [isConnected])
+
+  if (!isConnected) {
+    return <></>
+  }
 
   return (
     <>
