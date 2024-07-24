@@ -1,6 +1,5 @@
 'use client'
 
-
 import {
   Card,
   CardContent,
@@ -34,7 +33,7 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn, formatAddress } from "@/lib/utils"
 import { Activity } from 'lucide-react'
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useAccount } from 'wagmi'
 
 
@@ -134,6 +133,72 @@ function MainNav({
   )
 }
 
+const ownedGroups = [
+  {
+    id: "67859517-b722-46e9-97e0-4bf9bebedb4f",
+    name: "group 1",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis",
+    amount: "123"
+  },
+  {
+    id: "12709677-68fa-4b92-8463-7a0e10037432",
+    name: "group 2",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis",
+    amount: "123"
+  },
+  {
+    id: "e38be1a6-c37f-4fa8-a0eb-d9d94cf35ec1",
+    name: "group 3",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis",
+    amount: "123"
+  },
+  {
+    id: "7e7064b7-75bb-4b1b-8ae4-6bd7af012d20",
+    name: "group 4",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis",
+    amount: "123"
+  },
+  {
+    id: "1bb6f88f-0567-4b23-8a72-cf5fe533dd02",
+    name: "group 5",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis",
+    amount: "123"
+  },
+]
+
+const involvedGroups = [
+  {
+    id: "76bfa1b2-cd46-46e6-bdaf-210a101f5bec",
+    name: "group 1",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis",
+    amount: "123"
+  },
+  {
+    id: "87e297f2-46d3-43a4-a6d2-5a9760f5a0ba",
+    name: "group 2",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis",
+    amount: "123"
+  },
+]
+
+const GroupCard: React.FC<typeof ownedGroups[number]> = ({ name, description, amount }) => {
+  return (
+    <Card className="md:w-[12rem]">
+      < CardHeader className="" >
+        <CardTitle className="mb-2 capitalize">
+          {name}
+        </CardTitle>
+        <span className="text-slate-500 text-sm">{description}</span>
+      </CardHeader >
+      <CardContent>
+        <span className="flex text-md text-slate-800">
+          Collected <span className="ml-auto">{amount}</span>
+        </span>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function DashboardPage() {
   const notMobile = useMediaQuery({
     query: '(min-width: 640px)'
@@ -182,101 +247,16 @@ export default function DashboardPage() {
               </TabsList>
               <TabsContent value="owned" className="space-y-4">
                 <div className="flex flex-wrap gap-4">
-                  <Card className="md:w-[12rem]">
-                    <CardHeader className="">
-                      <CardTitle className="mb-2">
-                        Group 1
-                      </CardTitle>
-                      <span className="text-slate-500 text-sm">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis </span>
-                    </CardHeader>
-                    <CardContent>
-                      <span className="flex text-md text-slate-800">
-                        Collected <span className="ml-auto">123 ETH</span>
-                      </span>
-                    </CardContent>
-                  </Card>
-                  <Card className="md:w-[12rem]">
-                    <CardHeader className="">
-                      <CardTitle className="mb-2">
-                        Group 2
-                      </CardTitle>
-                      <span className="text-slate-500 text-sm">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis </span>
-                    </CardHeader>
-                    <CardContent>
-                      <span className="flex text-md text-slate-800">
-                        Collected <span className="ml-auto">123 ETH</span>
-                      </span>
-                    </CardContent>
-                  </Card>
-                  <Card className="md:w-[12rem]">
-                    <CardHeader className="">
-                      <CardTitle className="mb-2">
-                        Group 3
-                      </CardTitle>
-                      <span className="text-slate-500 text-sm">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis </span>
-                    </CardHeader>
-                    <CardContent>
-                      <span className="flex text-md text-slate-800">
-                        Collected <span className="ml-auto">123 ETH</span>
-                      </span>
-                    </CardContent>
-                  </Card>
-                  <Card className="md:w-[12rem]">
-                    <CardHeader className="">
-                      <CardTitle className="mb-2">
-                        Group 4
-                      </CardTitle>
-                      <span className="text-slate-500 text-sm">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis </span>
-                    </CardHeader>
-                    <CardContent>
-                      <span className="flex text-md text-slate-800">
-                        Collected <span className="ml-auto">123 ETH</span>
-                      </span>
-                    </CardContent>
-                  </Card>
-                  <Card className="md:w-[12rem]">
-                    <CardHeader className="">
-                      <CardTitle className="mb-2">
-                        Group 5
-                      </CardTitle>
-                      <span className="text-slate-500 text-sm">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis </span>
-                    </CardHeader>
-                    <CardContent>
-                      <span className="flex text-md text-slate-800">
-                        Collected <span className="ml-auto">123 ETH</span>
-                      </span>
-                    </CardContent>
-                  </Card>
+                  {
+                    ownedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                  }
                 </div>
               </TabsContent>
               <TabsContent value="involved" className="space-y-4">
                 <div className="flex flex-wrap gap-4">
-                  <Card className="md:w-[12rem]">
-                    <CardHeader className="">
-                      <CardTitle className="mb-2">
-                        Group 1
-                      </CardTitle>
-                      <span className="text-slate-500 text-sm">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis </span>
-                    </CardHeader>
-                    <CardContent>
-                      <span className="flex text-md text-slate-800">
-                        Collected <span className="ml-auto">123 ETH</span>
-                      </span>
-                    </CardContent>
-                  </Card>
-                  <Card className="md:w-[12rem]">
-                    <CardHeader className="">
-                      <CardTitle className="mb-2">
-                        Group 2
-                      </CardTitle>
-                      <span className="text-slate-500 text-sm">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis </span>
-                    </CardHeader>
-                    <CardContent>
-                      <span className="flex text-md text-slate-800">
-                        Collected <span className="ml-auto">123 ETH</span>
-                      </span>
-                    </CardContent>
-                  </Card>
+                  {
+                    involvedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                  }
                 </div>
               </TabsContent>
             </Tabs>
