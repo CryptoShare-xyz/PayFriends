@@ -8,14 +8,14 @@ The App contains:
 
 ## Getting started
 
-### Install
-Use `npm i --include=dev` to install dev requirements.
+### Install Backend
+Change dir to `backend/` and run `npm i --include=dev` to install dev requirements.
 
 ### Test
 Run `npx hardhat test` to test the contract
 
 ### UI
-1. Change folder to `fronend/` and run `npm i --include=dev`
+Change folder to `frontend/` and run `npm i --include=dev`
 
 > Note it you compile the contract again replace `app/ExpenseSplitter.json` with the new one and if you deploy new maybe need to change contract address in code
 
