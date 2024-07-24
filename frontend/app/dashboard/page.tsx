@@ -140,15 +140,17 @@ export default function DashboardPage() {
   })
 
   const { isConnected } = useAccount();
+  const [mounted, setMounted] = useState<Boolean>(false);
 
   // TODO: probably should use middleware/nextauth
   useEffect(() => {
+    setMounted(true);
     if (!isConnected) {
       redirect("/");
     }
   }, [isConnected])
 
-  if (!isConnected) {
+  if (!mounted) {
     return <></>
   }
 
