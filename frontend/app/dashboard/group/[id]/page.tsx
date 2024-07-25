@@ -90,7 +90,6 @@ export function ShareGroup() {
     )
 }
 
-const events = []
 
 export function GroupActionsMenu() {
     return (
@@ -124,21 +123,54 @@ export function GroupActionsMenu() {
     )
 }
 
+const events = [
+    {
+        address: "0x2b51b1941dfdb01fb54ce439295455b12a01da5d06ed0cc9073b61a5f9a7e4e1",
+        transaction: "pay",
+        amount: 5
+    },
+    {
+        address: "John",
+        transaction: "pay",
+        amount: 5
+    },
+    {
+        address: "0x5e1ff4a84beb13cdc03ecc6d5d553a6763edd0e8789eeb8faef744b0c9c87e84",
+        transaction: "collect",
+        amount: 10
+    },
+    {
+        address: "0x5f66df09cea2c715be958d025374fc965fe239260f2a6c3c924b56631dbceacc",
+        transaction: "pay",
+        amount: 2
+    },
+    {
+        address: "0x3af2e55285f092d375cc50f4aa12d944dd96ef8abc299fa4ea89fdf9f2457e5f",
+        transaction: "pay",
+        amount: 4
+    },
+    {
+        address: "Arnold",
+        transaction: "collect",
+        amount: 10
+    },
+]
 
 
 export default function Page({ params }: { params: { id: string } }) {
 
     return (
-        <div className="p-8 pt-6">
-            <div className="flex items-center justify-between space-y-2">
+        <div className="p-8 bg-slate-50 md:rounded-2xl md:max-w-[80%] w-full mx-auto">
+            <div className="flex items-center justify-between mb-4">
                 <h2 className="text-3xl font-bold tracking-tight">{`Group ${params.id?.substring(0, 4)}`}</h2>
                 <div className="flex items-center space-x-2">
                     <GroupActionsMenu />
                 </div>
             </div>
-            <div className="flex flex-wrap">
-                <div className="space-y-4 xl:w-3/5 mb-4">
-                    <Card className="md:w-[12rem] hover:scale-105 hover:border-2 hover:border-[#6b63ffa1] focus:scale-105 focus:border-2 focus:border-[#6b63ffa1]">
+            <p className="p-2 max-w-[30rem] text-muted-foreground">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum id nihil illum animi </p>
+            <div className="flex flex-col my-8 ">
+                <div className="mb-4 flex justify-evenly xl:flex-row flex-col gap-2">
+                    <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
                         <CardHeader>
                             <CardTitle className="mb-2 capitalize">
                                 collected
@@ -150,7 +182,7 @@ export default function Page({ params }: { params: { id: string } }) {
                             </span>
                         </CardContent>
                     </Card>
-                    <Card className="md:w-[12rem] hover:scale-105 hover:border-2 hover:border-[#6b63ffa1] focus:scale-105 focus:border-2 focus:border-[#6b63ffa1]">
+                    <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
                         <CardHeader>
                             <CardTitle className="mb-2 capitalize">
                                 withdrawn
@@ -162,7 +194,7 @@ export default function Page({ params }: { params: { id: string } }) {
                             </span>
                         </CardContent>
                     </Card>
-                    <Card className="md:w-[12rem] hover:scale-105 hover:border-2 hover:border-[#6b63ffa1] focus:scale-105 focus:border-2 focus:border-[#6b63ffa1]">
+                    <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
                         <CardHeader>
                             <CardTitle className="mb-2 capitalize">
                                 balance
@@ -176,15 +208,15 @@ export default function Page({ params }: { params: { id: string } }) {
                     </Card>
 
                 </div>
-                <aside className="xl:w-2/5 w-full mt-2">
+                <aside className="mt-2">
                     <div className="flex p-1 mb-4">
-                        <h1 className="font-semibold text-md">Recent activity</h1>
-                        <small className="ml-auto"><Activity size={16} className="text-muted-foreground" /></small>
+                        <small className="mr-2"><Activity size={16} className="text-muted-foreground" /></small>
+                        <h1 className="font-semibold text-md">Group activity</h1>
                     </div>
                     <Table className="bg-white border border-separate rounded-xl">
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Address</TableHead>
+                                <TableHead>Participant</TableHead>
                                 <TableHead>Transaction</TableHead>
                                 <TableHead>Amount</TableHead>
                             </TableRow>
@@ -192,7 +224,7 @@ export default function Page({ params }: { params: { id: string } }) {
                         <TableBody>
                             {events.map(({ address, transaction, amount }) => (
                                 <TableRow key={address}>
-                                    <TableCell className="font-medium">{formatAddress(address)}</TableCell>
+                                    <TableCell className="font-medium capitalize">{address.startsWith("0x") ? formatAddress(address) : address}</TableCell>
                                     <TableCell className="font-medium uppercase">{transaction}</TableCell>
                                     <TableCell>{amount} ETH</TableCell>
                                 </TableRow>
