@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatAddress } from "@/lib/utils";
 import {
     Activity,
+    Check,
     Coins,
     EllipsisVertical,
     LinkIcon,
@@ -37,8 +38,18 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
 
 export function ShareGroup() {
+    const shareUrl = window.location.href;
+    const [copied, setCopied] = useState(false)
+
+    const copyText = (e: React.MouseEvent<HTMLElement>) => {
+        navigator.clipboard.writeText(shareUrl)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+    
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -61,13 +72,17 @@ export function ShareGroup() {
                         </Label>
                         <Input
                             id="link"
-                            defaultValue={window.location.href}
+                            defaultValue={shareUrl}
                             readOnly
                         />
                     </div>
-                    <Button type="submit" size="sm" className="px-3 bg-[#6c63ff]">
+                    <Button type="submit" size="sm" className="px-3 bg-[#6c63ff]" onClick={copyText}>
                         <span className="sr-only">Copy</span>
-                        <Copy className="h-4 w-4" />
+                        {!copied ?
+                            <Copy className="h-4 w-4" />
+                            :
+                            <Check className="h-4 w-4" />
+                        }
                     </Button>
                 </div>
             </DialogContent>
