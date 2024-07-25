@@ -13,7 +13,6 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
-import { redirect } from 'next/navigation'
 
 
 import Link from "next/link"
@@ -33,8 +32,6 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatAddress } from "@/lib/utils"
 import { Activity } from 'lucide-react'
-import { useEffect, useState } from "react"
-import { useAccount } from 'wagmi'
 
 
 const events = [
@@ -179,21 +176,6 @@ const GroupCard: React.FC<typeof ownedGroups[number]> = ({ id, name, description
 }
 
 export default function DashboardPage() {
-  const { isConnected } = useAccount();
-  const [mounted, setMounted] = useState<Boolean>(false);
-
-  // TODO: probably should use middleware/nextauth
-  useEffect(() => {
-    setMounted(true);
-    if (!isConnected) {
-      redirect("/");
-    }
-  }, [isConnected])
-
-  if (!mounted) {
-    return <></>
-  }
-
   return (
     <div className="p-8">
       <div className="flex items-center justify-between space-y-2">
