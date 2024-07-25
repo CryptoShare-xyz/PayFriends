@@ -49,7 +49,7 @@ export function ShareGroup() {
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
-    
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -58,7 +58,7 @@ export function ShareGroup() {
                     <span>Share group</span>
                 </DropdownMenuItem>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md" showOverlay={false}>
                 <DialogHeader>
                     <DialogTitle>Share group link</DialogTitle>
                     <DialogDescription>
