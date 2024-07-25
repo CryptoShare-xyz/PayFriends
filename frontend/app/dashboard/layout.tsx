@@ -41,7 +41,7 @@ export default function DashboardLayout({
     })
     return (
         <div className="flex-col md:flex px-8 lg:max-w-[70%] mx-auto bg-slate-100 min-h-screen lg:rounded-2xl" >
-            <div className="border-b">
+            <div className="border-b mb-6">
                 <div className="flex h-16 items-center px-4">
                     <MainNav className="mx-6" />
                     <div className="ml-auto flex items-center space-x-4">
