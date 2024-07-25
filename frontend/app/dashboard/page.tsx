@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatAddress } from "@/lib/utils"
 import { Activity } from 'lucide-react'
-import { Dispatch, SetStateAction, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
 
 
@@ -200,11 +200,25 @@ const GroupCard: React.FC<typeof initialOwnedGroups[number]> = ({ id, name, desc
 
 export default function DashboardPage() {
   const [ownedGroups, setOwnedGroups] = useState(initialOwnedGroups);
+  const [filterOwnedGroups, setFilterOwnedGroups] = useState(ownedGroups);
   const [involvedGroups, setInvolvedGroups] = useState(initialInvolvedGroups);
+  const [filterInvolvedGroups, setFilterInvolvedGroups] = useState(involvedGroups);
+  const [filter, setFilter] = useState("");
+
+  const handleFilter = (e) => {
+    setFilter(e.target.value)
+    setFilterOwnedGroups(ownedGroups.filter(({ name }, _) => name.includes(e.target.value)))
+    setFilterInvolvedGroups(involvedGroups.filter(({ name }, _) => name.includes(e.target.value)))
+  }
+
+  useEffect(() => {
+    setFilterOwnedGroups(ownedGroups.filter(({ name }, _) => name.includes(filter)))
+    setFilterInvolvedGroups(involvedGroups.filter(({ name }, _) => name.includes(filter)))
+  }, [ownedGroups, involvedGroups]);
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center space-x-2">
           <CreateGroupDialog groups={ownedGroups} setGroups={setOwnedGroups} />
@@ -212,6 +226,7 @@ export default function DashboardPage() {
       </div>
       <div className="flex flex-wrap">
         <Tabs defaultValue="owned" className="space-y-4 xl:w-3/5 mb-4">
+          <Input placeholder="Search group" className="max-w-[25rem]" value={filter} onChange={handleFilter} />
           <TabsList>
             <TabsTrigger value="owned">Owned groups</TabsTrigger>
             <TabsTrigger value="involved">
@@ -221,14 +236,14 @@ export default function DashboardPage() {
           <TabsContent value="owned" className="space-y-4">
             <div className="flex flex-wrap gap-4 md:flex-row flex-col">
               {
-                ownedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                filterOwnedGroups.map(group => <GroupCard key={group.id} {...group} />)
               }
             </div>
           </TabsContent>
           <TabsContent value="involved" className="space-y-4">
             <div className="flex flex-wrap gap-4">
               {
-                involvedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                filterInvolvedGroups.map(group => <GroupCard key={group.id} {...group} />)
               }
             </div>
           </TabsContent>
