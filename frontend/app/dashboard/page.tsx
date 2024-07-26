@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatAddress } from "@/lib/utils"
-import { Activity } from 'lucide-react'
+import { Activity, XIcon } from 'lucide-react'
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -207,14 +207,12 @@ export default function DashboardPage() {
 
   const handleFilter = (e) => {
     setFilter(e.target.value)
-    setFilterOwnedGroups(ownedGroups.filter(({ name }, _) => name.includes(e.target.value)))
-    setFilterInvolvedGroups(involvedGroups.filter(({ name }, _) => name.includes(e.target.value)))
   }
 
   useEffect(() => {
     setFilterOwnedGroups(ownedGroups.filter(({ name }, _) => name.includes(filter)))
     setFilterInvolvedGroups(involvedGroups.filter(({ name }, _) => name.includes(filter)))
-  }, [ownedGroups, involvedGroups]);
+  }, [ownedGroups, involvedGroups, filter]);
 
   return (
     <div className="p-8">
@@ -226,7 +224,10 @@ export default function DashboardPage() {
       </div>
       <div className="flex flex-wrap">
         <Tabs defaultValue="owned" className="space-y-4 xl:w-3/5 mb-4">
-          <Input placeholder="Search group" className="max-w-[25rem]" value={filter} onChange={handleFilter} />
+          <div className="flex items-center relative max-w-[25rem]">
+            <Input placeholder="Search group" value={filter} onChange={handleFilter} />
+            {filter && <button className="z-1 opacity-40 absolute right-2 hover:opacity-60" onClick={(e) => setFilter("")}><XIcon size={16} /></button>}
+          </div>
           <TabsList>
             <TabsTrigger value="owned">Owned groups</TabsTrigger>
             <TabsTrigger value="involved">
