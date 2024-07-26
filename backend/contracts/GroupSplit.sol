@@ -1,32 +1,53 @@
+/* ToDo:
+1. finish getGroupInfo
+2. test getGroupInfo
+3. implement addFunds
+4. implement withdrawFunds
+
+*/
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 contract GroupSplit {
     struct Group {
-        uint256 groupId;   // ToDo: generate random id
+        uint256 groupId; // ToDo: generate random id
         string groupName;
-        bool groupStatus; // True = opened; False = closed;
+        bool status; // True = opened; False = closed;
         string url;
         uint256 creationTime; // ToDo: to understand how time can be registered on-chain
-        address creator;
+        address owner;
         uint256 balance; // the current group balance
         uint256 totalCollected; // the total payments received to the group by the participants
-        uint256 totalWithdrawn; // the total withdrawals from the group by the creator
+        uint256 totalWithdrawn; // the total withdrawals from the group by the owner
         address[] participantsAddresses; // the addresses of all participants who sent payments to the group
-        mapping(address => string) nicknames; // mapping between the participant address and a nickname (so the creator can see who paid)
-        
+        mapping(address => string) nicknames; // mapping between the participant address and a nickname (so the owner can see who paid)
     }
 
     Group[] public groups;
+    mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
+    mapping(uint256 => uint256) private groupIdByUrl; // Mapping from url to groupId in the groups array
+
     uint256 public activeGroups = 0;
-    uint256 public cashFlow = 0;
 
     // Define events for logging
     event logGroupCreated(
         uint256 indexed groupId,
-        address indexed creator,
-        string indexed groupName;
-        uint256 creationTime,
+        address indexed owner,
+        string indexed groupName,
+        uint256 creationTime
+    );
+    event logGroupClosed(
+        uint256 indexed groupId,
+        address indexed owner,
+        string indexed groupName,
+        uint256 closingTime
+    );
+    event logGroupOpened(
+        uint256 indexed groupId,
+        address indexed owner,
+        string indexed groupName,
+        uint256 openingTime
     );
     event logGroupPaymentReceived(
         uint256 indexed groupId,
@@ -38,38 +59,106 @@ contract GroupSplit {
         uint256 indexed groupId,
         uint256 amountTransferred,
         string time,
-        uint256 balance; // the current group balance
-        uint256 totalCollected; // the total payments received to the group by the participants
-        uint256 totalWithdrawn; // the total withdrawals from the group by the creator
+        uint256 balance,
+        uint256 totalCollected,
+        uint256 totalWithdrawn
     );
     event logTransferFailed(
         uint256 indexed groupId,
-        address indexed creator,
+        address indexed owner,
         uint256 amount
     );
-    
+
     function generateRandomNumber() private view returns (uint256) {
-        return uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender))) % 1000000;
+        return
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        block.timestamp,
+                        block.difficulty,
+                        msg.sender
+                    )
+                )
+            ) % 1000000;
     }
 
-    function createGroup(
-        string groupName
-    ) public {
-        uint256 groupId = generateRandomNumber();
-        bool groupStatus = True; // True = opened; False = closed;
-        string url; // ToDo: understand if we want to pass this as a variable
-        uint256 creationTime = block.timestamp;
-        address creator = msg.sender;
-        uint256 balance = 0; // the current group balance
-        uint256 totalCollected = 0; // the total payments received to the group by the participants
-        uint256 totalWithdrawn = 0; // the total withdrawals from the group by the creator
-        address[] participantsAddresses; // the addresses of all participants who sent payments to the group
-        mapping(address => string) nicknames; // mapping between the participant address and a nickname (so the creator can see who paid)
+    function createGroup(string _groupName, string _url) public {
+        // add to groups:
+        Group storage newGroup = groups.push();
+        // initiate all parameters:
+        newGroup.groupId = generateRandomNumber();
+        newGroup.groupName = _groupName;
+        newGroup.owner = msg.sender;
+        newGroup.url = _url;
+        newGroup.creationTime = block.timestamp;
+        newGroup.status = true; // True = opened; False = closed;
+        newGroup.balance = 0; // the current group balance
+        newGroup.totalCollected = 0; // the total payments received to the group by the participants
+        newGroup.totalWithdrawn = 0; // the total withdrawals from the group by the owner
+
+        // add group to groups list and mapping
+        uint256 index = groups.length -1; 
+        groupIndexById[groupId] = groups.index; // Mapping from groupId to index in the groups array
+        groupIdByUrl[url] = groupId; // Mapping from url to groupId in the groups array
 
         // Emit the event with the index
         activeGroups += 1;
-        emit LogGroupCreated(groupId,creator,groupName,creationTime);
+        emit logGroupCreated(groupId, owner, groupName, creationTime);
     }
+
+    function getGroupIndexById(uint256 _groupId) public view returns (uint256) {
+        require(
+            groupIndexById[_groupId] < groups.length,
+            "Group does not exist"
+        );
+        return groupIndexById[_groupId];
+    }
+
+    // Example function to show usage
+    function getGroupById(uint256 _groupId) public view returns (Group memory) {
+        uint256 index = getGroupIndexById(_groupId);
+        return groups[index];
+    }
+
+    // Example function to show usage
+    function getGroupIdByUrl(uint256 _url) public view returns (Group memory) {
+        return groupIdByUrl[_url];
+    }
+
+    function getGroupInfo(
+        uint256 groupId
+    )
+        public
+        view
+        returns (
+            uint256,
+            bool,
+            string,
+            uint256,
+            address,
+            uint256,
+            uint256,
+            uint256,
+            address[] memory
+        )
+    {
+        theGroup = getGroupById[_groupId];
+        return (
+            theGroup.groupId,
+        )
+    }
+
+    function addFunds(uint256 _groupId, string nickname) public payable {
+        // add participant address and nickname to list
+        uint256 x;
+    }
+
+    function withdrawFunds(uint256 _groupId) public payable {
+        // make sure the msg.sender is the group owner
+        uint256 x;
+    }
+}
+
 /* 
     function approvegroup(uint256 _groupId) public payable {
         group storage group = groups[_groupId];
