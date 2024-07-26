@@ -40,7 +40,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
-export function ShareGroup() {
+function ShareGroup() {
     const shareUrl = window.location.href;
     const [copied, setCopied] = useState(false)
 
@@ -91,7 +91,7 @@ export function ShareGroup() {
 }
 
 
-export function GroupActionsMenu() {
+function GroupActionsMenu() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
