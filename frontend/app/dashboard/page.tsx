@@ -236,14 +236,18 @@ export default function DashboardPage() {
           <TabsContent value="owned" className="space-y-4">
             <div className="flex flex-wrap gap-4 md:flex-row flex-col">
               {
-                filterOwnedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                filterOwnedGroups.length !== 0 ?
+                  filterOwnedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                  : <span className="p-2 text-muted-foreground">No group was found :(</span>
               }
             </div>
           </TabsContent>
           <TabsContent value="involved" className="space-y-4">
             <div className="flex flex-wrap gap-4">
               {
-                filterInvolvedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                filterInvolvedGroups.length !== 0 ?
+                  filterInvolvedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                  : <span className="p-2 text-muted-foreground">No group was found :(</span>
               }
             </div>
           </TabsContent>
