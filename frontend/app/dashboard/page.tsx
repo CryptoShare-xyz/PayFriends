@@ -115,6 +115,8 @@ function CreateGroupDialog({ groups, setGroups }: { groups: typeof initialInvolv
   const [description, setDescription] = useState("")
 
   const handleGroupCreation = (e) => {
+    // TODO: add validation
+
     const id = uuidv4()
     setGroups([{
       id: id,
@@ -122,6 +124,8 @@ function CreateGroupDialog({ groups, setGroups }: { groups: typeof initialInvolv
       description: description,
       amount: "123"
     }, ...groups])
+    setName("")
+    setDescription("")
   }
 
   return (
