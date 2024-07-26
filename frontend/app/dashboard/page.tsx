@@ -114,7 +114,7 @@ function CreateGroupDialog({ groups, setGroups }: { groups: typeof initialInvolv
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
 
-  const handleGroupCreation = (e) => {
+  const handleGroupCreation = (e: React.MouseEvent<HTMLElement>) => {
     // TODO: add validation
 
     const id = uuidv4()
@@ -209,7 +209,7 @@ export default function DashboardPage() {
   const [filterInvolvedGroups, setFilterInvolvedGroups] = useState(involvedGroups);
   const [filter, setFilter] = useState("");
 
-  const handleFilter = (e) => {
+  const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value)
   }
 
