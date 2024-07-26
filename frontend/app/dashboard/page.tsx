@@ -229,7 +229,7 @@ export default function DashboardPage() {
       <div className="flex flex-wrap">
         <Tabs defaultValue="owned" className="space-y-4 xl:w-3/5 mb-4">
           <div className="flex items-center relative max-w-[25rem]">
-            <Input placeholder="Search group" value={filter} onChange={handleFilter} />
+            <Input placeholder="Search group" value={filter} onChange={handleFilter} className="focus-visible:ring-transparent focus-visible:border-[#6b63ffa1]" />
             {filter && <button className="z-1 opacity-40 absolute right-2 hover:opacity-60" onClick={(e) => setFilter("")}><XIcon size={16} /></button>}
           </div>
           <TabsList>
@@ -258,9 +258,9 @@ export default function DashboardPage() {
           </TabsContent>
         </Tabs>
         <aside className="xl:w-2/5 w-full mt-2">
-          <div className="flex p-1 mb-4">
+          <div className="flex p-1 mb-4 items-center gap-2 ">
+            <small><Activity size={16} className="text-[#6b63ffa1]" /></small>
             <h1 className="font-semibold text-md">Recent activity</h1>
-            <small className="ml-auto"><Activity size={16} className="text-muted-foreground" /></small>
           </div>
           <Table className="bg-white border border-separate rounded-xl">
             <TableHeader>
