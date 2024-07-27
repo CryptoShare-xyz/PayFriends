@@ -1,8 +1,9 @@
 /* ToDo:
-1. finish getGroupInfo
-2. test getGroupInfo
-3. implement addFunds
-4. implement withdrawFunds
+[x] finish getGroupInfo
+[] test getGroupInfo
+[] implement addFunds
+[] implement withdrawFunds
+[] handle exception and input validation
 
 */
 
@@ -17,6 +18,7 @@ contract GroupSplit {
         string url;
         uint256 creationTime; // ToDo: to understand how time can be registered on-chain
         address owner;
+        string ownerNickname;
         uint256 balance; // the current group balance
         uint256 totalCollected; // the total payments received to the group by the participants
         uint256 totalWithdrawn; // the total withdrawals from the group by the owner
@@ -26,7 +28,7 @@ contract GroupSplit {
 
     Group[] public groups;
     mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
-    mapping(uint256 => uint256) private groupIdByUrl; // Mapping from url to groupId in the groups array
+    mapping(bytes32 => uint256) private groupIdByUrl; // Mapping from url to groupId in the groups array
 
     uint256 public activeGroups = 0;
 
@@ -82,13 +84,18 @@ contract GroupSplit {
             ) % 1000000;
     }
 
-    function createGroup(string _groupName, string _url) public {
+    function createGroup(
+        string memory _groupName,
+        string memory _ownerNickname,
+        string memory _url
+    ) public {
         // add to groups:
         Group storage newGroup = groups.push();
         // initiate all parameters:
         newGroup.groupId = generateRandomNumber();
         newGroup.groupName = _groupName;
         newGroup.owner = msg.sender;
+        newGroup.ownerNickname = _ownerNickname;
         newGroup.url = _url;
         newGroup.creationTime = block.timestamp;
         newGroup.status = true; // True = opened; False = closed;
@@ -97,13 +104,19 @@ contract GroupSplit {
         newGroup.totalWithdrawn = 0; // the total withdrawals from the group by the owner
 
         // add group to groups list and mapping
-        uint256 index = groups.length -1; 
-        groupIndexById[groupId] = groups.index; // Mapping from groupId to index in the groups array
-        groupIdByUrl[url] = groupId; // Mapping from url to groupId in the groups array
+        uint256 index = groups.length - 1;
+        groupIndexById[newGroup.groupId] = index; // Mapping from groupId to index in the groups array
+        groupIdByUrl[keccak256(abi.encodePacked(newGroup.url))] = newGroup
+            .groupId; // Mapping from url to groupId in the groups array
 
         // Emit the event with the index
         activeGroups += 1;
-        emit logGroupCreated(groupId, owner, groupName, creationTime);
+        emit logGroupCreated(
+            newGroup.groupId,
+            newGroup.owner,
+            newGroup.groupName,
+            newGroup.creationTime
+        );
     }
 
     function getGroupIndexById(uint256 _groupId) public view returns (uint256) {
@@ -115,40 +128,47 @@ contract GroupSplit {
     }
 
     // Example function to show usage
-    function getGroupById(uint256 _groupId) public view returns (Group memory) {
-        uint256 index = getGroupIndexById(_groupId);
-        return groups[index];
+    function getGroupIdByUrl(uint256 _url) public view returns (uint256) {
+        return groupIdByUrl[keccak256(abi.encodePacked(_url))];
     }
 
-    // Example function to show usage
-    function getGroupIdByUrl(uint256 _url) public view returns (Group memory) {
-        return groupIdByUrl[_url];
-    }
-
-    function getGroupInfo(
-        uint256 groupId
+    function getGroupInfoById(
+        uint256 _groupId
     )
         public
         view
         returns (
             uint256,
-            bool,
-            string,
-            uint256,
+            string memory,
             address,
+            string memory,
+            string memory,
+            uint256,
+            bool,
             uint256,
             uint256,
             uint256,
             address[] memory
         )
     {
-        theGroup = getGroupById[_groupId];
+        uint256 index = getGroupIndexById(_groupId);
+        Group storage group = groups[index];
         return (
-            theGroup.groupId,
-        )
+            group.groupId,
+            group.groupName,
+            group.owner,
+            group.ownerNickname,
+            group.url,
+            group.creationTime,
+            group.status,
+            group.balance,
+            group.totalCollected,
+            group.totalWithdrawn,
+            group.participantsAddresses
+        );
     }
 
-    function addFunds(uint256 _groupId, string nickname) public payable {
+    function addFunds(uint256 _groupId, string memory nickname) public payable {
         // add participant address and nickname to list
         uint256 x;
     }
