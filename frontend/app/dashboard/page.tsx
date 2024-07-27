@@ -13,7 +13,6 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
-import { redirect } from 'next/navigation'
 
 
 import Link from "next/link"
@@ -32,9 +31,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatAddress } from "@/lib/utils"
-import { Activity } from 'lucide-react'
-import { useEffect, useState } from "react"
-import { useAccount } from 'wagmi'
+import { Activity, XIcon } from 'lucide-react'
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { v4 as uuidv4 } from 'uuid'
 
 
 const events = [
@@ -58,59 +57,11 @@ const events = [
     transaction: "pay",
     amount: 4
   },
+
 ]
 
-function CreateGroupDialog() {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button className="my-2 mr-auto bg-[#6c63ff] text-slate-100">
-          <span className="sm:hidden rounded-[50%]">+</span>
-          <span className="hidden sm:block">Create group</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Create group</DialogTitle>
-          <DialogDescription>
-            Create group to share a common expense with friends by sending group link.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-left">
-              Group name
-            </Label>
-            <Input
-              id="name"
-              placeholder="Fun school trip"
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-left">
-              Description
-            </Label>
-            <Input
-              id="description"
-              placeholder="Gathering money for the best school trip ever!"
-              className="col-span-3"
-              maxLength={100}
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button type="submit" className="bg-[#6c63ff]">Create</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
 
-
-
-
-const ownedGroups = [
+const initialOwnedGroups = [
   {
     id: "67859517-b722-46e9-97e0-4bf9bebedb4f",
     name: "group 1",
@@ -143,7 +94,7 @@ const ownedGroups = [
   },
 ]
 
-const involvedGroups = [
+const initialInvolvedGroups = [
   {
     id: "76bfa1b2-cd46-46e6-bdaf-210a101f5bec",
     name: "group 1",
@@ -158,17 +109,90 @@ const involvedGroups = [
   },
 ]
 
-const GroupCard: React.FC<typeof ownedGroups[number]> = ({ id, name, description, amount }) => {
+
+function CreateGroupDialog({ groups, setGroups }: { groups: typeof initialInvolvedGroups, setGroups: Dispatch<SetStateAction<typeof initialInvolvedGroups>> }) {
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+
+  const handleGroupCreation = (e: React.MouseEvent<HTMLElement>) => {
+    // TODO: add validation
+
+    const id = uuidv4()
+    setGroups([{
+      id: id,
+      name: name,
+      description: description,
+      amount: "123"
+    }, ...groups])
+    setName("")
+    setDescription("")
+  }
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="my-2 mr-auto bg-[#6c63ff] text-slate-100">
+          <span className="sm:hidden rounded-[50%]">+</span>
+          <span className="hidden sm:block">Create group</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create group</DialogTitle>
+          <DialogDescription>
+            Create group to share a common expense with friends by sending group link.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-left">
+              Group name
+            </Label>
+            <Input
+              id="name"
+              placeholder="Fun school trip"
+              className="col-span-3"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="description" className="text-left">
+              Description
+            </Label>
+            <Input
+              id="description"
+              placeholder="Gathering money for the best school trip ever!"
+              className="col-span-3"
+              maxLength={100}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogTrigger asChild>
+            <Button className="bg-[#6c63ff]" onClick={handleGroupCreation}>Create</Button>
+          </DialogTrigger>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog >
+  )
+}
+
+
+
+const GroupCard: React.FC<typeof initialOwnedGroups[number]> = ({ id, name, description, amount }) => {
   return (
     <Link href={`/dashboard/group/${id}`}>
-      <Card className="md:w-[12rem] hover:scale-105 hover:border-2 hover:border-[#6b63ffa1] focus:scale-105 focus:border-2 focus:border-[#6b63ffa1]">
+      <Card className="flex flex-col md:w-[12rem] h-full hover:scale-105 hover:border-2 hover:border-[#6b63ffa1] focus:scale-105 focus:border-2 focus:border-[#6b63ffa1]">
         <CardHeader>
           <CardTitle className="mb-2 capitalize">
             {name}
           </CardTitle>
           <span className="text-slate-500 text-sm">{description}</span>
         </CardHeader >
-        <CardContent>
+        <CardContent className="mt-auto">
           <span className="flex text-md text-slate-800">
             Collected <span className="ml-auto">{amount}</span>
           </span>
@@ -179,31 +203,35 @@ const GroupCard: React.FC<typeof ownedGroups[number]> = ({ id, name, description
 }
 
 export default function DashboardPage() {
-  const { isConnected } = useAccount();
-  const [mounted, setMounted] = useState<Boolean>(false);
+  const [ownedGroups, setOwnedGroups] = useState(initialOwnedGroups);
+  const [filterOwnedGroups, setFilterOwnedGroups] = useState(ownedGroups);
+  const [involvedGroups, setInvolvedGroups] = useState(initialInvolvedGroups);
+  const [filterInvolvedGroups, setFilterInvolvedGroups] = useState(involvedGroups);
+  const [filter, setFilter] = useState("");
 
-  // TODO: probably should use middleware/nextauth
-  useEffect(() => {
-    setMounted(true);
-    if (!isConnected) {
-      redirect("/");
-    }
-  }, [isConnected])
-
-  if (!mounted) {
-    return <></>
+  const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value)
   }
 
+  useEffect(() => {
+    setFilterOwnedGroups(ownedGroups.filter(({ name }, _) => name.includes(filter)))
+    setFilterInvolvedGroups(involvedGroups.filter(({ name }, _) => name.includes(filter)))
+  }, [ownedGroups, involvedGroups, filter]);
+
   return (
-    <div className="p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
+    <div className="p-8">
+      <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center space-x-2">
-          <CreateGroupDialog />
+          <CreateGroupDialog groups={ownedGroups} setGroups={setOwnedGroups} />
         </div>
       </div>
       <div className="flex flex-wrap">
         <Tabs defaultValue="owned" className="space-y-4 xl:w-3/5 mb-4">
+          <div className="flex items-center relative max-w-[25rem]">
+            <Input placeholder="Search group" value={filter} onChange={handleFilter} className="focus-visible:ring-transparent focus-visible:border-[#6b63ffa1]" />
+            {filter && <button className="z-1 opacity-40 absolute right-2 hover:opacity-60" onClick={(e) => setFilter("")}><XIcon size={16} /></button>}
+          </div>
           <TabsList>
             <TabsTrigger value="owned">Owned groups</TabsTrigger>
             <TabsTrigger value="involved">
@@ -211,24 +239,28 @@ export default function DashboardPage() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="owned" className="space-y-4">
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 md:flex-row flex-col">
               {
-                ownedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                filterOwnedGroups.length !== 0 ?
+                  filterOwnedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                  : <span className="p-2 text-muted-foreground">No group was found :(</span>
               }
             </div>
           </TabsContent>
           <TabsContent value="involved" className="space-y-4">
             <div className="flex flex-wrap gap-4">
               {
-                involvedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                filterInvolvedGroups.length !== 0 ?
+                  filterInvolvedGroups.map(group => <GroupCard key={group.id} {...group} />)
+                  : <span className="p-2 text-muted-foreground">No group was found :(</span>
               }
             </div>
           </TabsContent>
         </Tabs>
         <aside className="xl:w-2/5 w-full mt-2">
-          <div className="flex p-1 mb-4">
+          <div className="flex p-1 mb-4 items-center gap-2 ">
+            <small><Activity size={16} className="text-[#6b63ffa1]" /></small>
             <h1 className="font-semibold text-md">Recent activity</h1>
-            <small className="ml-auto"><Activity size={16} className="text-muted-foreground" /></small>
           </div>
           <Table className="bg-white border border-separate rounded-xl">
             <TableHeader>
