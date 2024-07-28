@@ -9,6 +9,7 @@
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import "hardhat/console.sol";
 
 contract GroupSplit {
     struct Group {
@@ -27,6 +28,7 @@ contract GroupSplit {
     }
 
     Group[] public groups;
+    uint256[] public groupIds;
     mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
     mapping(bytes32 => uint256) private groupIdByUrl; // Mapping from url to groupId in the groups array
 
@@ -91,6 +93,8 @@ contract GroupSplit {
     ) public {
         // add to groups:
         Group storage newGroup = groups.push();
+        activeGroups += 1;
+
         // initiate all parameters:
         newGroup.groupId = generateRandomNumber();
         newGroup.groupName = _groupName;
@@ -109,8 +113,8 @@ contract GroupSplit {
         groupIdByUrl[keccak256(abi.encodePacked(newGroup.url))] = newGroup
             .groupId; // Mapping from url to groupId in the groups array
 
+        groupIds.push(newGroup.groupId);
         // Emit the event with the index
-        activeGroups += 1;
         emit logGroupCreated(
             newGroup.groupId,
             newGroup.owner,
@@ -130,6 +134,11 @@ contract GroupSplit {
     // Example function to show usage
     function getGroupIdByUrl(uint256 _url) public view returns (uint256) {
         return groupIdByUrl[keccak256(abi.encodePacked(_url))];
+    }
+
+    // Function to return all group IDs
+    function getAllGroupIds() public view returns (uint256[] memory) {
+        return groupIds;
     }
 
     function getGroupInfoById(
@@ -166,6 +175,10 @@ contract GroupSplit {
             group.totalWithdrawn,
             group.participantsAddresses
         );
+    }
+
+    function getGroupsNum() public view returns (uint256) {
+        return groups.length;
     }
 
     function addFunds(uint256 _groupId, string memory nickname) public payable {
