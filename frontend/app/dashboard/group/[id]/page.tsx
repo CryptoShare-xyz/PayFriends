@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import React, { useState } from "react";
 
 function ShareGroup() {
     const shareUrl = window.location.href;
@@ -157,14 +157,38 @@ const events = [
 ]
 
 
+
+const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button className="bg-[#6c63ff]">Join group</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Join group {groupId}</DialogTitle>
+                </DialogHeader>
+                <div className="flex justify-center items-center gap-4">
+                    <Label htmlFor="amount" className="text-right w-1/4">
+                        Amount
+                    </Label>
+                    <Input id="amount" className="w-2/4" placeholder="Amount to pay group" />
+                    <Button type="submit" className="bg-[#6c63ff]  w-1/4">Pay</Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 export default function Page({ params }: { params: { id: string } }) {
+    const [isOwner, setIsOwner] = useState(false)
 
     return (
         <div className="p-8 bg-slate-50 md:rounded-2xl md:max-w-[80%] w-full mx-auto">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-3xl font-bold tracking-tight">{`Group ${params.id?.substring(0, 4)}`}</h2>
                 <div className="flex items-center space-x-2">
-                    <GroupActionsMenu />
+                    {isOwner ? <GroupActionsMenu /> : <JoinGroupDialog groupId={params.id} />}
                 </div>
             </div>
             <p className="p-2 max-w-[30rem] text-muted-foreground">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum id nihil illum animi </p>
