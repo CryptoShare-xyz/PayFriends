@@ -214,8 +214,8 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    setFilterOwnedGroups(ownedGroups.filter(({ name }, _) => name.includes(filter)))
-    setFilterInvolvedGroups(involvedGroups.filter(({ name }, _) => name.includes(filter)))
+    setFilterOwnedGroups(ownedGroups.filter(({ name }, _) => name.toLowerCase().includes(filter.toLowerCase())))
+    setFilterInvolvedGroups(involvedGroups.filter(({ name }, _) => name.toLowerCase().includes(filter.toLowerCase())))
   }, [ownedGroups, involvedGroups, filter]);
 
   return (
