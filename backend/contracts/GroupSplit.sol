@@ -1,9 +1,12 @@
 /* ToDo:
 [x] finish getGroupInfo
-[] test getGroupInfo
-[] implement addFunds
+[x] test getGroupInfo
+[] test events
+[] implement depositToGroup
 [] implement withdrawFunds
-[] handle exception and input validation
+[] handle exceptions and input validation
+[] implement a new contract for each group. this is the only way to deposit funds a separte eth account address for each group (without this the contract GroupSplit has the money of all groups which is clearly very unsecure)
+
 
 */
 
@@ -12,6 +15,12 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 
 contract GroupSplit {
+    struct Participant {
+        address participantAddress;
+        string nickname;
+        uint256 totalDeposits;
+    }
+
     struct Group {
         uint256 groupId; // ToDo: generate random id
         string groupName;
@@ -24,15 +33,31 @@ contract GroupSplit {
         uint256 totalCollected; // the total payments received to the group by the participants
         uint256 totalWithdrawn; // the total withdrawals from the group by the owner
         address[] participantsAddresses; // the addresses of all participants who sent payments to the group
-        mapping(address => string) nicknames; // mapping between the participant address and a nickname (so the owner can see who paid)
+        mapping(address => Participant) participantDetails; // Mapping to store participants' details
     }
 
     Group[] public groups;
     uint256[] public groupIds;
     mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
     mapping(bytes32 => uint256) private groupIdByUrl; // Mapping from url to groupId in the groups array
-
     uint256 public activeGroups = 0;
+
+    // Add a participant to a group
+    function addParticipantToGroup(
+        uint256 _groupId,
+        address _participantAddress,
+        string memory _nickname,
+        uint256 _totalDeposits
+    ) public {
+        uint256 index = getGroupIndexById(_groupId);
+        Group storage group = groups[index];
+        group.participantDetails[_participantAddress] = Participant(
+            _participantAddress,
+            _nickname,
+            _totalDeposits
+        );
+        group.participantsAddresses.push(_participantAddress);
+    }
 
     // Define events for logging
     event logGroupCreated(
@@ -181,9 +206,14 @@ contract GroupSplit {
         return groups.length;
     }
 
-    function addFunds(uint256 _groupId, string memory nickname) public payable {
+    function depositToGroup(
+        uint256 _groupId,
+        string memory nickname
+    ) public payable {
         // add participant address and nickname to list
-        uint256 x;
+        uint256 index = getGroupIndexById(_groupId);
+        Group storage group = groups[index];
+        group.participantsAddresses.push(msg.sender);
     }
 
     function withdrawFunds(uint256 _groupId) public payable {

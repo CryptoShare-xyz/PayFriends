@@ -51,9 +51,9 @@ describe("GroupSplit", function () {
           });
           it("Get Group Info", async function(){
               const { groupSplit, owner, user1, user2, user3 } = await loadFixture(deployFixture);
-              const groupName = "test_group";
-              const ownerNickname = "owner_nick";
-              const url = "test_url";
+              const groupName = "test_group1";
+              const ownerNickname = "owner_nick1";
+              const url = "test_url1";
 
               // Perform the transaction
               const tx = await groupSplit.createGroup(groupName, ownerNickname, url);
