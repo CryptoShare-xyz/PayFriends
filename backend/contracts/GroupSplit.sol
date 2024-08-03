@@ -1,11 +1,10 @@
 /* ToDo:
 [x] finish getGroupInfo
 [x] test getGroupInfo
-[] test events
 [] implement depositToGroup
 [] implement withdrawFunds
+[] test events
 [] handle exceptions and input validation
-[] implement a new contract for each group. this is the only way to deposit funds a separte eth account address for each group (without this the contract GroupSplit has the money of all groups which is clearly very unsecure)
 
 
 */
@@ -42,21 +41,44 @@ contract GroupSplit {
     mapping(bytes32 => uint256) private groupIdByUrl; // Mapping from url to groupId in the groups array
     uint256 public activeGroups = 0;
 
+    // Modifier to check if the group is open
+    modifier isGroupOpen(uint256 _groupId) {
+        uint256 index = getGroupIndexById(_groupId);
+        require(groups[index].status == true, "Group is closed");
+        _;
+    }
+
     // Add a participant to a group
     function addParticipantToGroup(
         uint256 _groupId,
         address _participantAddress,
         string memory _nickname,
-        uint256 _totalDeposits
+        uint256 _deposit
     ) public {
         uint256 index = getGroupIndexById(_groupId);
         Group storage group = groups[index];
-        group.participantDetails[_participantAddress] = Participant(
-            _participantAddress,
-            _nickname,
-            _totalDeposits
-        );
-        group.participantsAddresses.push(_participantAddress);
+
+        // Check if the participant already exists in the mapping by verifying the address
+        if (
+            group.participantDetails[_participantAddress].participantAddress !=
+            address(0)
+        ) {
+            // If participant already exists, update their total deposits
+            group
+                .participantDetails[_participantAddress]
+                .totalDeposits += _deposit;
+        } else {
+            // If participant does not exist, add them to the group
+            group.participantDetails[_participantAddress] = Participant(
+                _participantAddress,
+                _nickname,
+                _deposit
+            );
+            group.participantsAddresses.push(_participantAddress);
+        }
+        // Update group's balance and totalCollected
+        group.balance += _deposit;
+        group.totalCollected += _deposit;
     }
 
     // Define events for logging
@@ -78,11 +100,11 @@ contract GroupSplit {
         string indexed groupName,
         uint256 openingTime
     );
-    event logGroupPaymentReceived(
+    event logGroupDepositReceived(
         uint256 indexed groupId,
         address indexed participant,
         string nickname,
-        uint256 paymentAmount
+        uint256 deposit
     );
     event logGroupWithdrawal(
         uint256 indexed groupId,
@@ -208,12 +230,13 @@ contract GroupSplit {
 
     function depositToGroup(
         uint256 _groupId,
-        string memory nickname
-    ) public payable {
+        string memory _nickname
+    ) public payable isGroupOpen(_groupId) {
+        require(msg.value > 0, "Deposit amount must be greater than zero");
+        uint256 _deposit = msg.value;
         // add participant address and nickname to list
-        uint256 index = getGroupIndexById(_groupId);
-        Group storage group = groups[index];
-        group.participantsAddresses.push(msg.sender);
+        addParticipantToGroup(_groupId, msg.sender, _nickname, _deposit);
+        emit logGroupDepositReceived(_groupId, msg.sender, _nickname, _deposit);
     }
 
     function withdrawFunds(uint256 _groupId) public payable {

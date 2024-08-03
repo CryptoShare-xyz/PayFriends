@@ -65,6 +65,55 @@ describe("GroupSplit", function () {
               console.log(groupInfo);
 
           });
+          it("depositToGroup", async function(){
+            const { groupSplit, owner, user1, user2, user3 } = await loadFixture(deployFixture);
+            const groupName = "test_group1";
+            const ownerNickname = "owner_nick1";
+            const url = "test_url1";
+            const participantnickname = "test_nickname1";
+            const depositAmount = 123; // 1 WEI
+            console.log(`user1 = ${user1.address}`);
+
+
+            // Perform the transaction
+            const tx = await groupSplit.createGroup(groupName, ownerNickname, url);
+
+
+            const newGroupIds = await groupSplit.getAllGroupIds();
+            console.log(`groupIds = ${newGroupIds}`);
+
+            const groupInfo = await groupSplit.getGroupInfoById(newGroupIds[0]);
+            console.log(groupInfo);
+
+            const tx2 = await groupSplit.connect(user1).depositToGroup(newGroupIds[0],participantnickname,{value: depositAmount})
+
+            const groupInfo2 = await groupSplit.getGroupInfoById(newGroupIds[0]);
+            // 98846n,
+            //   'test_group1',
+            //   '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+            //   'owner_nick1',
+            //   'test_url1',
+            //   1722712459n,
+            //   true,
+            //   123n,
+            //   123n,
+            //   0n,
+            //   Result(1) [ '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' ])
+
+            expect(groupInfo2[1]).equal("test_group1");
+            expect(groupInfo2[2]).equal('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+            expect(groupInfo2[3]).equal("owner_nick1");
+            expect(groupInfo2[4]).equal("test_url1");
+            expect(groupInfo2[6]).equal(true);
+            expect(groupInfo2[7]).equal(123);
+            expect(groupInfo2[8]).equal(123);
+            expect(groupInfo2[9]).equal(0);
+            expect(groupInfo2[10]).deep.equal(['0x70997970C51812dc3A010C7d01b50e0d17dc79C8']);
+
+
+            console.log(groupInfo2);
+            
+        });
               // expect(await expenseSplitter.getExpensesLength()).equal(1)
             
               // const expense = await expenseSplitter.getExpense(0);
