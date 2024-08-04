@@ -2,7 +2,7 @@
 [x] finish getGroupInfo
 [x] test getGroupInfo
 [x] implement depositToGroup
-[]  test depositToGroup
+[x]  test depositToGroup
 [x] implement withdrawFromGroup
 []  test withdrawFromGroup
 [] test events
