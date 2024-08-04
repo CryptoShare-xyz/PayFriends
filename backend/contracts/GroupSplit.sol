@@ -1,8 +1,10 @@
 /* ToDo:
 [x] finish getGroupInfo
 [x] test getGroupInfo
-[] implement depositToGroup
-[] implement withdrawFunds
+[x] implement depositToGroup
+[]  test depositToGroup
+[x] implement withdrawFromGroup
+[]  test withdrawFromGroup
 [] test events
 [] handle exceptions and input validation
 
@@ -108,13 +110,12 @@ contract GroupSplit {
     );
     event logGroupWithdrawal(
         uint256 indexed groupId,
-        uint256 amountTransferred,
-        string time,
-        uint256 balance,
+        uint256 amountWithdrawn,
+        uint256 time,
         uint256 totalCollected,
         uint256 totalWithdrawn
     );
-    event logTransferFailed(
+    event logWithdrawalFailed(
         uint256 indexed groupId,
         address indexed owner,
         uint256 amount
@@ -231,7 +232,7 @@ contract GroupSplit {
     function depositToGroup(
         uint256 _groupId,
         string memory _nickname
-    ) public payable isGroupOpen(_groupId) {
+    ) external payable isGroupOpen(_groupId) {
         require(msg.value > 0, "Deposit amount must be greater than zero");
         uint256 _deposit = msg.value;
         // add participant address and nickname to list
@@ -239,105 +240,31 @@ contract GroupSplit {
         emit logGroupDepositReceived(_groupId, msg.sender, _nickname, _deposit);
     }
 
-    function withdrawFunds(uint256 _groupId) public payable {
+    function withdrawFromGroup(uint256 _groupId) public payable {
+        uint256 index = getGroupIndexById(_groupId);
+        Group storage group = groups[index];
         // make sure the msg.sender is the group owner
-        uint256 x;
-    }
-}
+        require(msg.sender == group.owner, "Only group owner can withdraw");
+        (bool success, ) = payable(group.owner).call{value: group.balance}("");
+        if (success) {
+            group.totalWithdrawn = group.balance;
+            group.balance = 0;
 
-/* 
-    function approvegroup(uint256 _groupId) public payable {
-        group storage group = groups[_groupId];
-        require(!group.completed, "group already completed");
-        require(!group.approvals[msg.sender], "Already approved");
-        require(msg.value > 0, "Must send ETH to approve");
-
-        bool isApproverValid = false;
-        for (uint256 i = 0; i < group.splitAddresses.length; i++) {
-            if (group.splitAddresses[i] == msg.sender) {
-                isApproverValid = true;
-                break;
-            }
+            emit logGroupWithdrawal(
+                _groupId,
+                group.balance,
+                block.timestamp,
+                group.totalCollected,
+                group.totalWithdrawn
+            );
+        } else {
+            emit logWithdrawalFailed(_groupId, group.owner, group.balance);
         }
-        require(
-            isApproverValid,
-            "You are not authorized to approve this group"
-        );
-
-        group.approvals[msg.sender] = true;
-        group.collectedAmount += msg.value;
-        cashFlow += msg.value;
-        emit LoggroupApproved(_groupId, msg.sender, msg.value);
-
-        // Check if all approvals are received
-        bool allApproved = true;
-        for (uint256 i = 0; i < group.splitAddresses.length; i++) {
-            if (!group.approvals[group.splitAddresses[i]]) {
-                allApproved = false;
-                break;
-            }
-        }
-
-        if (allApproved) {
-            group.completed = true;
-            activegroups -= 1;
-            uint256 amountToTransfer = group.collectedAmount;
-            group.collectedAmount = 0;
-            (bool success, ) = payable(group.creator).call{
-                value: amountToTransfer
-            }("");
-            if (success) {
-                emit LoggroupCompleted(_groupId, amountToTransfer);
-            } else {
-                emit LogTransferFailed(
-                    _groupId,
-                    group.creator,
-                    amountToTransfer
-                );
-            }
-        }
-    }
-
-    function getgroup(
-        uint256 _index
-    )
-        public
-        view
-        returns (
-            address,
-            uint256,
-            address[] memory,
-            bool,
-            bool[] memory,
-            uint256
-        )
-    {
-        group storage group = groups[_index];
-        bool[] memory approvalsArray = new bool[](
-            group.splitAddresses.length
-        );
-        for (uint256 i = 0; i < group.splitAddresses.length; i++) {
-            approvalsArray[i] = group.approvals[group.splitAddresses[i]];
-        }
-        return (
-            group.creator,
-            group.amount,
-            group.splitAddresses,
-            group.completed,
-            approvalsArray,
-            group.collectedAmount
-        );
-
-    }
-
-    function getgroupsLength() public view returns (uint256) {
-        return groups.length;
     }
 
     function getActivegroups() public view returns (uint256) {
-        return groups.length;
+        return activeGroups;
     }
 
     receive() external payable {}
 }
-*/

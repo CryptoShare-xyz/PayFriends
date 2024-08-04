@@ -59,10 +59,10 @@ describe("GroupSplit", function () {
               const tx = await groupSplit.createGroup(groupName, ownerNickname, url);
 
               const newGroupIds = await groupSplit.getAllGroupIds();
-              console.log(`groupIds = ${newGroupIds}`);
+              // console.log(`groupIds = ${newGroupIds}`);
 
               const groupInfo = await groupSplit.getGroupInfoById(newGroupIds[0]);
-              console.log(groupInfo);
+              // console.log(groupInfo);
 
           });
           it("depositToGroup", async function(){
@@ -72,33 +72,20 @@ describe("GroupSplit", function () {
             const url = "test_url1";
             const participantnickname = "test_nickname1";
             const depositAmount = 123; // 1 WEI
-            console.log(`user1 = ${user1.address}`);
-
+            // console.log(`user1 = ${user1.address}`);
 
             // Perform the transaction
             const tx = await groupSplit.createGroup(groupName, ownerNickname, url);
 
-
             const newGroupIds = await groupSplit.getAllGroupIds();
-            console.log(`groupIds = ${newGroupIds}`);
+            // console.log(`groupIds = ${newGroupIds}`);
 
             const groupInfo = await groupSplit.getGroupInfoById(newGroupIds[0]);
-            console.log(groupInfo);
+            // console.log(groupInfo);
 
             const tx2 = await groupSplit.connect(user1).depositToGroup(newGroupIds[0],participantnickname,{value: depositAmount})
 
             const groupInfo2 = await groupSplit.getGroupInfoById(newGroupIds[0]);
-            // 98846n,
-            //   'test_group1',
-            //   '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-            //   'owner_nick1',
-            //   'test_url1',
-            //   1722712459n,
-            //   true,
-            //   123n,
-            //   123n,
-            //   0n,
-            //   Result(1) [ '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' ])
 
             expect(groupInfo2[1]).equal("test_group1");
             expect(groupInfo2[2]).equal('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
@@ -109,94 +96,9 @@ describe("GroupSplit", function () {
             expect(groupInfo2[8]).equal(123);
             expect(groupInfo2[9]).equal(0);
             expect(groupInfo2[10]).deep.equal(['0x70997970C51812dc3A010C7d01b50e0d17dc79C8']);
-
-
-            console.log(groupInfo2);
+            // console.log(groupInfo2);
             
         });
-              // expect(await expenseSplitter.getExpensesLength()).equal(1)
-            
-              // const expense = await expenseSplitter.getExpense(0);
-
-              // expect(expense[0]).to.equal(owner.address); // creator
-              // expect(expense[1]).to.equal(amount); // amount
-              // expect(expense[2]).to.deep.equal(splitAddresses); // splitAddresses
-              // expect(expense[3]).to.be.false; // completed
-              // expect(expense[4]).to.deep.equal([false, false, false]); // approvals
-              // expect(expense[5]).to.equal(0); // collectedAmount
-
-          // it("Approve an expense", async function () {
-          //     const { expenseSplitter, owner, user1, user2, user3 } = await loadFixture(deployFixture);
-          //     const amount = 9
-          //     const splitAddresses = [user1.address, user2.address, user3.address]
-
-          //     await expect(expenseSplitter.createExpense(amount, splitAddresses))
-          //         .to.emit(expenseSplitter, "LogExpenseCreated")
-          //         .withArgs(0, owner.address, amount, splitAddresses);
-
-          //     expect(await expenseSplitter.getExpensesLength()).equal(1)
-
-          //     await expect(
-          //         expenseSplitter.connect(user1).approveExpense(0, { value: 9 })
-          //     )
-          //         .to.emit(expenseSplitter, "LogExpenseApproved")
-          //         .withArgs(0, user1.address, 9);
-
-          //     const expense = await expenseSplitter.getExpense(0);
-
-          //     expect(expense[0]).to.equal(owner.address); // creator
-          //     expect(expense[1]).to.equal(amount); // amount
-          //     expect(expense[2]).to.deep.equal(splitAddresses); // splitAddresses
-          //     expect(expense[3]).to.be.false; // completed
-          //     expect(expense[4]).to.deep.equal([true, false, false]); // approvals
-          //     expect(expense[5]).to.equal(9); // collectedAmount
-
-          // });
-
-          // it("Complete an expense", async function () {
-          //     const { expenseSplitter, owner, user1, user2, user3 } = await loadFixture(deployFixture);
-          //     const amount = 9
-          //     const splitAddresses = [user1.address, user2.address, user3.address]
-
-          //     await expect(expenseSplitter.createExpense(amount, splitAddresses))
-          //         .to.emit(expenseSplitter, "LogExpenseCreated")
-          //         .withArgs(0, owner.address, amount, splitAddresses);
-
-          //     expect(await expenseSplitter.getExpensesLength()).equal(1)
-
-          //     // need to check this here because the expense costs money
-          //     const ownerBalance = await ethers.provider.getBalance(owner)
-
-          //     await expect(
-          //         expenseSplitter.connect(user1).approveExpense(0, { value: 9 })
-          //     )
-          //         .to.emit(expenseSplitter, "LogExpenseApproved")
-          //         .withArgs(0, user1.address, 9);
-
-          //     await expect(
-          //         expenseSplitter.connect(user2).approveExpense(0, { value: 9 })
-          //     )
-          //         .to.emit(expenseSplitter, "LogExpenseApproved")
-          //         .withArgs(0, user2.address, 9);
-
-          //     await expect(
-          //         expenseSplitter.connect(user3).approveExpense(0, { value: 9 })
-          //     )
-          //         .to.emit(expenseSplitter, "LogExpenseApproved")
-          //         .withArgs(0, user3.address, 9);
-
-          //     const expense = await expenseSplitter.getExpense(0);
-
-          //     expect(expense[0]).to.equal(owner.address); // creator
-          //     expect(expense[1]).to.equal(amount); // amount
-          //     expect(expense[2]).to.deep.equal(splitAddresses); // splitAddresses
-          //     expect(expense[3]).to.be.true; // completed
-          //     expect(expense[4]).to.deep.equal([true, true, true]); // approvals
-          //     expect(expense[5]).to.equal(0); // collectedAmount
-
-          //     expect(await ethers.provider.getBalance(owner)).to.equal(ownerBalance + BigInt(3 * 9))
-
-          // });
       });
   });
 });
