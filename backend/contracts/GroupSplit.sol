@@ -41,6 +41,12 @@ contract GroupSplit {
     mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
     uint256 public activeGroups = 0;
 
+    constructor() public {
+      createGroup("genesisgroup", "cryptoshare");
+      activeGroups = 0;
+   }
+
+
     // Modifier to check if the group is open
     modifier isGroupOpen(uint256 _groupId) {
         uint256 index = getGroupIndexById(_groupId);
@@ -167,7 +173,7 @@ contract GroupSplit {
 
     function getGroupIndexById(uint256 _groupId) public view returns (uint256) {
         require(
-            groupIndexById[_groupId] < groups.length,
+            groupIndexById[_groupId] != 0,
             "Group does not exist"
         );
         return groupIndexById[_groupId];

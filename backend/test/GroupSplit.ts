@@ -25,17 +25,16 @@ describe("GroupSplit", function () {
       describe("Sanity", async function () {
           it("Should compile and deploy", async function () {
               const { groupSplit } = await loadFixture(deployFixture);
-              expect(await groupSplit.getGroupsNum()).equal(0)
+              expect(await groupSplit.getGroupsNum()).equal(1)
           });
           it("Create a Group", async function () {
               const { groupSplit, owner, user1, user2, user3 } = await loadFixture(deployFixture);
               const groupName = "test_group";
               const ownerNickname = "owner_nick";
-              const url = "test_url";
               // const splitAddresses = [user1.address, user2.address, user3.address]
               
               // Perform the transaction
-              const tx = await groupSplit.createGroup(groupName, ownerNickname, url);
+              const tx = await groupSplit.createGroup(groupName, ownerNickname);
 
               // Log the number of groups created
               // const groupCount = await groupSplit.getGroupsNum();
@@ -53,15 +52,14 @@ describe("GroupSplit", function () {
               const { groupSplit, owner, user1, user2, user3 } = await loadFixture(deployFixture);
               const groupName = "test_group1";
               const ownerNickname = "owner_nick1";
-              const url = "test_url1";
 
               // Perform the transaction
-              const tx = await groupSplit.createGroup(groupName, ownerNickname, url);
+              const tx = await groupSplit.createGroup(groupName, ownerNickname);
 
               const newGroupIds = await groupSplit.getAllGroupIds();
               // console.log(`groupIds = ${newGroupIds}`);
 
-              const groupInfo = await groupSplit.getGroupInfoById(newGroupIds[0]);
+              const groupInfo = await groupSplit.getGroupInfoById(newGroupIds[1]);
               // console.log(groupInfo);
 
           });
@@ -69,33 +67,31 @@ describe("GroupSplit", function () {
             const { groupSplit, owner, user1, user2, user3 } = await loadFixture(deployFixture);
             const groupName = "test_group1";
             const ownerNickname = "owner_nick1";
-            const url = "test_url1";
             const participantnickname = "test_nickname1";
             const depositAmount = 123; // 1 WEI
             // console.log(`user1 = ${user1.address}`);
 
             // Perform the transaction
-            const tx = await groupSplit.createGroup(groupName, ownerNickname, url);
+            const tx = await groupSplit.createGroup(groupName, ownerNickname);
 
             const newGroupIds = await groupSplit.getAllGroupIds();
             // console.log(`groupIds = ${newGroupIds}`);
 
-            const groupInfo = await groupSplit.getGroupInfoById(newGroupIds[0]);
+            const groupInfo = await groupSplit.getGroupInfoById(newGroupIds[1]);
             // console.log(groupInfo);
 
-            const tx2 = await groupSplit.connect(user1).depositToGroup(newGroupIds[0],participantnickname,{value: depositAmount})
+            const tx2 = await groupSplit.connect(user1).depositToGroup(newGroupIds[1],participantnickname,{value: depositAmount})
 
-            const groupInfo2 = await groupSplit.getGroupInfoById(newGroupIds[0]);
+            const groupInfo2 = await groupSplit.getGroupInfoById(newGroupIds[1]);
 
             expect(groupInfo2[1]).equal("test_group1");
             expect(groupInfo2[2]).equal('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
             expect(groupInfo2[3]).equal("owner_nick1");
-            expect(groupInfo2[4]).equal("test_url1");
-            expect(groupInfo2[6]).equal(true);
+            expect(groupInfo2[5]).equal(true);
+            expect(groupInfo2[6]).equal(123);
             expect(groupInfo2[7]).equal(123);
-            expect(groupInfo2[8]).equal(123);
-            expect(groupInfo2[9]).equal(0);
-            expect(groupInfo2[10]).deep.equal(['0x70997970C51812dc3A010C7d01b50e0d17dc79C8']);
+            expect(groupInfo2[8]).equal(0);
+            expect(groupInfo2[9]).deep.equal(['0x70997970C51812dc3A010C7d01b50e0d17dc79C8']);
             // console.log(groupInfo2);
             
         });
