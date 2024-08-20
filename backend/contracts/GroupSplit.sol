@@ -26,7 +26,6 @@ contract GroupSplit {
         uint256 groupId; // ToDo: generate random id
         string groupName;
         bool status; // True = opened; False = closed;
-        string url;
         uint256 creationTime; // ToDo: to understand how time can be registered on-chain
         address owner;
         string ownerNickname;
@@ -40,7 +39,6 @@ contract GroupSplit {
     Group[] public groups;
     uint256[] public groupIds;
     mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
-    mapping(bytes32 => uint256) private groupIdByUrl; // Mapping from url to groupId in the groups array
     uint256 public activeGroups = 0;
 
     // Modifier to check if the group is open
@@ -136,8 +134,7 @@ contract GroupSplit {
 
     function createGroup(
         string memory _groupName,
-        string memory _ownerNickname,
-        string memory _url
+        string memory _ownerNickname
     ) public {
         // add to groups:
         Group storage newGroup = groups.push();
@@ -148,7 +145,6 @@ contract GroupSplit {
         newGroup.groupName = _groupName;
         newGroup.owner = msg.sender;
         newGroup.ownerNickname = _ownerNickname;
-        newGroup.url = _url;
         newGroup.creationTime = block.timestamp;
         newGroup.status = true; // True = opened; False = closed;
         newGroup.balance = 0; // the current group balance
@@ -158,8 +154,6 @@ contract GroupSplit {
         // add group to groups list and mapping
         uint256 index = groups.length - 1;
         groupIndexById[newGroup.groupId] = index; // Mapping from groupId to index in the groups array
-        groupIdByUrl[keccak256(abi.encodePacked(newGroup.url))] = newGroup
-            .groupId; // Mapping from url to groupId in the groups array
 
         groupIds.push(newGroup.groupId);
         // Emit the event with the index
@@ -179,10 +173,6 @@ contract GroupSplit {
         return groupIndexById[_groupId];
     }
 
-    // Example function to show usage
-    function getGroupIdByUrl(uint256 _url) public view returns (uint256) {
-        return groupIdByUrl[keccak256(abi.encodePacked(_url))];
-    }
 
     // Function to return all group IDs
     function getAllGroupIds() public view returns (uint256[] memory) {
@@ -199,7 +189,6 @@ contract GroupSplit {
             string memory,
             address,
             string memory,
-            string memory,
             uint256,
             bool,
             uint256,
@@ -215,7 +204,6 @@ contract GroupSplit {
             group.groupName,
             group.owner,
             group.ownerNickname,
-            group.url,
             group.creationTime,
             group.status,
             group.balance,
