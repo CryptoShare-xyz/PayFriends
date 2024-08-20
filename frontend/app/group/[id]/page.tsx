@@ -2,10 +2,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatAddress } from "@/lib/utils";
 import {
     Activity,
     Check,
+    ChevronsLeftRight,
     Coins,
     EllipsisVertical,
     LinkIcon,
@@ -38,7 +38,26 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+
+import GroupSplit from "@/artifacts/contracts/GroupSplit.sol/GroupSplit.json";
+import { createAlchemyWeb3 } from "@alch/alchemy-web3";
+import { useAccount } from "wagmi";
+import { AbiItem } from 'web3-utils';
+
+// TODO: probably need to dynamically read this from somewhere
+const contractAddress = "0x19076809aAb956D0Ea73EEDaC42D4ace4F46fb8F";
+const contractGenesisBlock = 6333314
+
+// TODO: probably dont want to expose NEXT_PUBLIC_ALCHEMY_API_KEY
+const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+const web3 = createAlchemyWeb3(alchemyKey);
+const groupSplitContract = new web3.eth.Contract(
+    GroupSplit.abi as AbiItem[],
+    contractAddress
+);
+
 
 function ShareGroup() {
     const shareUrl = window.location.href;
@@ -91,7 +110,7 @@ function ShareGroup() {
 }
 
 
-function GroupActionsMenu() {
+function GroupActionsMenu({ isOwner }: { isOwner: boolean }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -103,21 +122,25 @@ function GroupActionsMenu() {
                 <DropdownMenuGroup>
                     <DropdownMenuItem>
                         <Coins className="mr-2 h-4 w-4" />
-                        <span>Withdraw balance</span>
+                        <span>Pay group</span>
                     </DropdownMenuItem>
+                    {isOwner && <DropdownMenuItem>
+                        <ChevronsLeftRight className="mr-2 h-4 w-4" />
+                        <span>Withdraw balance</span>
+                    </DropdownMenuItem>}
                     <ShareGroup />
-                    <DropdownMenuItem>
+                    {isOwner && <DropdownMenuItem>
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
-                    </DropdownMenuItem>
+                    </DropdownMenuItem>}
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
+                {isOwner && <DropdownMenuSeparator />}
+                {isOwner && <DropdownMenuGroup>
                     <DropdownMenuItem>
                         <Stamp className="mr-2 h-4 w-4 text-red-700" />
                         <span className="text-red-700">Close group</span>
                     </DropdownMenuItem>
-                </DropdownMenuGroup>
+                </DropdownMenuGroup>}
             </DropdownMenuContent>
         </DropdownMenu>
     )
@@ -180,18 +203,96 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     )
 }
 
+function Loading() {
+    return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <div className="flex flex-col items-center space-y-4">
+                <div className="animate-spin rounded-full border-4 border-gray-300 border-t-gray-900 h-12 w-12" />
+                <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+            </div>
+        </div>
+    )
+}
+
+type Group = {
+    groupId: string,
+    groupName: string,
+    owner: string,
+    ownerNickname: string,
+    creationTime: string,
+    status: string,
+    balance: string,
+    totalCollected: string,
+    totalWithdrawn: string,
+    participantsAddresses: Participant[]
+}
+
+type Participant = {
+    participantAddress: string;
+    nickname: string;
+    totalDeposits: string;
+}
+
 export default function Page({ params }: { params: { id: string } }) {
     const [isOwner, setIsOwner] = useState(false)
+    const [isParticipant, setIsParticipant] = useState(false)
+    const [group, setGroup] = useState<Group | undefined>(undefined);
+    const [loading, setLoading] = useState(true)
+    const { address, isConnected } = useAccount();
+
+    async function getGroupInfo(id: string) {
+        try {
+            const groupInfo = await groupSplitContract.methods.getGroupInfoById(id).call()
+
+            const participants: Participant[] = await Promise.all<Participant>(groupInfo[9].map(async (participantsAddress): Promise<Participant> => {
+                return {} as Participant
+            }))
+
+            setGroup({
+                groupId: groupInfo[0],
+                groupName: groupInfo[1],
+                owner: groupInfo[2],
+                ownerNickname: groupInfo[3],
+                creationTime: groupInfo[4],
+                status: groupInfo[5],
+                balance: groupInfo[6],
+                totalCollected: groupInfo[7],
+                totalWithdrawn: groupInfo[8],
+                participantsAddresses: participants
+            })
+
+            setIsOwner(groupInfo[2] !== address);
+            setIsParticipant(groupInfo[2] === address || groupInfo[9].some(participantsAddress => participantsAddress === address));
+
+        } catch {
+            console.log(`Group id: ${id} not found`)
+            setGroup(undefined)
+        } finally {
+            setLoading(false)
+        }
+    }
+    useEffect(() => {
+        getGroupInfo(params.id);
+
+    }, [params.id])
+
+    if (loading) {
+        return <Loading />
+    }
+
+    if (group === undefined) {
+        return <span>Group {params.id} no found</span>
+    }
+
 
     return (
         <div className="p-8 bg-slate-50 md:rounded-2xl md:max-w-[80%] w-full mx-auto">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-3xl font-bold tracking-tight">{`Group ${params.id?.substring(0, 4)}`}</h2>
+                <h2 className="text-3xl font-bold tracking-tight">{group.groupName}</h2>
                 <div className="flex items-center space-x-2">
-                    {isOwner ? <GroupActionsMenu /> : <JoinGroupDialog groupId={params.id} />}
+                    {isParticipant ? <GroupActionsMenu isOwner={isOwner} /> : <JoinGroupDialog groupId={group.groupId} />}
                 </div>
             </div>
-            <p className="p-2 max-w-[30rem] text-muted-foreground">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum id nihil illum animi </p>
             <div className="flex flex-col my-8 ">
                 <div className="mb-4 flex justify-evenly xl:flex-row flex-col gap-2">
                     <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
@@ -202,7 +303,7 @@ export default function Page({ params }: { params: { id: string } }) {
                         </CardHeader >
                         <CardContent>
                             <span className="flex text-md text-slate-800">
-                                123 ETH
+                                {group.totalCollected} WEI
                             </span>
                         </CardContent>
                     </Card>
@@ -214,7 +315,7 @@ export default function Page({ params }: { params: { id: string } }) {
                         </CardHeader >
                         <CardContent>
                             <span className="flex text-md text-slate-800">
-                                123 ETH
+                                {group.totalWithdrawn} WEI
                             </span>
                         </CardContent>
                     </Card>
@@ -226,7 +327,7 @@ export default function Page({ params }: { params: { id: string } }) {
                         </CardHeader >
                         <CardContent>
                             <span className="flex text-md text-slate-800">
-                                123 ETH
+                                {group.balance} WEI
                             </span>
                         </CardContent>
                     </Card>
@@ -235,22 +336,20 @@ export default function Page({ params }: { params: { id: string } }) {
                 <aside className="mt-2">
                     <div className="flex p-1 mb-4">
                         <small className="mr-2"><Activity size={16} className="text-muted-foreground" /></small>
-                        <h1 className="font-semibold text-md">Group activity</h1>
+                        <h1 className="font-semibold text-md">Participants</h1>
                     </div>
                     <Table className="bg-white border border-separate rounded-xl">
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Participant</TableHead>
-                                <TableHead>Transaction</TableHead>
                                 <TableHead>Amount</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {events.map(({ address, transaction, amount }) => (
+                            {group.participantsAddresses.map(({ nickname, totalDeposits }) => (
                                 <TableRow key={address}>
-                                    <TableCell className="font-medium capitalize">{address.startsWith("0x") ? formatAddress(address) : address}</TableCell>
-                                    <TableCell className="font-medium uppercase">{transaction}</TableCell>
-                                    <TableCell>{amount} ETH</TableCell>
+                                    <TableCell className="font-medium capitalize">{nickname}</TableCell>
+                                    <TableCell>{totalDeposits} WEI</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

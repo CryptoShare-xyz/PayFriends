@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { formatAddress } from "@/lib/utils";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { ConnectKitButton } from "connectkit";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 import { AbiItem } from 'web3-utils';
 
@@ -47,18 +47,26 @@ const groupSplitContract = new web3.eth.Contract(
 
 
 
-function CreateGroupDialog({ address }) {
+function CreateGroupDialog({ address }: { address: string }) {
   const [name, setName] = useState("")
+  const [loading, setLoading] = useState(false)
   const [ownerNickname, setOwnerNickname] = useState("")
+  const { push } = useRouter()
 
   const handleGroupCreation = async (e: React.MouseEvent<HTMLElement>) => {
     // TODO: add validation
-    console.log(name, ownerNickname)
-    const group = await groupSplitContract.methods.createGroup(name, ownerNickname).send({ from: address });
-    console.log(group)
-    const groupId = group.events.logGroupCreated.returnValues.groupId
-    console.log(groupId)
-    redirect(`/group/${groupId}`)
+    e.preventDefault()
+    setLoading(true)
+    try {
+      const group = await groupSplitContract.methods.createGroup(name, ownerNickname).send({ from: address });
+      const groupId = group.events.logGroupCreated.returnValues.groupId
+      console.log(group)
+      push(`/group/${groupId}`)
+    } finally {
+      setLoading(false)
+      setName("")
+      setOwnerNickname("")
+    }
   }
 
   return (
@@ -105,7 +113,7 @@ function CreateGroupDialog({ address }) {
         </div>
         <DialogFooter>
           <DialogTrigger asChild>
-            <Button className="bg-[#6c63ff]" onClick={handleGroupCreation}>Create</Button>
+            <Button className="bg-[#6c63ff]" onClick={handleGroupCreation} disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
           </DialogTrigger>
         </DialogFooter>
       </DialogContent>
