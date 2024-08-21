@@ -3,17 +3,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-    Activity,
     Check,
     ChevronsLeftRight,
     Coins,
     EllipsisVertical,
     LinkIcon,
     Settings,
-    Stamp
+    Stamp,
+    User
 } from "lucide-react";
 
 
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 import {
     DropdownMenu,
@@ -25,13 +27,15 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
+import moment from "moment";
+
 import { Copy } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger
@@ -146,62 +150,83 @@ function GroupActionsMenu({ isOwner }: { isOwner: boolean }) {
     )
 }
 
-const events = [
-    {
-        address: "0x2b51b1941dfdb01fb54ce439295455b12a01da5d06ed0cc9073b61a5f9a7e4e1",
-        transaction: "pay",
-        amount: 5
-    },
-    {
-        address: "John",
-        transaction: "pay",
-        amount: 5
-    },
-    {
-        address: "0x5e1ff4a84beb13cdc03ecc6d5d553a6763edd0e8789eeb8faef744b0c9c87e84",
-        transaction: "collect",
-        amount: 10
-    },
-    {
-        address: "0x5f66df09cea2c715be958d025374fc965fe239260f2a6c3c924b56631dbceacc",
-        transaction: "pay",
-        amount: 2
-    },
-    {
-        address: "0x3af2e55285f092d375cc50f4aa12d944dd96ef8abc299fa4ea89fdf9f2457e5f",
-        transaction: "pay",
-        amount: 4
-    },
-    {
-        address: "Arnold",
-        transaction: "collect",
-        amount: 10
-    },
-]
-
-
 
 const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
+    const [open, setOpen] = useState(false);
+    const [nickname, setNickname] = useState("");
+    const [amount, setAmount] = useState("");
+    const [loading, setLoading] = useState(false)
+    const { address, isConnected } = useAccount();
+    const { toast } = useToast()
+
+    const handlePay = async (e: React.MouseEvent<HTMLElement>) => {
+        e.preventDefault()
+        setLoading(true)
+        try {
+            const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
+            console.log(groupId, nickname, address, wei)
+            const tx = await groupSplitContract.methods.depositToGroup(groupId, nickname).send({ from: address, value: wei });
+            toast({ description: "Payed group" })
+            window.location.reload()
+        } catch (error) {
+            if (error.message !== undefined) {
+                toast({ variant: "destructive", description: error.message })
+            }
+        } finally {
+            setOpen(false)
+            setLoading(false)
+            setNickname("")
+            setAmount("");
+        }
+    }
+
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-[#6c63ff]">Join group</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Join group {groupId}</DialogTitle>
+                    <DialogTitle>Join group</DialogTitle>
                 </DialogHeader>
-                <div className="flex justify-center items-center gap-4">
-                    <Label htmlFor="amount" className="text-right w-1/4">
-                        Amount
-                    </Label>
-                    <Input id="amount" className="w-2/4" placeholder="Amount to pay group" />
-                    <Button type="submit" className="bg-[#6c63ff]  w-1/4">Pay</Button>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-left">
+                            Nickname
+                        </Label>
+                        <Input
+                            id="name"
+                            placeholder="John"
+                            className="col-span-3"
+                            value={nickname}
+                            onChange={(e) => setNickname(e.target.value)}
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="amount" className="text-left">
+                            Amount
+                        </Label>
+                        <Input
+                            id="amount"
+                            placeholder="1337"
+                            className="col-span-3"
+                            maxLength={100}
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                        />
+                    </div>
                 </div>
+                <DialogFooter>
+                    <DialogTrigger asChild>
+                        <Button className="bg-[#6c63ff]" onClick={handlePay} disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
+                    </DialogTrigger>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )
 }
+
+
 
 function Loading() {
     return (
@@ -261,7 +286,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 participantsAddresses: participants
             })
 
-            setIsOwner(groupInfo[2] !== address);
+            setIsOwner(groupInfo[2] === address);
             setIsParticipant(groupInfo[2] === address || groupInfo[9].some(participantsAddress => participantsAddress === address));
 
         } catch {
@@ -274,7 +299,7 @@ export default function Page({ params }: { params: { id: string } }) {
     useEffect(() => {
         getGroupInfo(params.id);
 
-    }, [params.id])
+    }, [params.id, address])
 
     if (loading) {
         return <Loading />
@@ -287,12 +312,14 @@ export default function Page({ params }: { params: { id: string } }) {
 
     return (
         <div className="p-8 bg-slate-50 md:rounded-2xl md:max-w-[80%] w-full mx-auto">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">{group.groupName}</h2>
                 <div className="flex items-center space-x-2">
                     {isParticipant ? <GroupActionsMenu isOwner={isOwner} /> : <JoinGroupDialog groupId={group.groupId} />}
                 </div>
             </div>
+            <p className="text-muted-foreground text-xs">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
+
             <div className="flex flex-col my-8 ">
                 <div className="mb-4 flex justify-evenly xl:flex-row flex-col gap-2">
                     <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
@@ -334,8 +361,8 @@ export default function Page({ params }: { params: { id: string } }) {
 
                 </div>
                 <aside className="mt-2">
-                    <div className="flex p-1 mb-4">
-                        <small className="mr-2"><Activity size={16} className="text-muted-foreground" /></small>
+                    <div className="flex p-1 mb-4 items-center">
+                        <small className="mr-2"><User size={16} className="text-muted-foreground" /></small>
                         <h1 className="font-semibold text-md">Participants</h1>
                     </div>
                     <Table className="bg-white border border-separate rounded-xl">

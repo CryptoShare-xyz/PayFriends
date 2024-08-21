@@ -1,4 +1,5 @@
 "use client";
+import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import { Inter as FontSans } from "next/font/google";
@@ -40,6 +41,7 @@ export default function RootLayout({
           </body>
         </ConnectKitProvider>
       </WagmiConfig>
+      <Toaster />
     </html>
   );
 }

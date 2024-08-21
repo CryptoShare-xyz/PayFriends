@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatAddress } from "@/lib/utils";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
-import { ConnectKitButton } from "connectkit";
+import { ConnectKitButton, useModal } from "connectkit";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 import { AbiItem } from 'web3-utils';
@@ -47,20 +47,28 @@ const groupSplitContract = new web3.eth.Contract(
 
 
 
-function CreateGroupDialog({ address }: { address: string }) {
+function CreateGroupDialog() {
   const [name, setName] = useState("")
   const [loading, setLoading] = useState(false)
   const [ownerNickname, setOwnerNickname] = useState("")
   const { push } = useRouter()
+  const { address, isConnected } = useAccount();
+  const { openSIWE } = useModal()
 
   const handleGroupCreation = async (e: React.MouseEvent<HTMLElement>) => {
     // TODO: add validation
     e.preventDefault()
     setLoading(true)
+
+    if (!isConnected) {
+      openSIWE(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       const group = await groupSplitContract.methods.createGroup(name, ownerNickname).send({ from: address });
       const groupId = group.events.logGroupCreated.returnValues.groupId
-      console.log(group)
       push(`/group/${groupId}`)
     } finally {
       setLoading(false)
@@ -68,6 +76,8 @@ function CreateGroupDialog({ address }: { address: string }) {
       setOwnerNickname("")
     }
   }
+
+
 
   return (
     <Dialog>
@@ -128,7 +138,6 @@ export default function Home() {
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [cashFlow, setCashFlow] = useState(0);
   const [activeExpenses, setActiveExpenses] = useState(0);
-  const { address, isConnected } = useAccount();
 
 
   // const getContractStats = async () => {
@@ -172,7 +181,7 @@ export default function Home() {
           <div className="my-auto">
             <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
             <h2 className="text-slate-400 my-2 w-[80%] mx-auto ">A group payments app to split different payments among friends</h2>
-            <CreateGroupDialog address={address} />
+            <CreateGroupDialog />
             {/* <Button variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Create group</Button> */}
           </div>
           <aside className="w-[80%] max-w-[480px] my-2 mx-auto">
