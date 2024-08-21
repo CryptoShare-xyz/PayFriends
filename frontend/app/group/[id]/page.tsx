@@ -33,6 +33,7 @@ import { Copy } from "lucide-react";
 
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -114,7 +115,7 @@ function ShareGroup() {
 }
 
 
-function GroupActionsMenu({ isOwner }: { isOwner: boolean }) {
+function GroupActionsMenu({ isOwner, groupId }: { isOwner: boolean, groupId: string }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -124,14 +125,8 @@ function GroupActionsMenu({ isOwner }: { isOwner: boolean }) {
                 <DropdownMenuLabel>Group actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                        <Coins className="mr-2 h-4 w-4" />
-                        <span>Pay group</span>
-                    </DropdownMenuItem>
-                    {isOwner && <DropdownMenuItem>
-                        <ChevronsLeftRight className="mr-2 h-4 w-4" />
-                        <span>Withdraw balance</span>
-                    </DropdownMenuItem>}
+                    <PayGroupDialog groupId={groupId} />
+                    {isOwner && <WithdrawDialog groupId={groupId} />}
                     <ShareGroup />
                     {isOwner && <DropdownMenuItem>
                         <Settings className="mr-2 h-4 w-4" />
@@ -220,6 +215,122 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                     <DialogTrigger asChild>
                         <Button className="bg-[#6c63ff]" onClick={handlePay} disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
                     </DialogTrigger>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
+    const [open, setOpen] = useState(false);
+    const [nickname, setNickname] = useState("");
+    const [amount, setAmount] = useState("");
+    const [loading, setLoading] = useState(false)
+    const { address, isConnected } = useAccount();
+    const { toast } = useToast()
+
+    const handlePay = async (e: React.MouseEvent<HTMLElement>) => {
+        e.preventDefault()
+        setLoading(true)
+        try {
+            const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
+            console.log(groupId, nickname, address, wei)
+            const tx = await groupSplitContract.methods.depositToGroup(groupId, nickname).send({ from: address, value: wei });
+            toast({ description: "Payed group" })
+            window.location.reload()
+        } catch (error) {
+            if (error.message !== undefined) {
+                toast({ variant: "destructive", description: error.message })
+            }
+        } finally {
+            setOpen(false)
+            setLoading(false)
+            setNickname("")
+            setAmount("");
+        }
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Coins className="mr-2 h-4 w-4" />
+                    <span>Pay group</span>
+                </DropdownMenuItem>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Pay group</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="amount" className="text-left">
+                            Amount
+                        </Label>
+                        <Input
+                            id="amount"
+                            placeholder="1337"
+                            className="col-span-3"
+                            maxLength={100}
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <DialogTrigger asChild>
+                        <Button className="bg-[#6c63ff]" onClick={handlePay} disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
+                    </DialogTrigger>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false)
+    const { address, isConnected } = useAccount();
+    const { toast } = useToast()
+
+    const handleWithdraw = async (e: React.MouseEvent<HTMLElement>) => {
+        e.preventDefault()
+        setLoading(true)
+        try {
+            const tx = await groupSplitContract.methods.withdrawFromGroup(groupId).send({ from: address });
+            toast({ description: "Withdrawn from group" })
+            window.location.reload()
+        } catch (error) {
+            if (error.message !== undefined) {
+                toast({ variant: "destructive", description: error.message })
+            }
+        } finally {
+            setOpen(false)
+            setLoading(false)
+        }
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <ChevronsLeftRight className="mr-2 h-4 w-4" />
+                    <span>Withdraw balance</span>
+                </DropdownMenuItem>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Are you sure you want to withdraw ?</DialogTitle>
+                </DialogHeader>
+                <DialogFooter className="flex items-center justify-center sm:justify-center gap-4">
+                    <DialogTrigger asChild>
+                        <Button className="bg-[#6c63ff]" onClick={handleWithdraw} disabled={loading}>{loading ? "Withdrawing..." : "Withdraw balance"}</Button>
+                    </DialogTrigger>
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">
+                            Close
+                        </Button>
+                    </DialogClose>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -315,7 +426,7 @@ export default function Page({ params }: { params: { id: string } }) {
             <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">{group.groupName}</h2>
                 <div className="flex items-center space-x-2">
-                    {isParticipant ? <GroupActionsMenu isOwner={isOwner} /> : <JoinGroupDialog groupId={group.groupId} />}
+                    {isParticipant ? <GroupActionsMenu isOwner={isOwner} groupId={group.groupId} /> : <JoinGroupDialog groupId={group.groupId} />}
                 </div>
             </div>
             <p className="text-muted-foreground text-xs">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
