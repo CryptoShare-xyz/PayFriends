@@ -164,7 +164,7 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
             toast({ description: "Payed group" })
             window.location.reload()
         } catch (error) {
-            if (error.message !== undefined) {
+            if (error instanceof Error) {
                 toast({ variant: "destructive", description: error.message })
             }
         } finally {
@@ -239,7 +239,7 @@ const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
             toast({ description: "Payed group" })
             window.location.reload()
         } catch (error) {
-            if (error.message !== undefined) {
+            if (error instanceof Error) {
                 toast({ variant: "destructive", description: error.message })
             }
         } finally {
@@ -301,7 +301,7 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
             toast({ description: "Withdrawn from group" })
             window.location.reload()
         } catch (error) {
-            if (error.message !== undefined) {
+            if (error instanceof Error) {
                 toast({ variant: "destructive", description: error.message })
             }
         } finally {
@@ -380,7 +380,7 @@ export default function Page({ params }: { params: { id: string } }) {
         try {
             const groupInfo = await groupSplitContract.methods.getGroupInfoById(id).call()
 
-            const participants: Participant[] = await Promise.all<Participant>(groupInfo[9].map(async (participantsAddress): Promise<Participant> => {
+            const participants: Participant[] = await Promise.all<Participant>(groupInfo[9].map(async (participantsAddress: string): Promise<Participant> => {
                 return {} as Participant
             }))
 
@@ -398,7 +398,7 @@ export default function Page({ params }: { params: { id: string } }) {
             })
 
             setIsOwner(groupInfo[2] === address);
-            setIsParticipant(groupInfo[2] === address || groupInfo[9].some(participantsAddress => participantsAddress === address));
+            setIsParticipant(groupInfo[2] === address || groupInfo[9].some((participantsAddress: string) => participantsAddress === address));
 
         } catch {
             console.log(`Group id: ${id} not found`)
