@@ -15,10 +15,14 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
-import ExpenseSplitter from "@/artifacts/contracts/ExpenseSplitter.sol/ExpenseSplitter.json";
+import GroupSplit from "@/artifacts/contracts/GroupSplit.sol/GroupSplit.json";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatAddress } from "@/lib/utils";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
-import { ConnectKitButton } from "connectkit";
+import { ConnectKitButton, useModal } from "connectkit";
+import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 import { AbiItem } from 'web3-utils';
 
@@ -28,49 +32,138 @@ type Expense = {
   from: string
 }
 
+
 // TODO: probably need to dynamically read this from somewhere
-const contractAddress = "0xF5e2a7e572094b035bfC1E6070ee98fB5Eb79a21";
+const contractAddress = "0x19076809aAb956D0Ea73EEDaC42D4ace4F46fb8F";
 const contractGenesisBlock = 6333314
 
 // TODO: probably dont want to expose NEXT_PUBLIC_ALCHEMY_API_KEY
 const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
 const web3 = createAlchemyWeb3(alchemyKey);
-const expenseSplitterContract = new web3.eth.Contract(
-  ExpenseSplitter.abi as AbiItem[],
+const groupSplitContract = new web3.eth.Contract(
+  GroupSplit.abi as AbiItem[],
   contractAddress
 );
+
+
+
+function CreateGroupDialog() {
+  const [name, setName] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [ownerNickname, setOwnerNickname] = useState("")
+  const { push } = useRouter()
+  const { address, isConnected } = useAccount();
+  const { openSIWE } = useModal()
+
+  const handleGroupCreation = async (e: React.MouseEvent<HTMLElement>) => {
+    // TODO: add validation
+    e.preventDefault()
+    setLoading(true)
+
+    if (!isConnected) {
+      openSIWE(true);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const group = await groupSplitContract.methods.createGroup(name, ownerNickname).send({ from: address });
+      const groupId = group.events.logGroupCreated.returnValues.groupId
+      push(`/group/${groupId}`)
+    } finally {
+      setLoading(false)
+      setName("")
+      setOwnerNickname("")
+    }
+  }
+
+
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="my-2 mr-auto bg-[#6c63ff] text-slate-100">
+          <span className="sm:hidden rounded-[50%]">+</span>
+          <span className="hidden sm:block">Create group</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create group</DialogTitle>
+          <DialogDescription>
+            Create group to share a common expense with friends by sending group link.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-left">
+              Group name
+            </Label>
+            <Input
+              id="name"
+              placeholder="Fun school trip"
+              className="col-span-3"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="ownerNickname" className="text-left">
+              Owner nickname
+            </Label>
+            <Input
+              id="ownerNickname"
+              placeholder="John"
+              className="col-span-3"
+              maxLength={100}
+              value={ownerNickname}
+              onChange={(e) => setOwnerNickname(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogTrigger asChild>
+            <Button className="bg-[#6c63ff]" onClick={handleGroupCreation} disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
+          </DialogTrigger>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog >
+  )
+}
+
+
 
 export default function Home() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [cashFlow, setCashFlow] = useState(0);
   const [activeExpenses, setActiveExpenses] = useState(0);
-  const { address, isConnected } = useAccount();
 
-  const getContractStats = async () => {
-    const totalExpenses = await expenseSplitterContract.methods.getExpensesLength().call();
-    setTotalExpenses(Number.parseInt(totalExpenses))
 
-    const cashFlow = await expenseSplitterContract.methods.cashFlow().call();
-    setCashFlow(cashFlow)
+  // const getContractStats = async () => {
+  //   const totalExpenses = await expenseSplitterContract.methods.getExpensesLength().call();
+  //   setTotalExpenses(Number.parseInt(totalExpenses))
 
-    const activeExpenses = await expenseSplitterContract.methods.getActiveExpenses().call();
-    setActiveExpenses(activeExpenses)
-  }
+  //   const cashFlow = await expenseSplitterContract.methods.cashFlow().call();
+  //   setCashFlow(cashFlow)
 
-  const getRecentExpenses = async () => {
-    await expenseSplitterContract.getPastEvents("LogExpenseCreated", {
-      fromBlock: contractGenesisBlock
-    }, (err, events) => {
-      const expenses = events.map(event => ({
-        from: event.returnValues.creator,
-        amount: event.returnValues.amount,
-        id: event.transactionHash,
-      }))
-      setExpenses(expenses)
-    }
-    )
-  }
+  //   const activeExpenses = await expenseSplitterContract.methods.getActiveExpenses().call();
+  //   setActiveExpenses(activeExpenses)
+  // }
+
+  // const getRecentExpenses = async () => {
+  //   await expenseSplitterContract.getPastEvents("LogExpenseCreated", {
+  //     fromBlock: contractGenesisBlock
+  //   }, (err, events) => {
+  //     const expenses = events.map(event => ({
+  //       from: event.returnValues.creator,
+  //       amount: event.returnValues.amount,
+  //       id: event.transactionHash,
+  //     }))
+  //     setExpenses(expenses)
+  //   }
+  //   )
+  // }
 
   // useEffect(() => {
   //   getContractStats();
@@ -81,14 +174,15 @@ export default function Home() {
     <main className="lg:max-w-[80%] mx-auto">
       <section id="hero" className="bg-slate-700 px-4 py-4 lg:rounded-2xl">
         <nav className="flex mb-4 lg:mb-16 justify-end gap-4">
-          {isConnected && <Button variant="secondary" className="bg-[#6c63ff] text-slate-100"><Link href="dashboard">Dashboard</Link></Button>}
+          {/* {isConnected && <Button variant="secondary" className="bg-[#6c63ff] text-slate-100"><Link href="dashboard">Dashboard</Link></Button>} */}
           <ConnectKitButton />
         </nav>
         <div className="flex flex-wrap gap-8 justify-center text-center lg:mb-48 mb-8">
           <div className="my-auto">
             <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
             <h2 className="text-slate-400 my-2 w-[80%] mx-auto ">A group payments app to split different payments among friends</h2>
-            <Button variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Getting started</Button>
+            <CreateGroupDialog />
+            {/* <Button variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Create group</Button> */}
           </div>
           <aside className="w-[80%] max-w-[480px] my-2 mx-auto">
             <Image src="/hero.svg" width={640} height={640} alt=" hero" />

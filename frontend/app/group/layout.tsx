@@ -3,8 +3,7 @@
 import { cn } from "@/lib/utils";
 import { ConnectKitButton } from "connectkit";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMediaQuery } from 'react-responsive';
 import { useAccount } from "wagmi";
 
@@ -46,16 +45,16 @@ export default function DashboardLayout({
     const [mounted, setMounted] = useState<Boolean>(false);
 
     // TODO: probably should use middleware/nextauth
-    useEffect(() => {
-        setMounted(true);
-        if (!isConnected) {
-            redirect("/");
-        }
-    }, [isConnected])
+    // useEffect(() => {
+    //     setMounted(true);
+    //     if (!isConnected) {
+    //         redirect("/");
+    //     }
+    // }, [isConnected])
 
-    if (!mounted) {
-        return <></>
-    }
+    // if (!mounted) {
+    //     return <></>
+    // }
 
     return (
         <div className="flex-col md:flex px-8 lg:max-w-[70%] mx-auto bg-slate-100 min-h-screen lg:rounded-2xl" >
