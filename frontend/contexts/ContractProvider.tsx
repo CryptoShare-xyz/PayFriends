@@ -5,9 +5,9 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { AbiItem } from 'web3-utils';
 
 // Context to hold the contract instance
-const ContractContext = createContext<GroupSplit | null>(null);
+const ContractContext = createContext<GroupSplit | undefined>(undefined);
 
-const contractAddress = "0x19076809aAb956D0Ea73EEDaC42D4ace4F46fb8F";
+const contractAddress = process.env.NEXT_PUBLIC_CONTACT_ADDRESS
 const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
 
 export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
