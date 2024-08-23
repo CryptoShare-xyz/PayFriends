@@ -1,4 +1,5 @@
 import "@nomicfoundation/hardhat-toolbox";
+import "@typechain/hardhat";
 import * as dotenv from 'dotenv';
 import { HardhatUserConfig } from "hardhat/config";
 
@@ -13,6 +14,11 @@ const config: HardhatUserConfig = {
         enabled: true
       }
     }
+  },
+
+  typechain: {
+    outDir: "../frontend/typechain-types", // Specify the output directory for generated types
+    target: "web3-v1", // Generate types for Ethers.js v5
   },
 
   // This makes sure tests are ran locally
