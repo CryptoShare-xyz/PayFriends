@@ -2,17 +2,29 @@ import GroupSplitABI from "@/artifacts/contracts/GroupSplit.sol/GroupSplit.json"
 import { GroupSplit } from "@/typechain-types";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import React, { createContext, useContext, useMemo } from 'react';
+import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
 // Context to hold the contract instance
 const ContractContext = createContext<GroupSplit | undefined>(undefined);
 
 const contractAddress = process.env.NEXT_PUBLIC_CONTACT_ADDRESS
-const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+
+const createWeb3 = () => {
+    if (isDevelopment) {
+        const provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545")
+        return new Web3(provider)
+    } else {
+        const alchemyUrl = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+        return createAlchemyWeb3(alchemyUrl);
+    }
+}
+
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const contract = useMemo(() => {
-        const web3 = createAlchemyWeb3(alchemyKey);
+        const web3 = createWeb3()
         return new web3.eth.Contract(
             GroupSplitABI.abi as AbiItem[],
             contractAddress
