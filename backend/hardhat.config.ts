@@ -25,6 +25,7 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {},
+
     sepolia: {
       accounts: [`${process.env.PRIVATE_KEY || dummyKey}`],
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
