@@ -15,16 +15,14 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
-import GroupSplit from "@/artifacts/contracts/GroupSplit.sol/GroupSplit.json";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
-import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import { ConnectKitButton, useModal } from "connectkit";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
-import { AbiItem } from 'web3-utils';
 
 type Expense = {
   id: string,
@@ -32,20 +30,7 @@ type Expense = {
   from: string
 }
 
-
-// TODO: probably need to dynamically read this from somewhere
 const contractAddress = "0x19076809aAb956D0Ea73EEDaC42D4ace4F46fb8F";
-const contractGenesisBlock = 6333314
-
-// TODO: probably dont want to expose NEXT_PUBLIC_ALCHEMY_API_KEY
-const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
-const web3 = createAlchemyWeb3(alchemyKey);
-const groupSplitContract = new web3.eth.Contract(
-  GroupSplit.abi as AbiItem[],
-  contractAddress
-);
-
-
 
 function CreateGroupDialog() {
   const [name, setName] = useState("")
@@ -54,6 +39,7 @@ function CreateGroupDialog() {
   const { push } = useRouter()
   const { address, isConnected } = useAccount();
   const { openSIWE } = useModal()
+  const contract = useContract()
 
   const handleGroupCreation = async (e: React.MouseEvent<HTMLElement>) => {
     // TODO: add validation
@@ -67,8 +53,8 @@ function CreateGroupDialog() {
     }
 
     try {
-      const group = await groupSplitContract.methods.createGroup(name, ownerNickname).send({ from: address });
-      const groupId = group.events.logGroupCreated.returnValues.groupId
+      const group = await contract.methods.createGroup(name, ownerNickname).send({ from: address });
+      const groupId = group.events?.logGroupCreated.returnValues.groupId
       push(`/group/${groupId}`)
     } finally {
       setLoading(false)
@@ -139,37 +125,6 @@ export default function Home() {
   const [cashFlow, setCashFlow] = useState(0);
   const [activeExpenses, setActiveExpenses] = useState(0);
 
-
-  // const getContractStats = async () => {
-  //   const totalExpenses = await expenseSplitterContract.methods.getExpensesLength().call();
-  //   setTotalExpenses(Number.parseInt(totalExpenses))
-
-  //   const cashFlow = await expenseSplitterContract.methods.cashFlow().call();
-  //   setCashFlow(cashFlow)
-
-  //   const activeExpenses = await expenseSplitterContract.methods.getActiveExpenses().call();
-  //   setActiveExpenses(activeExpenses)
-  // }
-
-  // const getRecentExpenses = async () => {
-  //   await expenseSplitterContract.getPastEvents("LogExpenseCreated", {
-  //     fromBlock: contractGenesisBlock
-  //   }, (err, events) => {
-  //     const expenses = events.map(event => ({
-  //       from: event.returnValues.creator,
-  //       amount: event.returnValues.amount,
-  //       id: event.transactionHash,
-  //     }))
-  //     setExpenses(expenses)
-  //   }
-  //   )
-  // }
-
-  // useEffect(() => {
-  //   getContractStats();
-  //   getRecentExpenses();
-  // }, [])
-
   return (
     <main className="lg:max-w-[80%] mx-auto">
       <section id="hero" className="bg-slate-700 px-4 py-4 lg:rounded-2xl">
@@ -182,7 +137,6 @@ export default function Home() {
             <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
             <h2 className="text-slate-400 my-2 w-[80%] mx-auto ">A group payments app to split different payments among friends</h2>
             <CreateGroupDialog />
-            {/* <Button variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Create group</Button> */}
           </div>
           <aside className="w-[80%] max-w-[480px] my-2 mx-auto">
             <Image src="/hero.svg" width={640} height={640} alt=" hero" />
