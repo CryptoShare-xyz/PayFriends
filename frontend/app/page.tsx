@@ -34,6 +34,7 @@ const contractAddress = "0x19076809aAb956D0Ea73EEDaC42D4ace4F46fb8F";
 
 function CreateGroupDialog() {
   const [name, setName] = useState("")
+  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [ownerNickname, setOwnerNickname] = useState("")
   const { push } = useRouter()
@@ -57,6 +58,7 @@ function CreateGroupDialog() {
       const groupId = group.events?.logGroupCreated.returnValues.groupId
       push(`/group/${groupId}`)
     } finally {
+      setOpen(false)
       setLoading(false)
       setName("")
       setOwnerNickname("")
@@ -66,7 +68,7 @@ function CreateGroupDialog() {
 
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="my-2 mr-auto bg-[#6c63ff] text-slate-100">
           <span className="sm:hidden rounded-[50%]">+</span>
