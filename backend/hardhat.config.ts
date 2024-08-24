@@ -24,7 +24,12 @@ const config: HardhatUserConfig = {
   // This makes sure tests are ran locally
   defaultNetwork: "hardhat",
   networks: {
-    hardhat: {},
+    hardhat: {
+      // mining: {
+      //   auto: false,
+      //   interval: 1000
+      // }
+    },
 
     sepolia: {
       accounts: [`${process.env.PRIVATE_KEY || dummyKey}`],
