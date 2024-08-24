@@ -190,7 +190,7 @@ export default function Home() {
 
         <section id="Expenses" className="py-8 w-[90%] mx-auto max-w-[48rem]">
           <Table>
-            <TableCaption >All active expenses on contract <Link target="_blank" className="hover:underline" href={`https://sepolia.etherscan.io/address/${process.env.NEXT_PUBLIC_CONTACT_ADDRESS}`}>{formatAddress(process.env.NEXT_PUBLIC_CONTACT_ADDRESS)}</Link></TableCaption>
+            <TableCaption >All active expenses on contract <Link target="_blank" className="hover:underline" href={`https://sepolia.basescan.org/address/${process.env.NEXT_PUBLIC_CONTACT_ADDRESS}`}>{formatAddress(process.env.NEXT_PUBLIC_CONTACT_ADDRESS)}</Link></TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Request address</TableHead>
