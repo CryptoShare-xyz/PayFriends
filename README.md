@@ -18,7 +18,6 @@ A group payments app to split different payments among friends.
 Run `npx hardhat test` to test the contract
 
 ## TODO
-- [ ] move to the most convenient L2
 - [ ] consider supporting USDC instead of eth transfers
 - [ ] make code more efficient
 
