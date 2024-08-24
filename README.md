@@ -1,10 +1,5 @@
-# CryptoShare
+# [CryptoShare](https://cryptoshare-phi.vercel.app/)
 A group payments app to split different payments among friends.
-
-https://cryptoshare-phi.vercel.app/
-
-The App contains:
-* ExpenseSplitter.sol: a smart contract that operates expense creation and approval.
 
 ## Getting started
 
