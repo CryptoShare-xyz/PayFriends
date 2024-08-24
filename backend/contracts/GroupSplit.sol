@@ -20,6 +20,7 @@ contract GroupSplit {
         address participantAddress;
         string nickname;
         uint256 totalDeposits;
+        uint256[] groups;
     }
 
     struct Group {
@@ -61,6 +62,9 @@ contract GroupSplit {
         string memory _nickname,
         uint256 _deposit
     ) public {
+        // Ensure the group exists
+        require(groups[_groupId].groupId == _groupId, "Group does not exist");
+        
         uint256 index = getGroupIndexById(_groupId);
         Group storage group = groups[index];
 
@@ -75,11 +79,17 @@ contract GroupSplit {
                 .totalDeposits += _deposit;
         } else {
             // If participant does not exist, add them to the group
-            group.participantDetails[_participantAddress] = Participant(
+            uint256[] tempgroups;
+            tempgroups.push(_groupId);
+            Participant memory newParticipant = Participant(
                 _participantAddress,
                 _nickname,
-                _deposit
+                _deposit,
+                tempgroups
             );
+            newParticipant.groups.push(_groupId);
+            group.participantDetails[_participantAddress] = newParticipant;
+
             group.participantsAddresses.push(_participantAddress);
         }
         // Update group's balance and totalCollected
