@@ -18,13 +18,13 @@ function MainNav({
             {...props}
         >
             <Link
-                href="/dashboard"
+                href="/"
                 className="text-sm  transition-colors hover:text-primary text-[#6c63ff] font-bold"
             >
                 Overview
             </Link>
             <Link
-                href="/dashboard"
+                href="#"
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
             >
                 Settings
