@@ -1,10 +1,13 @@
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { ReactNode } from "react";
-import { WagmiConfig, createConfig } from "wagmi";
-import { hardhat, sepolia } from "wagmi/chains";
+import { WagmiProvider, createConfig } from "wagmi";
+import { hardhat, baseSepolia } from "wagmi/chains";
 
 const isDevelopment = process.env.NODE_ENV === 'development';
-const selectedChains = isDevelopment ? [hardhat] : [sepolia];
+const selectedChains = isDevelopment ? [hardhat] : [baseSepolia];
+
+const queryClient = new QueryClient()
 
 const config = createConfig(
     getDefaultConfig({
@@ -17,10 +20,12 @@ const config = createConfig(
 
 export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     return (
-        <WagmiConfig config={config}>
+        <WagmiProvider config={config}>
+            <QueryClientProvider client={queryClient}>
             <ConnectKitProvider theme="auto" mode="light">
                 {children}
-            </ConnectKitProvider>
-        </WagmiConfig>
+                </ConnectKitProvider>
+            </QueryClientProvider>
+        </WagmiProvider>
     )
 }
