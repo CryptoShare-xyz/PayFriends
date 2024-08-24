@@ -18,13 +18,10 @@ A group payments app to split different payments among friends.
 Run `npx hardhat test` to test the contract
 
 ## TODO
-- [x] switch to hardhat environment and Sepolia
-- [ ] FrontEnd to interact with contract
 - [ ] move to the most convenient L2
 - [ ] consider supporting USDC instead of eth transfers
-- [x] integration with metamask or another wallet
 - [ ] make code more efficient
-- [ ] probably need to make expenseID from each one created for uniqueness
+
 
 
 
