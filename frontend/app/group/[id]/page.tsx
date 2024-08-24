@@ -21,6 +21,15 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -41,9 +50,17 @@ import {
 } from "lucide-react";
 
 import { useContract } from "@/contexts/ContractProvider";
+import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
 import web3 from "web3";
+import { z } from "zod";
+
+const joinGroupSchema = z.object({
+    nickname: z.string().min(1).max(20),
+    amount: z.coerce.number().positive().min(1)
+})
 
 function ShareGroup() {
     const shareUrl = window.location.href;
@@ -129,19 +146,23 @@ function GroupActionsMenu({ isOwner, groupId }: { isOwner: boolean, groupId: str
 
 const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const [open, setOpen] = useState(false);
-    const [nickname, setNickname] = useState("");
-    const [amount, setAmount] = useState("");
     const [loading, setLoading] = useState(false)
-    const { address, isConnected } = useAccount();
+    const { address } = useAccount();
     const { toast } = useToast()
     const contract = useContract()
+    const form = useForm<z.infer<typeof joinGroupSchema>>({
+        resolver: zodResolver(joinGroupSchema),
+        defaultValues: {
+            nickname: "",
+            amount: 0
+        },
+    })
 
-    const handlePay = async (e: React.MouseEvent<HTMLElement>) => {
-        e.preventDefault()
+    async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
+        const { nickname, amount } = values;
         setLoading(true)
         try {
             const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
-            console.log(groupId, nickname, address, wei)
             const tx = await contract.methods.depositToGroup(groupId, nickname).send({ from: address, value: wei });
             toast({ description: "Payed group" })
             window.location.reload()
@@ -152,9 +173,9 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
         } finally {
             setOpen(false)
             setLoading(false)
-            setNickname("")
-            setAmount("");
+            form.reset()
         }
+
     }
 
     return (
@@ -166,38 +187,45 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                 <DialogHeader>
                     <DialogTitle>Join group</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-left">
-                            Nickname
-                        </Label>
-                        <Input
-                            id="name"
-                            placeholder="John"
-                            className="col-span-3"
-                            value={nickname}
-                            onChange={(e) => setNickname(e.target.value)}
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                        <FormField
+                            control={form.control}
+                            name="nickname"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Nickname</FormLabel>
+                                    <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription>
+                                    <FormControl>
+                                        <Input placeholder="John Doe" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="amount" className="text-left">
-                            Amount
-                        </Label>
-                        <Input
-                            id="amount"
-                            placeholder="1337"
-                            className="col-span-3"
-                            maxLength={100}
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                        <FormField
+                            control={form.control}
+                            name="amount"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Amount to deposit</FormLabel>
+                                    <FormDescription>
+                                        This is the amount of wei to deposit to the group.
+                                    </FormDescription>
+                                    <FormControl>
+                                        <Input type="number" placeholder="1337" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <DialogTrigger asChild>
-                        <Button className="bg-[#6c63ff]" onClick={handlePay} disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
-                    </DialogTrigger>
-                </DialogFooter>
+                        <DialogFooter>
+                            <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     )
