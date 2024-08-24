@@ -16,13 +16,26 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+
 import { useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ConnectKitButton, useModal } from "connectkit";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
+import { z } from "zod";
 
 type Expense = {
   id: string,
@@ -30,21 +43,28 @@ type Expense = {
   from: string
 }
 
-const contractAddress = "0x19076809aAb956D0Ea73EEDaC42D4ace4F46fb8F";
+const createGroupSchema = z.object({
+  groupName: z.string().min(1).max(20),
+  ownerNickname: z.string().min(1).max(20)
+})
 
 function CreateGroupDialog() {
-  const [name, setName] = useState("")
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [ownerNickname, setOwnerNickname] = useState("")
   const { push } = useRouter()
   const { address, isConnected } = useAccount();
   const { openSIWE } = useModal()
   const contract = useContract()
+  const form = useForm<z.infer<typeof createGroupSchema>>({
+    resolver: zodResolver(createGroupSchema),
+    defaultValues: {
+      groupName: "",
+      ownerNickname: ""
+    }
+  })
 
-  const handleGroupCreation = async (e: React.MouseEvent<HTMLElement>) => {
-    // TODO: add validation
-    e.preventDefault()
+  async function onSubmit(values: z.infer<typeof createGroupSchema>) {
+    const { groupName, ownerNickname } = values
     setLoading(true)
 
     if (!isConnected) {
@@ -54,18 +74,15 @@ function CreateGroupDialog() {
     }
 
     try {
-      const group = await contract.methods.createGroup(name, ownerNickname).send({ from: address });
+      const group = await contract.methods.createGroup(groupName, ownerNickname).send({ from: address });
       const groupId = group.events?.logGroupCreated.returnValues.groupId
       push(`/group/${groupId}`)
     } finally {
       setOpen(false)
       setLoading(false)
-      setName("")
-      setOwnerNickname("")
+      form.reset()
     }
   }
-
-
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -82,38 +99,45 @@ function CreateGroupDialog() {
             Create group to share a common expense with friends by sending group link.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-left">
-              Group name
-            </Label>
-            <Input
-              id="name"
-              placeholder="Fun school trip"
-              className="col-span-3"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+            <FormField
+              control={form.control}
+              name="groupName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Group Name</FormLabel>
+                  <FormDescription>
+                    This is your public group name.
+                  </FormDescription>
+                  <FormControl>
+                    <Input placeholder="Field trip" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="ownerNickname" className="text-left">
-              Owner nickname
-            </Label>
-            <Input
-              id="ownerNickname"
-              placeholder="John"
-              className="col-span-3"
-              maxLength={100}
-              value={ownerNickname}
-              onChange={(e) => setOwnerNickname(e.target.value)}
+            <FormField
+              control={form.control}
+              name="ownerNickname"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Owner nickname</FormLabel>
+                  <FormDescription>
+                    This is your public nickname.
+                  </FormDescription>
+                  <FormControl>
+                    <Input placeholder="John Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-        </div>
-        <DialogFooter>
-          <DialogTrigger asChild>
-            <Button className="bg-[#6c63ff]" onClick={handleGroupCreation} disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
-          </DialogTrigger>
-        </DialogFooter>
+            <DialogFooter>
+              <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog >
   )
@@ -166,7 +190,7 @@ export default function Home() {
 
         <section id="Expenses" className="py-8 w-[90%] mx-auto max-w-[48rem]">
           <Table>
-            <TableCaption >All active expenses on contract <Link target="_blank" className="hover:underline" href={`https://sepolia.etherscan.io/address/${contractAddress}`}>{formatAddress(contractAddress)}</Link></TableCaption>
+            <TableCaption >All active expenses on contract <Link target="_blank" className="hover:underline" href={`https://sepolia.etherscan.io/address/${process.env.NEXT_PUBLIC_CONTACT_ADDRESS}`}>{formatAddress(process.env.NEXT_PUBLIC_CONTACT_ADDRESS)}</Link></TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Request address</TableHead>
