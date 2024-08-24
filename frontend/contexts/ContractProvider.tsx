@@ -11,16 +11,16 @@ const ContractContext = createContext<GroupSplit | undefined>(undefined);
 const contractAddress = process.env.NEXT_PUBLIC_CONTACT_ADDRESS
 
 const createWeb3 = () => {
+    const isDevelopment = process.env.NODE_ENV === 'development';
     if (isDevelopment) {
         const provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545")
         return new Web3(provider)
     } else {
-        const alchemyUrl = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+        const alchemyUrl = `wss://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
         return createAlchemyWeb3(alchemyUrl);
     }
 }
 
-const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const contract = useMemo(() => {
