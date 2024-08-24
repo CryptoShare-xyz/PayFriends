@@ -15,16 +15,27 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
-import GroupSplit from "@/artifacts/contracts/GroupSplit.sol/GroupSplit.json";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+
+import { useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
-import { createAlchemyWeb3 } from "@alch/alchemy-web3";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ConnectKitButton, useModal } from "connectkit";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
-import { AbiItem } from 'web3-utils';
+import { z } from "zod";
 
 type Expense = {
   id: string,
@@ -32,32 +43,28 @@ type Expense = {
   from: string
 }
 
-
-// TODO: probably need to dynamically read this from somewhere
-const contractAddress = "0x19076809aAb956D0Ea73EEDaC42D4ace4F46fb8F";
-const contractGenesisBlock = 6333314
-
-// TODO: probably dont want to expose NEXT_PUBLIC_ALCHEMY_API_KEY
-const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
-const web3 = createAlchemyWeb3(alchemyKey);
-const groupSplitContract = new web3.eth.Contract(
-  GroupSplit.abi as AbiItem[],
-  contractAddress
-);
-
-
+const createGroupSchema = z.object({
+  groupName: z.string().min(1).max(20),
+  ownerNickname: z.string().min(1).max(20)
+})
 
 function CreateGroupDialog() {
-  const [name, setName] = useState("")
+  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [ownerNickname, setOwnerNickname] = useState("")
   const { push } = useRouter()
   const { address, isConnected } = useAccount();
   const { openSIWE } = useModal()
+  const contract = useContract()
+  const form = useForm<z.infer<typeof createGroupSchema>>({
+    resolver: zodResolver(createGroupSchema),
+    defaultValues: {
+      groupName: "",
+      ownerNickname: ""
+    }
+  })
 
-  const handleGroupCreation = async (e: React.MouseEvent<HTMLElement>) => {
-    // TODO: add validation
-    e.preventDefault()
+  async function onSubmit(values: z.infer<typeof createGroupSchema>) {
+    const { groupName, ownerNickname } = values
     setLoading(true)
 
     if (!isConnected) {
@@ -67,20 +74,18 @@ function CreateGroupDialog() {
     }
 
     try {
-      const group = await groupSplitContract.methods.createGroup(name, ownerNickname).send({ from: address });
-      const groupId = group.events.logGroupCreated.returnValues.groupId
+      const group = await contract.methods.createGroup(groupName, ownerNickname).send({ from: address });
+      const groupId = group.events?.logGroupCreated.returnValues.groupId
       push(`/group/${groupId}`)
     } finally {
+      setOpen(false)
       setLoading(false)
-      setName("")
-      setOwnerNickname("")
+      form.reset()
     }
   }
 
-
-
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="my-2 mr-auto bg-[#6c63ff] text-slate-100">
           <span className="sm:hidden rounded-[50%]">+</span>
@@ -94,38 +99,45 @@ function CreateGroupDialog() {
             Create group to share a common expense with friends by sending group link.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-left">
-              Group name
-            </Label>
-            <Input
-              id="name"
-              placeholder="Fun school trip"
-              className="col-span-3"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+            <FormField
+              control={form.control}
+              name="groupName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Group Name</FormLabel>
+                  <FormDescription>
+                    This is your public group name.
+                  </FormDescription>
+                  <FormControl>
+                    <Input placeholder="Field trip" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="ownerNickname" className="text-left">
-              Owner nickname
-            </Label>
-            <Input
-              id="ownerNickname"
-              placeholder="John"
-              className="col-span-3"
-              maxLength={100}
-              value={ownerNickname}
-              onChange={(e) => setOwnerNickname(e.target.value)}
+            <FormField
+              control={form.control}
+              name="ownerNickname"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Owner nickname</FormLabel>
+                  <FormDescription>
+                    This is your public display name.
+                  </FormDescription>
+                  <FormControl>
+                    <Input placeholder="John Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-        </div>
-        <DialogFooter>
-          <DialogTrigger asChild>
-            <Button className="bg-[#6c63ff]" onClick={handleGroupCreation} disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
-          </DialogTrigger>
-        </DialogFooter>
+            <DialogFooter>
+              <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog >
   )
@@ -139,37 +151,6 @@ export default function Home() {
   const [cashFlow, setCashFlow] = useState(0);
   const [activeExpenses, setActiveExpenses] = useState(0);
 
-
-  // const getContractStats = async () => {
-  //   const totalExpenses = await expenseSplitterContract.methods.getExpensesLength().call();
-  //   setTotalExpenses(Number.parseInt(totalExpenses))
-
-  //   const cashFlow = await expenseSplitterContract.methods.cashFlow().call();
-  //   setCashFlow(cashFlow)
-
-  //   const activeExpenses = await expenseSplitterContract.methods.getActiveExpenses().call();
-  //   setActiveExpenses(activeExpenses)
-  // }
-
-  // const getRecentExpenses = async () => {
-  //   await expenseSplitterContract.getPastEvents("LogExpenseCreated", {
-  //     fromBlock: contractGenesisBlock
-  //   }, (err, events) => {
-  //     const expenses = events.map(event => ({
-  //       from: event.returnValues.creator,
-  //       amount: event.returnValues.amount,
-  //       id: event.transactionHash,
-  //     }))
-  //     setExpenses(expenses)
-  //   }
-  //   )
-  // }
-
-  // useEffect(() => {
-  //   getContractStats();
-  //   getRecentExpenses();
-  // }, [])
-
   return (
     <main className="lg:max-w-[80%] mx-auto">
       <section id="hero" className="bg-slate-700 px-4 py-4 lg:rounded-2xl">
@@ -182,7 +163,6 @@ export default function Home() {
             <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
             <h2 className="text-slate-400 my-2 w-[80%] mx-auto ">A group payments app to split different payments among friends</h2>
             <CreateGroupDialog />
-            {/* <Button variant="secondary" className="my-2 mr-auto bg-[#6c63ff] text-slate-100">Create group</Button> */}
           </div>
           <aside className="w-[80%] max-w-[480px] my-2 mx-auto">
             <Image src="/hero.svg" width={640} height={640} alt=" hero" />
@@ -210,7 +190,7 @@ export default function Home() {
 
         <section id="Expenses" className="py-8 w-[90%] mx-auto max-w-[48rem]">
           <Table>
-            <TableCaption >All active expenses on contract <Link target="_blank" className="hover:underline" href={`https://sepolia.etherscan.io/address/${contractAddress}`}>{formatAddress(contractAddress)}</Link></TableCaption>
+            <TableCaption >All active expenses on contract <Link target="_blank" className="hover:underline" href={`https://sepolia.basescan.org/address/${process.env.NEXT_PUBLIC_CONTACT_ADDRESS}`}>{formatAddress(process.env.NEXT_PUBLIC_CONTACT_ADDRESS)}</Link></TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Request address</TableHead>

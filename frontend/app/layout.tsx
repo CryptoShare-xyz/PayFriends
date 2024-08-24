@@ -1,21 +1,12 @@
 "use client";
 import { Toaster } from "@/components/ui/toaster";
+import { ContractProvider } from "@/contexts/ContractProvider";
+import { WalletProvider } from "@/contexts/WalletProvider";
 import { cn } from "@/lib/utils";
-import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import { Inter as FontSans } from "next/font/google";
-import { WagmiConfig, createConfig } from "wagmi";
-import { sepolia } from "wagmi/chains";
 import "./globals.css";
 
 
-const config = createConfig(
-  getDefaultConfig({
-    chains: [sepolia],
-    alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-    walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
-    appName: "CryptoShare",
-  })
-);
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -29,8 +20,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <WagmiConfig config={config}>
-        <ConnectKitProvider theme="auto" mode="light">
+      <WalletProvider>
+        <ContractProvider>
           <body
             className={cn(
               "min-h-screen bg-background font-sans antialiased bg-slate-200",
@@ -39,8 +30,8 @@ export default function RootLayout({
           >
             {children}
           </body>
-        </ConnectKitProvider>
-      </WagmiConfig>
+        </ContractProvider>
+      </WalletProvider>
       <Toaster />
     </html>
   );

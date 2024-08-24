@@ -1,4 +1,5 @@
 import "@nomicfoundation/hardhat-toolbox";
+import "@typechain/hardhat";
 import * as dotenv from 'dotenv';
 import { HardhatUserConfig } from "hardhat/config";
 
@@ -15,13 +16,24 @@ const config: HardhatUserConfig = {
     }
   },
 
+  typechain: {
+    outDir: "../frontend/typechain-types", // Specify the output directory for generated types
+    target: "web3-v1", // Generate types for Ethers.js v5
+  },
+
   // This makes sure tests are ran locally
   defaultNetwork: "hardhat",
   networks: {
-    hardhat: {},
-    sepolia: {
+    hardhat: {
+      mining: {
+        auto: false,
+        interval: 1000
+      }
+    },
+
+    base_sepolia: {
       accounts: [`${process.env.PRIVATE_KEY || dummyKey}`],
-      url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+      url: `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
     },
   },
   paths: {

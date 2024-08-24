@@ -1,36 +1,7 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-    Check,
-    ChevronsLeftRight,
-    Coins,
-    EllipsisVertical,
-    LinkIcon,
-    Settings,
-    Stamp,
-    User
-} from "lucide-react";
-
-
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-
-import moment from "moment";
-
-import { Copy } from "lucide-react";
-
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
     DialogClose,
@@ -41,28 +12,55 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useToast } from "@/components/ui/use-toast";
+
+import moment from "moment";
+
+import {
+    Check,
+    ChevronsLeftRight,
+    Coins,
+    Copy,
+    EllipsisVertical,
+    LinkIcon,
+    Settings,
+    Stamp,
+    User
+} from "lucide-react";
+
+import { useContract } from "@/contexts/ContractProvider";
+import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
-
-
-import GroupSplit from "@/artifacts/contracts/GroupSplit.sol/GroupSplit.json";
-import { createAlchemyWeb3 } from "@alch/alchemy-web3";
+import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
-import { AbiItem } from 'web3-utils';
+import web3 from "web3";
+import { z } from "zod";
 
-// TODO: probably need to dynamically read this from somewhere
-const contractAddress = "0x19076809aAb956D0Ea73EEDaC42D4ace4F46fb8F";
-const contractGenesisBlock = 6333314
-
-// TODO: probably dont want to expose NEXT_PUBLIC_ALCHEMY_API_KEY
-const alchemyKey = `wss://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
-const web3 = createAlchemyWeb3(alchemyKey);
-const groupSplitContract = new web3.eth.Contract(
-    GroupSplit.abi as AbiItem[],
-    contractAddress
-);
-
+const joinGroupSchema = z.object({
+    nickname: z.string().min(1).max(20),
+    amount: z.coerce.number().positive().min(1)
+})
 
 function ShareGroup() {
     const shareUrl = window.location.href;
@@ -148,19 +146,24 @@ function GroupActionsMenu({ isOwner, groupId }: { isOwner: boolean, groupId: str
 
 const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const [open, setOpen] = useState(false);
-    const [nickname, setNickname] = useState("");
-    const [amount, setAmount] = useState("");
     const [loading, setLoading] = useState(false)
-    const { address, isConnected } = useAccount();
+    const { address } = useAccount();
     const { toast } = useToast()
+    const contract = useContract()
+    const form = useForm<z.infer<typeof joinGroupSchema>>({
+        resolver: zodResolver(joinGroupSchema),
+        defaultValues: {
+            nickname: "",
+            amount: 0
+        },
+    })
 
-    const handlePay = async (e: React.MouseEvent<HTMLElement>) => {
-        e.preventDefault()
+    async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
+        const { nickname, amount } = values;
         setLoading(true)
         try {
             const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
-            console.log(groupId, nickname, address, wei)
-            const tx = await groupSplitContract.methods.depositToGroup(groupId, nickname).send({ from: address, value: wei });
+            const tx = await contract.methods.depositToGroup(groupId, nickname).send({ from: address, value: wei });
             toast({ description: "Payed group" })
             window.location.reload()
         } catch (error) {
@@ -170,9 +173,9 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
         } finally {
             setOpen(false)
             setLoading(false)
-            setNickname("")
-            setAmount("");
+            form.reset()
         }
+
     }
 
     return (
@@ -184,38 +187,45 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                 <DialogHeader>
                     <DialogTitle>Join group</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-left">
-                            Nickname
-                        </Label>
-                        <Input
-                            id="name"
-                            placeholder="John"
-                            className="col-span-3"
-                            value={nickname}
-                            onChange={(e) => setNickname(e.target.value)}
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                        <FormField
+                            control={form.control}
+                            name="nickname"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Nickname</FormLabel>
+                                    <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription>
+                                    <FormControl>
+                                        <Input placeholder="John Doe" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="amount" className="text-left">
-                            Amount
-                        </Label>
-                        <Input
-                            id="amount"
-                            placeholder="1337"
-                            className="col-span-3"
-                            maxLength={100}
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                        <FormField
+                            control={form.control}
+                            name="amount"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Amount to deposit</FormLabel>
+                                    <FormDescription>
+                                        This is the amount of wei to deposit to the group.
+                                    </FormDescription>
+                                    <FormControl>
+                                        <Input type="number" placeholder="1337" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <DialogTrigger asChild>
-                        <Button className="bg-[#6c63ff]" onClick={handlePay} disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
-                    </DialogTrigger>
-                </DialogFooter>
+                        <DialogFooter>
+                            <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     )
@@ -223,19 +233,24 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
 
 const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const [open, setOpen] = useState(false);
-    const [nickname, setNickname] = useState("");
-    const [amount, setAmount] = useState("");
     const [loading, setLoading] = useState(false)
     const { address, isConnected } = useAccount();
     const { toast } = useToast()
+    const contract = useContract()
+    const form = useForm<z.infer<typeof joinGroupSchema>>({
+        resolver: zodResolver(joinGroupSchema),
+        defaultValues: {
+            nickname: "PAY", // patch
+            amount: 0
+        },
+    })
 
-    const handlePay = async (e: React.MouseEvent<HTMLElement>) => {
-        e.preventDefault()
+    async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
+        const { nickname, amount } = values;
         setLoading(true)
         try {
             const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
-            console.log(groupId, nickname, address, wei)
-            const tx = await groupSplitContract.methods.depositToGroup(groupId, nickname).send({ from: address, value: wei });
+            const tx = await contract.methods.depositToGroup(groupId, "").send({ from: address, value: wei });
             toast({ description: "Payed group" })
             window.location.reload()
         } catch (error) {
@@ -245,9 +260,9 @@ const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
         } finally {
             setOpen(false)
             setLoading(false)
-            setNickname("")
-            setAmount("");
+            form.reset()
         }
+
     }
 
     return (
@@ -262,26 +277,29 @@ const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                 <DialogHeader>
                     <DialogTitle>Pay group</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="amount" className="text-left">
-                            Amount
-                        </Label>
-                        <Input
-                            id="amount"
-                            placeholder="1337"
-                            className="col-span-3"
-                            maxLength={100}
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                        <FormField
+                            control={form.control}
+                            name="amount"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Amount to deposit</FormLabel>
+                                    <FormDescription>
+                                        This is the amount of wei to deposit to the group.
+                                    </FormDescription>
+                                    <FormControl>
+                                        <Input type="number" placeholder="1337" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <DialogTrigger asChild>
-                        <Button className="bg-[#6c63ff]" onClick={handlePay} disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
-                    </DialogTrigger>
-                </DialogFooter>
+                        <DialogFooter>
+                            <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     )
@@ -292,12 +310,13 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const [loading, setLoading] = useState(false)
     const { address, isConnected } = useAccount();
     const { toast } = useToast()
+    const contract = useContract()
 
     const handleWithdraw = async (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault()
         setLoading(true)
         try {
-            const tx = await groupSplitContract.methods.withdrawFromGroup(groupId).send({ from: address });
+            const tx = await contract.methods.withdrawFromGroup(groupId).send({ from: address });
             toast({ description: "Withdrawn from group" })
             window.location.reload()
         } catch (error) {
@@ -375,10 +394,11 @@ export default function Page({ params }: { params: { id: string } }) {
     const [group, setGroup] = useState<Group | undefined>(undefined);
     const [loading, setLoading] = useState(true)
     const { address, isConnected } = useAccount();
+    const contract = useContract()
 
     async function getGroupInfo(id: string) {
         try {
-            const groupInfo = await groupSplitContract.methods.getGroupInfoById(id).call()
+            const groupInfo = await contract.methods.getGroupInfoById(id).call()
 
             const participants: Participant[] = await Promise.all<Participant>(groupInfo[9].map(async (participantsAddress: string): Promise<Participant> => {
                 return {} as Participant
@@ -390,7 +410,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 owner: groupInfo[2],
                 ownerNickname: groupInfo[3],
                 creationTime: groupInfo[4],
-                status: groupInfo[5],
+                status: groupInfo[5] ? "True" : "False",
                 balance: groupInfo[6],
                 totalCollected: groupInfo[7],
                 totalWithdrawn: groupInfo[8],

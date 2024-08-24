@@ -1,32 +1,26 @@
-# CryptoShare
+# [CryptoShare](https://cryptoshare-phi.vercel.app/)
 A group payments app to split different payments among friends.
-
-https://cryptoshare-phi.vercel.app/
-
-The App contains:
-* ExpenseSplitter.sol: a smart contract that operates expense creation and approval.
 
 ## Getting started
 
-### Install Backend
-Change dir to `backend/` and run `npm i --include=dev` to install dev requirements.
+### Installation
+1. Install root dependencies `npm i --include=dev`
+2. Install backend dependencies `npm --prefix backend i --include=dev`
+3. Install frontend dependencies `npm --prefix frontend i --include=dev`
 
-### Test
+### Running dev environment
+1. Create a local environment `cp frontend/.env.local.example frontend/.env.local` and add your API keys.
+2. Run `npm run dev` in the root folder.
+3. (only first time) import the private keys to your wallet (Metamask, Coinbase).
+4. Deploy the contract `npm run deploy-dev` and add the address to the `frontend/.env.local` to `NEXT_PUBLIC_CONTACT_ADDRESS`.
+
+### Testing contract
 Run `npx hardhat test` to test the contract
 
-### UI
-Change folder to `frontend/` and run `npm i --include=dev`
-
-> Note it you compile the contract again replace `app/ExpenseSplitter.json` with the new one and if you deploy new maybe need to change contract address in code
-
 ## TODO
-- [x] switch to hardhat environment and Sepolia
-- [ ] FrontEnd to interact with contract
-- [ ] move to the most convenient L2
 - [ ] consider supporting USDC instead of eth transfers
-- [x] integration with metamask or another wallet
 - [ ] make code more efficient
-- [ ] probably need to make expenseID from each one created for uniqueness
+
 
 
 

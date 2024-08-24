@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "dev": "concurrently --kill-others \"npm --prefix frontend/ run dev\" \"(cd backend/ && npx hardhat node)\"",
+    "deploy-dev": "(cd backend/ && npx hardhat ignition deploy ./ignition/modules/GroupSplit.ts --network localhost)"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
