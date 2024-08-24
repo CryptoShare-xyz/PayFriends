@@ -20,7 +20,6 @@ contract GroupSplit {
         address participantAddress;
         string nickname;
         uint256 totalDeposits;
-        uint256[] groups;
     }
 
     struct Group {
@@ -77,16 +76,14 @@ contract GroupSplit {
                 .participantDetails[_participantAddress]
                 .totalDeposits += _deposit;
         } else {
-            // If participant does not exist, add them to the group
-            uint256[] tempgroups;
-            tempgroups.push(_groupId);
-            Participant memory newParticipant = Participant(
-                _participantAddress,
-                _nickname,
-                _deposit,
-                tempgroups
-            );
-            newParticipant.groups.push(_groupId);
+        
+            // Create a new participant
+
+            Participant memory newParticipant = Participant({
+                participantAddress: _participantAddress,
+                nickname: _nickname,
+                totalDeposits: _deposit
+            });
             group.participantDetails[_participantAddress] = newParticipant;
 
             group.participantsAddresses.push(_participantAddress);
@@ -264,6 +261,31 @@ contract GroupSplit {
     function getActivegroups() public view returns (uint256) {
         return activeGroups;
     }
+
+    function getParticipantDetails(uint256 _groupId, address _participantAddress)
+    public
+    view
+    returns (
+        address participantAddress,
+        string memory nickname,
+        uint256 totalDeposits
+    )
+{
+    // Ensure the group exists
+    uint256 index = getGroupIndexById(_groupId);
+    Group storage group = groups[index];
+
+    // Ensure the participant exists in the group
+    Participant memory participant = group.participantDetails[_participantAddress];
+    require(participant.participantAddress != address(0), "Participant does not exist");
+
+    // Return participant's details
+    return (
+        participant.participantAddress,
+        participant.nickname,
+        participant.totalDeposits
+    );
+}
 
     receive() external payable {}
 }
