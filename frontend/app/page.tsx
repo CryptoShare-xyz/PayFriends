@@ -124,7 +124,7 @@ function CreateGroupDialog() {
                 <FormItem>
                   <FormLabel>Owner nickname</FormLabel>
                   <FormDescription>
-                    This is your public nickname.
+                    This is your public display name.
                   </FormDescription>
                   <FormControl>
                     <Input placeholder="John Doe" {...field} />
