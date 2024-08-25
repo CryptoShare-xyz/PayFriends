@@ -20,6 +20,7 @@ Run `npx hardhat test` to test the contract
 ## TODO
 - [ ] consider supporting USDC instead of eth transfers
 - [ ] make code more efficient
+- [ ] make transaction **a lot** cheaper
 
 
 
