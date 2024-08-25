@@ -4,7 +4,7 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@typechain/hardhat": "^9.1.0",
     "@typechain/web3-v1": "^6.0.7",
-    "hardhat": "^2.22.6",
+    "hardhat": "^2.22.9",
     "typechain": "^8.3.2"
   },
   "dependencies": {

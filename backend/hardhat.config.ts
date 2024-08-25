@@ -25,10 +25,10 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      mining: {
-        auto: false,
-        interval: 1000
-      }
+      // mining: {
+      //   auto: false,
+      //   interval: 1000
+      // }
     },
 
     base_sepolia: {

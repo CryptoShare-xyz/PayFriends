@@ -134,6 +134,18 @@ export interface GroupSplit extends BaseContract {
 
     getGroupsNum(): NonPayableTransactionObject<string>;
 
+    getParticipantDetails(
+      _groupId: number | string | BN,
+      _participantAddress: string
+    ): NonPayableTransactionObject<{
+      participantAddress: string;
+      nickname: string;
+      totalDeposits: string;
+      0: string;
+      1: string;
+      2: string;
+    }>;
+
     groupIds(arg0: number | string | BN): NonPayableTransactionObject<string>;
 
     groups(arg0: number | string | BN): NonPayableTransactionObject<{

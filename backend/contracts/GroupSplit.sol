@@ -42,8 +42,8 @@ contract GroupSplit {
     uint256 public activeGroups = 0;
 
     constructor() {
-        createGroup("genesisgroup", "cryptoshare");
-        activeGroups = 0;
+        // make genesis group unvalid
+        groups.push();
     }
 
     // Modifier to check if the group is open
@@ -60,10 +60,10 @@ contract GroupSplit {
         string memory _nickname,
         uint256 _deposit
     ) public {
-        // Ensure the group exists
-        require(groups[_groupId].groupId == _groupId, "Group does not exist");
-        
         uint256 index = getGroupIndexById(_groupId);
+        // Ensure the group exists
+        require(groups[index].groupId == _groupId, "Group does not exist");
+
         Group storage group = groups[index];
 
         // Check if the participant already exists in the mapping by verifying the address
@@ -76,7 +76,6 @@ contract GroupSplit {
                 .participantDetails[_participantAddress]
                 .totalDeposits += _deposit;
         } else {
-        
             // Create a new participant
 
             Participant memory newParticipant = Participant({
@@ -168,6 +167,9 @@ contract GroupSplit {
         groupIndexById[newGroup.groupId] = index; // Mapping from groupId to index in the groups array
 
         groupIds.push(newGroup.groupId);
+
+        // Make owner a participant
+        addParticipantToGroup(newGroup.groupId, msg.sender, _ownerNickname, 0);
         // Emit the event with the index
         emit logGroupCreated(
             newGroup.groupId,
@@ -262,30 +264,38 @@ contract GroupSplit {
         return activeGroups;
     }
 
-    function getParticipantDetails(uint256 _groupId, address _participantAddress)
-    public
-    view
-    returns (
-        address participantAddress,
-        string memory nickname,
-        uint256 totalDeposits
+    function getParticipantDetails(
+        uint256 _groupId,
+        address _participantAddress
     )
-{
-    // Ensure the group exists
-    uint256 index = getGroupIndexById(_groupId);
-    Group storage group = groups[index];
+        public
+        view
+        returns (
+            address participantAddress,
+            string memory nickname,
+            uint256 totalDeposits
+        )
+    {
+        // Ensure the group exists
+        uint256 index = getGroupIndexById(_groupId);
+        Group storage group = groups[index];
 
-    // Ensure the participant exists in the group
-    Participant memory participant = group.participantDetails[_participantAddress];
-    require(participant.participantAddress != address(0), "Participant does not exist");
+        // Ensure the participant exists in the group
+        Participant memory participant = group.participantDetails[
+            _participantAddress
+        ];
+        require(
+            participant.participantAddress != address(0),
+            "Participant does not exist"
+        );
 
-    // Return participant's details
-    return (
-        participant.participantAddress,
-        participant.nickname,
-        participant.totalDeposits
-    );
-}
+        // Return participant's details
+        return (
+            participant.participantAddress,
+            participant.nickname,
+            participant.totalDeposits
+        );
+    }
 
     receive() external payable {}
 }
