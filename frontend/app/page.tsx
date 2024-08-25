@@ -88,8 +88,7 @@ function CreateGroupDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="my-2 mr-auto bg-[#6c63ff] text-slate-100">
-          <span className="sm:hidden rounded-[50%]">+</span>
-          <span className="hidden sm:block">Create group</span>
+          <span>Create group</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
