@@ -401,7 +401,8 @@ export default function Page({ params }: { params: { id: string } }) {
             const groupInfo = await contract.methods.getGroupInfoById(id).call()
 
             const participants: Participant[] = await Promise.all<Participant>(groupInfo[9].map(async (participantsAddress: string): Promise<Participant> => {
-                return {} as Participant
+                const participant = await contract.methods.getParticipantDetails(groupInfo[0], participantsAddress).call();
+                return participant
             }))
 
             setGroup({
@@ -504,8 +505,8 @@ export default function Page({ params }: { params: { id: string } }) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {group.participantsAddresses.map(({ nickname, totalDeposits }) => (
-                                <TableRow key={address}>
+                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress }) => (
+                                <TableRow key={participantAddress}>
                                     <TableCell className="font-medium capitalize">{nickname}</TableCell>
                                     <TableCell>{totalDeposits} WEI</TableCell>
                                 </TableRow>
