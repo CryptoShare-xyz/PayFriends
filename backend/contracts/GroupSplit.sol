@@ -4,8 +4,8 @@
 [x] implement depositToGroup
 [x]  test depositToGroup
 [x] implement withdrawFromGroup
-[]  test withdrawFromGroup
-[] test events
+[x]  test withdrawFromGroup
+[x] test events
 [] handle exceptions and input validation
 
 

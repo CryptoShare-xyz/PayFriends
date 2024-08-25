@@ -92,6 +92,34 @@ describe("GroupSplit", function () {
         expect(groupInfo2[9]).to.deep.equal([owner.address, user1.address])
 
       });
+
+      it("withdrawFromGroup", async function () {
+        const { groupSplit, owner, user1 } = await loadFixture(deployFixture);
+        const groupName = "test_group1";
+        const ownerNickname = "owner_nick1";
+        const participantNickname = "test_nickname1";
+        const depositAmount = 123; // 1 WEI
+
+        const tx = await groupSplit.createGroup(groupName, ownerNickname);
+        const receipt = await tx.wait()
+        const groupId = receipt?.logs[0]?.args[0]
+
+        const tx2 = await groupSplit.connect(user1).depositToGroup(groupId, participantNickname, { value: depositAmount })
+        await expect(tx2)
+          .to.emit(groupSplit, "logGroupDepositReceived")
+          .withArgs(groupId, user1.address, participantNickname, depositAmount);
+
+        // Perform the transaction
+        const tx3 = await groupSplit.withdrawFromGroup(groupId);
+        await expect(tx3).to.changeEtherBalance(owner, depositAmount);
+
+        await expect(tx3)
+          .to.emit(groupSplit, "logGroupWithdrawal")
+          .withArgs(groupId, 0, anyValue, depositAmount, depositAmount);
+
+
+      });
+
     });
   });
 });
