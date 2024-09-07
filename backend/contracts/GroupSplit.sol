@@ -300,6 +300,4 @@ contract GroupSplit {
             participant.totalDeposits
         );
     }
-
-    receive() external payable {}
 }
