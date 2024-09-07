@@ -1,14 +1,11 @@
 /* ToDo:
-[x] finish getGroupInfo
-[x] test getGroupInfo
-[x] implement depositToGroup
-[x]  test depositToGroup
-[x] implement withdrawFromGroup
-[x]  test withdrawFromGroup
-[x] test events
 [] handle exceptions and input validation
-
-
+[] test new withdrawFromGroup (with reentrancy protection)
+[] test USDC supporting version
+[] improve generateRandomNumber (gpt recommendation)
+[] revise again withdrawFromGroup for edge cases
+[] implement open/close group
+[] consider using a proxy contract
 */
 
 // SPDX-License-Identifier: MIT
@@ -243,21 +240,30 @@ contract GroupSplit {
         Group storage group = groups[index];
         // make sure the msg.sender is the group owner
         require(msg.sender == group.owner, "Only group owner can withdraw");
-        (bool success, ) = payable(group.owner).call{value: group.balance}("");
-        if (success) {
-            group.totalWithdrawn = group.balance;
-            group.balance = 0;
+        require(group.balance > 0, "No balance to withdraw");
 
-            emit logGroupWithdrawal(
-                _groupId,
-                group.balance,
-                block.timestamp,
-                group.totalCollected,
-                group.totalWithdrawn
-            );
-        } else {
+        uint256 amount = group.balance;
+
+        // Update state before the external call to avoid reentrancy
+        group.totalWithdrawn += amount;
+        group.balance = 0;
+
+        (bool success, ) = payable(group.owner).call{value: amount}("");
+        if (!success) {
+            // In case of failure, revert the balance changes
+            group.balance = amount;
+            group.totalWithdrawn -= amount;
             emit logWithdrawalFailed(_groupId, group.owner, group.balance);
+            return;
         }
+
+        emit logGroupWithdrawal(
+            _groupId,
+            amount,
+            block.timestamp,
+            group.totalCollected,
+            group.totalWithdrawn
+        );
     }
 
     function getActivegroups() public view returns (uint256) {

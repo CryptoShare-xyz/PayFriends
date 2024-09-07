@@ -115,7 +115,7 @@ describe("GroupSplit", function () {
 
         await expect(tx3)
           .to.emit(groupSplit, "logGroupWithdrawal")
-          .withArgs(groupId, 0, anyValue, depositAmount, depositAmount);
+          .withArgs(groupId, depositAmount, anyValue, depositAmount, depositAmount);
 
 
       });
