@@ -2,7 +2,7 @@
 [] handle exceptions and input validation
 [] test new withdrawFromGroup (with reentrancy protection)
 [] test USDC supporting version
-[] improve generateRandomNumber (gpt recommendation)
+[X] improve generateRandomNumber (gpt recommendation)
 [] revise again withdrawFromGroup for edge cases
 [] implement open/close group
 [] consider using a proxy contract
@@ -127,19 +127,6 @@ contract GroupSplit {
         uint256 amount
     );
 
-    function generateRandomNumber() private view returns (uint256) {
-        return
-            uint256(
-                keccak256(
-                    abi.encodePacked(
-                        block.timestamp,
-                        block.difficulty,
-                        msg.sender
-                    )
-                )
-            ) % 1000000;
-    }
-
     function createGroup(
         string memory _groupName,
         string memory _ownerNickname
@@ -149,7 +136,19 @@ contract GroupSplit {
         activeGroups += 1;
 
         // initiate all parameters:
-        newGroup.groupId = generateRandomNumber();
+        newGroup.groupId = uint256(
+            keccak256(
+                abi.encodePacked(
+                    _groupName,
+                    msg.sender,
+                    _ownerNickname,
+                    block.timestamp,
+                    block.difficulty,
+                    groups.length
+                )
+            )
+        );
+
         newGroup.groupName = _groupName;
         newGroup.owner = msg.sender;
         newGroup.ownerNickname = _ownerNickname;
