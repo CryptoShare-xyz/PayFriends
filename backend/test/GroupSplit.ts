@@ -5,6 +5,8 @@ import {
 import { expect } from "chai";
 import hre from "hardhat";
 
+const _GROUP_CLOSED = 1;
+const _GROUP_OPEN = 2;
 
 describe("GroupSplit", function () {
   // We define a fixture to reuse the same setup in every test.
@@ -60,7 +62,7 @@ describe("GroupSplit", function () {
           owner.address,
           ownerNickname,
           timestamp,
-          true,
+          _GROUP_OPEN,
           0n,
           0n,
           0n,

@@ -125,7 +125,7 @@ export interface GroupSplit extends BaseContract {
       2: string;
       3: string;
       4: string;
-      5: boolean;
+      5: string;
       6: string;
       7: string;
       8: string;
@@ -151,7 +151,7 @@ export interface GroupSplit extends BaseContract {
     groups(arg0: number | string | BN): NonPayableTransactionObject<{
       groupId: string;
       groupName: string;
-      status: boolean;
+      status: string;
       creationTime: string;
       owner: string;
       ownerNickname: string;
@@ -160,7 +160,7 @@ export interface GroupSplit extends BaseContract {
       totalWithdrawn: string;
       0: string;
       1: string;
-      2: boolean;
+      2: string;
       3: string;
       4: string;
       5: string;

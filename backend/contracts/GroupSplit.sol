@@ -1,5 +1,4 @@
 /* ToDo:
-[] handle exceptions and input validation
 [] test new withdrawFromGroup (with reentrancy protection)
 [] test USDC supporting version
 [X] improve generateRandomNumber (gpt recommendation)
@@ -12,6 +11,12 @@
 pragma solidity ^0.8.0;
 
 contract GroupSplit {
+
+    // Use uint256 instead of bool for group state, see:
+    // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/58f635312aa21f947cae5f8578638a85aa2519f5/contracts/security/ReentrancyGuard.sol#L23-L27
+    uint256 private constant _GROUP_CLOSED = 1;
+    uint256 private constant _GROUP_OPEN = 2;
+
     struct Participant {
         address participantAddress;
         string nickname;
@@ -19,10 +24,10 @@ contract GroupSplit {
     }
 
     struct Group {
-        uint256 groupId; // ToDo: generate random id
+        uint256 groupId;
         string groupName;
-        bool status; // True = opened; False = closed;
-        uint256 creationTime; // ToDo: to understand how time can be registered on-chain
+        uint256 status;
+        uint256 creationTime;
         address owner;
         string ownerNickname;
         uint256 balance; // the current group balance
@@ -45,7 +50,7 @@ contract GroupSplit {
     // Modifier to check if the group is open
     modifier isGroupOpen(uint256 _groupId) {
         uint256 index = getGroupIndexById(_groupId);
-        require(groups[index].status == true, "Group is closed");
+        require(groups[index].status == _GROUP_OPEN, "Group is closed");
         _;
     }
 
@@ -152,7 +157,7 @@ contract GroupSplit {
         newGroup.owner = msg.sender;
         newGroup.ownerNickname = _ownerNickname;
         newGroup.creationTime = block.timestamp;
-        newGroup.status = true; // True = opened; False = closed;
+        newGroup.status = _GROUP_OPEN;
         newGroup.balance = 0; // the current group balance
         newGroup.totalCollected = 0; // the total payments received to the group by the participants
         newGroup.totalWithdrawn = 0; // the total withdrawals from the group by the owner
@@ -195,7 +200,7 @@ contract GroupSplit {
             address,
             string memory,
             uint256,
-            bool,
+            uint256,
             uint256,
             uint256,
             uint256,
