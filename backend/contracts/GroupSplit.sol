@@ -11,7 +11,6 @@
 pragma solidity ^0.8.0;
 
 contract GroupSplit {
-
     // Use uint256 instead of bool for group state, see:
     // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/58f635312aa21f947cae5f8578638a85aa2519f5/contracts/security/ReentrancyGuard.sol#L23-L27
     uint256 private constant _GROUP_CLOSED = 1;
@@ -182,6 +181,22 @@ contract GroupSplit {
     function getGroupIndexById(uint256 _groupId) public view returns (uint256) {
         require(groupIndexById[_groupId] != 0, "Group does not exist");
         return groupIndexById[_groupId];
+    }
+
+    function closeGroup(uint256 _groupId) public {
+        uint256 index = getGroupIndexById(_groupId);
+        Group storage group = groups[index];
+
+        require(msg.sender == group.owner, "Only group owner can close group");
+        require(group.balance == 0, "Can't close group with balance");
+
+        group.status = _GROUP_CLOSED;
+        emit logGroupClosed(
+            _groupId,
+            group.owner,
+            group.groupName,
+            block.timestamp
+        );
     }
 
     // Function to return all group IDs
