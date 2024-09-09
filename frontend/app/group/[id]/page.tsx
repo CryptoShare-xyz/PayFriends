@@ -34,7 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-
+import { Lock } from "lucide-react";
 import moment from "moment";
 
 import {
@@ -126,13 +126,13 @@ function GroupActionsMenu({ isOwner, groupId }: { isOwner: boolean, groupId: str
                     {isOwner && <WithdrawDialog groupId={groupId} />}
                     <ShareGroup />
                 </DropdownMenuGroup>
-                {isOwner && <DropdownMenuSeparator />}
-                {isOwner && <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                        <Stamp className="mr-2 h-4 w-4 text-red-700" />
-                        <span className="text-red-700">Close group</span>
-                    </DropdownMenuItem>
-                </DropdownMenuGroup>}
+                {isOwner &&
+                    <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuGroup>
+                            <CloseDialog groupId={groupId} />
+                        </DropdownMenuGroup>
+                    </>}
             </DropdownMenuContent>
         </DropdownMenu>
     )
@@ -352,6 +352,58 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
 }
 
 
+const CloseDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false)
+    const { address, isConnected } = useAccount();
+    const { toast } = useToast()
+    const contract = useContract()
+
+    const handleClose = async (e: React.MouseEvent<HTMLElement>) => {
+        e.preventDefault()
+        setLoading(true)
+        try {
+            const tx = await contract.methods.closeGroup(groupId).send({ from: address });
+            toast({ description: "Closed group" })
+            window.location.reload()
+        } catch (error) {
+            if (error instanceof Error) {
+                toast({ variant: "destructive", description: error.message })
+            }
+        } finally {
+            setOpen(false)
+            setLoading(false)
+        }
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Stamp className="mr-2 h-4 w-4 text-red-700" />
+                    <span className="text-red-700">Close group</span>
+                </DropdownMenuItem>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Are you sure you want to close group ?</DialogTitle>
+                </DialogHeader>
+                <DialogFooter className="flex items-center justify-center sm:justify-center gap-4">
+                    <DialogTrigger asChild>
+                        <Button className="bg-red-700" onClick={handleClose} disabled={loading}>{loading ? "Closing..." : "Close group"}</Button>
+                    </DialogTrigger>
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">
+                            Close
+                        </Button>
+                    </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+
 
 function Loading() {
     return (
@@ -370,7 +422,7 @@ type Group = {
     owner: string,
     ownerNickname: string,
     creationTime: string,
-    status: string,
+    status: bool,
     balance: string,
     totalCollected: string,
     totalWithdrawn: string,
@@ -383,6 +435,8 @@ type Participant = {
     totalDeposits: string;
 }
 
+
+
 export default function Page({ params }: { params: { id: string } }) {
     const [isOwner, setIsOwner] = useState(false)
     const [isParticipant, setIsParticipant] = useState(false)
@@ -392,6 +446,8 @@ export default function Page({ params }: { params: { id: string } }) {
     const contract = useContract()
 
     async function getGroupInfo(id: string) {
+        const _GROUP_OPEN = 2;
+
         try {
             const groupInfo = await contract.methods.getGroupInfoById(id).call()
 
@@ -406,7 +462,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 owner: groupInfo[2],
                 ownerNickname: groupInfo[3],
                 creationTime: groupInfo[4],
-                status: groupInfo[5] ? "True" : "False",
+                status: Number.parseInt(groupInfo[5]) === _GROUP_OPEN,
                 balance: groupInfo[6],
                 totalCollected: groupInfo[7],
                 totalWithdrawn: groupInfo[8],
@@ -440,10 +496,15 @@ export default function Page({ params }: { params: { id: string } }) {
     return (
         <div className="p-8 bg-slate-50 md:rounded-2xl md:max-w-[80%] w-full mx-auto">
             <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold tracking-tight">{group.groupName}</h2>
-                <div className="flex items-center space-x-2">
-                    {isParticipant ? <GroupActionsMenu isOwner={isOwner} groupId={group.groupId} /> : <JoinGroupDialog groupId={group.groupId} />}
-                </div>
+                <h2 className="text-3xl font-bold tracking-tight flex justify-center items-center gap-4">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+                    <Lock className="mr-1 h-3 w-3" />
+                    Closed
+                </span>}</h2>
+                {group.status &&
+                    <div className="flex items-center space-x-2">
+                        {isParticipant ? <GroupActionsMenu isOwner={isOwner} groupId={group.groupId} /> : <JoinGroupDialog groupId={group.groupId} />}
+                    </div>
+                }
             </div>
             <p className="text-muted-foreground text-xs">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
 
@@ -510,6 +571,6 @@ export default function Page({ params }: { params: { id: string } }) {
                     </Table>
                 </aside>
             </div>
-        </div>
+        </div >
     )
 } 
