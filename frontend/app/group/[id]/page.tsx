@@ -44,7 +44,6 @@ import {
     Copy,
     EllipsisVertical,
     LinkIcon,
-    Settings,
     Stamp,
     User
 } from "lucide-react";
@@ -126,10 +125,6 @@ function GroupActionsMenu({ isOwner, groupId }: { isOwner: boolean, groupId: str
                     <PayGroupDialog groupId={groupId} />
                     {isOwner && <WithdrawDialog groupId={groupId} />}
                     <ShareGroup />
-                    {isOwner && <DropdownMenuItem>
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
-                    </DropdownMenuItem>}
                 </DropdownMenuGroup>
                 {isOwner && <DropdownMenuSeparator />}
                 {isOwner && <DropdownMenuGroup>
