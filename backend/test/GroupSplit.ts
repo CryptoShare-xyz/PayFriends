@@ -122,6 +122,39 @@ describe("GroupSplit", function () {
 
       });
 
+      it("closeGroup", async function () {
+        const { groupSplit, owner, user1 } = await loadFixture(deployFixture);
+        const groupName = "test_group1";
+        const ownerNickname = "owner_nick1";
+        const participantNickname = "test_nickname1";
+        const depositAmount = 123; // 1 WEI
+
+        const tx = await groupSplit.createGroup(groupName, ownerNickname);
+        const receipt = await tx.wait()
+        const groupId = receipt?.logs[0]?.args[0]
+
+        const tx2 = groupSplit.connect(user1).depositToGroup(groupId, participantNickname, { value: depositAmount })
+        await expect(tx2)
+          .to.emit(groupSplit, "logGroupDepositReceived")
+          .withArgs(groupId, user1.address, participantNickname, depositAmount);
+
+        const tx3 = groupSplit.connect(user1).closeGroup(groupId);
+        await expect(tx3).to.be.revertedWith("Only group owner can close group");
+
+        const tx4 = groupSplit.closeGroup(groupId);
+        await expect(tx4).to.be.revertedWith("Can't close group with balance");
+
+        await groupSplit.withdrawFromGroup(groupId);
+
+        const tx5 = groupSplit.closeGroup(groupId);
+        await expect(tx5)
+          .to.emit(groupSplit, "logGroupClosed")
+          .withArgs(groupId, owner.address, groupName, anyValue);
+
+        const tx6 = groupSplit.connect(user1).depositToGroup(groupId, participantNickname, { value: depositAmount })
+        await expect(tx6).to.be.revertedWith("Group is closed")
+      });
+
     });
   });
 });

@@ -99,6 +99,10 @@ export interface GroupSplit extends BaseContract {
       _deposit: number | string | BN
     ): NonPayableTransactionObject<void>;
 
+    closeGroup(
+      _groupId: number | string | BN
+    ): NonPayableTransactionObject<void>;
+
     createGroup(
       _groupName: string,
       _ownerNickname: string
