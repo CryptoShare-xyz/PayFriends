@@ -26,40 +26,48 @@ export type logGroupClosed = ContractEventLog<{
   owner: string;
   groupName: string;
   closingTime: string;
+  isUSDC: boolean;
   0: string;
   1: string;
   2: string;
   3: string;
+  4: boolean;
 }>;
 export type logGroupCreated = ContractEventLog<{
   groupId: string;
   owner: string;
   groupName: string;
   creationTime: string;
+  isUSDC: boolean;
   0: string;
   1: string;
   2: string;
   3: string;
+  4: boolean;
 }>;
 export type logGroupDepositReceived = ContractEventLog<{
   groupId: string;
   participant: string;
   nickname: string;
   deposit: string;
+  isUSDC: boolean;
   0: string;
   1: string;
   2: string;
   3: string;
+  4: boolean;
 }>;
 export type logGroupOpened = ContractEventLog<{
   groupId: string;
   owner: string;
   groupName: string;
   openingTime: string;
+  isUSDC: boolean;
   0: string;
   1: string;
   2: string;
   3: string;
+  4: boolean;
 }>;
 export type logGroupWithdrawal = ContractEventLog<{
   groupId: string;
@@ -67,19 +75,23 @@ export type logGroupWithdrawal = ContractEventLog<{
   time: string;
   totalCollected: string;
   totalWithdrawn: string;
+  isUSDC: boolean;
   0: string;
   1: string;
   2: string;
   3: string;
   4: string;
+  5: boolean;
 }>;
 export type logWithdrawalFailed = ContractEventLog<{
   groupId: string;
   owner: string;
   amount: string;
+  isUSDC: boolean;
   0: string;
   1: string;
   2: string;
+  3: boolean;
 }>;
 
 export interface GroupSplit extends BaseContract {
@@ -90,6 +102,8 @@ export interface GroupSplit extends BaseContract {
   ): GroupSplit;
   clone(): GroupSplit;
   methods: {
+    USDC(): NonPayableTransactionObject<string>;
+
     activeGroups(): NonPayableTransactionObject<string>;
 
     addParticipantToGroup(
@@ -99,18 +113,17 @@ export interface GroupSplit extends BaseContract {
       _deposit: number | string | BN
     ): NonPayableTransactionObject<void>;
 
-    closeGroup(
-      _groupId: number | string | BN
-    ): NonPayableTransactionObject<void>;
-
     createGroup(
       _groupName: string,
-      _ownerNickname: string
+      _ownerNickname: string,
+      isUSDC: boolean
     ): NonPayableTransactionObject<void>;
 
     depositToGroup(
       _groupId: number | string | BN,
-      _nickname: string
+      _nickname: string,
+      isUSDCDeposit: boolean,
+      usdcAmount: number | string | BN
     ): PayableTransactionObject<void>;
 
     getActivegroups(): NonPayableTransactionObject<string>;
@@ -126,14 +139,15 @@ export interface GroupSplit extends BaseContract {
     ): NonPayableTransactionObject<{
       0: string;
       1: string;
-      2: string;
+      2: boolean;
       3: string;
       4: string;
       5: string;
       6: string;
       7: string;
       8: string;
-      9: string[];
+      9: string;
+      10: string[];
     }>;
 
     getGroupsNum(): NonPayableTransactionObject<string>;
@@ -155,6 +169,7 @@ export interface GroupSplit extends BaseContract {
     groups(arg0: number | string | BN): NonPayableTransactionObject<{
       groupId: string;
       groupName: string;
+      isUSDC: boolean;
       status: string;
       creationTime: string;
       owner: string;
@@ -164,13 +179,14 @@ export interface GroupSplit extends BaseContract {
       totalWithdrawn: string;
       0: string;
       1: string;
-      2: string;
+      2: boolean;
       3: string;
       4: string;
       5: string;
       6: string;
       7: string;
       8: string;
+      9: string;
     }>;
 
     withdrawFromGroup(
