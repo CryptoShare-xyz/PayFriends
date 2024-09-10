@@ -143,7 +143,7 @@ contract GroupSplit {
         string memory _groupName,
         string memory _ownerNickname,
         bool isUSDC // New flag to indicate if the group will use USDC or ETH
-    ) public {
+    ) external {
         // add to groups:
         Group storage newGroup = groups.push();
         activeGroups += 1;
@@ -190,7 +190,9 @@ contract GroupSplit {
         );
     }
 
-    function getGroupIndexById(uint256 _groupId) public view returns (uint256) {
+    function getGroupIndexById(
+        uint256 _groupId
+    ) private view returns (uint256) {
         require(groupIndexById[_groupId] != 0, "Group does not exist");
         return groupIndexById[_groupId];
     }
@@ -203,7 +205,7 @@ contract GroupSplit {
     function getGroupInfoById(
         uint256 _groupId
     )
-        public
+        external
         view
         returns (
             uint256,
@@ -287,7 +289,7 @@ contract GroupSplit {
         );
     }
 
-    function withdrawFromGroup(uint256 _groupId) public payable {
+    function withdrawFromGroup(uint256 _groupId) external payable {
         uint256 index = getGroupIndexById(_groupId);
         Group storage group = groups[index];
         // make sure the msg.sender is the group owner

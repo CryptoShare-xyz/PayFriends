@@ -123,10 +123,6 @@ export interface GroupSplit extends BaseContract {
 
     getAllGroupIds(): NonPayableTransactionObject<string[]>;
 
-    getGroupIndexById(
-      _groupId: number | string | BN
-    ): NonPayableTransactionObject<string>;
-
     getGroupInfoById(
       _groupId: number | string | BN
     ): NonPayableTransactionObject<{
