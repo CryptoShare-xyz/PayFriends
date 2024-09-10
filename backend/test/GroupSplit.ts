@@ -17,6 +17,7 @@ describe("GroupSplit", function () {
     const usdcMock = await USDCMock.deploy();
     await usdcMock.waitForDeployment();
 
+
     return { usdcMock };
   }
 
@@ -29,7 +30,13 @@ describe("GroupSplit", function () {
     const groupSplit = await GroupSplit.deploy(await usdcMock.getAddress());
     await groupSplit.waitForDeployment();
 
-    return { groupSplit, owner, user1, user2, user3 };
+    console.log(await groupSplit.getAddress())
+    await usdcMock.mint(owner.address, 1000000);
+    await usdcMock.mint(user1.address, 1000000);
+    await usdcMock.mint(user2.address, 1000000);
+    await usdcMock.mint(user3.address, 1000000);
+
+    return { groupSplit, usdcMock, owner, user1, user2, user3 };
   }
 
 
@@ -89,21 +96,48 @@ describe("GroupSplit", function () {
         const ownerNickname = "owner_nick1";
         const participantNickname = "test_nickname1";
         const depositAmount = 123; // 1 WEI
+        const isUSDC = false;
 
-        const tx = await groupSplit.createGroup(groupName, ownerNickname);
+        const tx = await groupSplit.createGroup(groupName, ownerNickname, isUSDC);
         const receipt = await tx.wait()
         const groupId = receipt?.logs[0]?.args[0]
 
         // Perform the transaction
-        const tx2 = await groupSplit.connect(user1).depositToGroup(groupId, participantNickname, { value: depositAmount })
+        const tx2 = await groupSplit.connect(user1).depositToGroup(groupId, participantNickname, isUSDC, 0, { value: depositAmount })
         await expect(tx2)
           .to.emit(groupSplit, "logGroupDepositReceived")
-          .withArgs(groupId, user1.address, participantNickname, depositAmount);
+          .withArgs(groupId, user1.address, participantNickname, depositAmount, isUSDC);
 
         const groupInfo2 = await groupSplit.getGroupInfoById(groupId);
-        expect(groupInfo2[6]).equal(123);
         expect(groupInfo2[7]).equal(123);
-        expect(groupInfo2[9]).to.deep.equal([owner.address, user1.address])
+        expect(groupInfo2[8]).equal(123);
+        expect(groupInfo2[10]).to.deep.equal([owner.address, user1.address])
+
+      });
+
+      it("depositUSDCToGroup", async function () {
+        const { groupSplit, usdcMock, owner, user1 } = await loadFixture(deployFixture);
+        const groupName = "test_group1";
+        const ownerNickname = "owner_nick1";
+        const participantNickname = "test_nickname1";
+        const depositAmount = 123; // 1 WEI
+        const isUSDC = true;
+
+        const tx = await groupSplit.createGroup(groupName, ownerNickname, isUSDC);
+        const receipt = await tx.wait()
+        const groupId = receipt?.logs[0]?.args[0]
+
+        await usdcMock.connect(user1).approve(await groupSplit.getAddress(), depositAmount);
+        // Perform the transaction
+        const tx2 = await groupSplit.connect(user1).depositToGroup(groupId, participantNickname, isUSDC, depositAmount, { value: 0 })
+        await expect(tx2)
+          .to.emit(groupSplit, "logGroupDepositReceived")
+          .withArgs(groupId, user1.address, participantNickname, depositAmount, isUSDC);
+
+        const groupInfo2 = await groupSplit.getGroupInfoById(groupId);
+        expect(groupInfo2[7]).equal(123);
+        expect(groupInfo2[8]).equal(123);
+        expect(groupInfo2[10]).to.deep.equal([owner.address, user1.address])
 
       });
 
@@ -113,15 +147,16 @@ describe("GroupSplit", function () {
         const ownerNickname = "owner_nick1";
         const participantNickname = "test_nickname1";
         const depositAmount = 123; // 1 WEI
+        const isUSDC = false;
 
-        const tx = await groupSplit.createGroup(groupName, ownerNickname);
+        const tx = await groupSplit.createGroup(groupName, ownerNickname, isUSDC);
         const receipt = await tx.wait()
         const groupId = receipt?.logs[0]?.args[0]
 
-        const tx2 = await groupSplit.connect(user1).depositToGroup(groupId, participantNickname, { value: depositAmount })
+        const tx2 = await groupSplit.connect(user1).depositToGroup(groupId, participantNickname, isUSDC, 0, { value: depositAmount })
         await expect(tx2)
           .to.emit(groupSplit, "logGroupDepositReceived")
-          .withArgs(groupId, user1.address, participantNickname, depositAmount);
+          .withArgs(groupId, user1.address, participantNickname, depositAmount, isUSDC);
 
         // Perform the transaction
         const tx3 = await groupSplit.withdrawFromGroup(groupId);
@@ -129,10 +164,44 @@ describe("GroupSplit", function () {
 
         await expect(tx3)
           .to.emit(groupSplit, "logGroupWithdrawal")
-          .withArgs(groupId, depositAmount, anyValue, depositAmount, depositAmount);
+          .withArgs(groupId, depositAmount, anyValue, depositAmount, depositAmount, isUSDC);
 
 
       });
+
+      it("withdrawUSDCFromGroup", async function () {
+        const { groupSplit, usdcMock, owner, user1 } = await loadFixture(deployFixture);
+        const groupName = "test_group1";
+        const ownerNickname = "owner_nick1";
+        const participantNickname = "test_nickname1";
+        const depositAmount = 123; // 1 WEI
+        const isUSDC = true;
+
+        const tx = await groupSplit.createGroup(groupName, ownerNickname, isUSDC);
+        const receipt = await tx.wait()
+        const groupId = receipt?.logs[0]?.args[0]
+
+        await usdcMock.connect(user1).approve(await groupSplit.getAddress(), depositAmount);
+
+        const tx2 = await groupSplit.connect(user1).depositToGroup(groupId, participantNickname, isUSDC, depositAmount, { value: 0 })
+        await expect(tx2)
+          .to.emit(groupSplit, "logGroupDepositReceived")
+          .withArgs(groupId, user1.address, participantNickname, depositAmount, isUSDC);
+
+        const beforeOwnerUSDCBalance = await usdcMock.balanceOf(owner.address);
+        // Perform the transaction
+        const tx3 = await groupSplit.withdrawFromGroup(groupId);
+        const afterOwnerUSDCBalance = await usdcMock.balanceOf(owner.address);
+        expect(afterOwnerUSDCBalance - beforeOwnerUSDCBalance).to.equal(depositAmount);
+        await expect(tx3).to.changeEtherBalance(owner, 0);
+
+        await expect(tx3)
+          .to.emit(groupSplit, "logGroupWithdrawal")
+          .withArgs(groupId, depositAmount, anyValue, depositAmount, depositAmount, isUSDC);
+
+
+      });
+
     });
   });
 });
