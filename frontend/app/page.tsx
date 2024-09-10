@@ -56,12 +56,6 @@ function CreateGroupDialog() {
     const { groupName, ownerNickname } = values
     setLoading(true)
 
-    if (!isConnected) {
-      openSIWE(true);
-      setLoading(false);
-      return;
-    }
-
     try {
       const group = await contract.methods.createGroup(groupName, ownerNickname).send({ from: address });
       const groupId = group.events?.logGroupCreated.returnValues.groupId
@@ -73,10 +67,20 @@ function CreateGroupDialog() {
     }
   }
 
+  const onOpenDialog = (event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault()
+
+    if (!isConnected) {
+      openSIWE(true);
+      return;
+    }
+    setOpen(true)
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="my-4 w-[70%] bg-gradient-to-br from-[#009BEB] to-[#005885] text-slate-100 text-lg">
+        <Button onClick={onOpenDialog} className="my-4 w-[70%] bg-gradient-to-br from-[#009BEB] to-[#005885] text-slate-100 text-lg">
           <span>Create group</span>
         </Button>
       </DialogTrigger>
@@ -88,7 +92,7 @@ function CreateGroupDialog() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="groupName"
@@ -162,22 +166,22 @@ export default function Home() {
       <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl">
         <section id="stats" className="flex flex-col text-center lg:flex-row justify-evenly mx-auto gap-4 mb-8 ">
           <article className="flex justify-center items-center gap-4">
-            <div className="max-w-[15vw]">
+            <div className="max-w-[20vw]">
               <Image src="/group.svg" width={128} height={128} alt=" group" />
             </div>
             <aside className="flex flex-col items-start">
-              <h1 className="lg:text-3xl text-2xl text-[#1F92CE]">203</h1>
-              <small className="text-[#B2B2B2] text-sm">Opened Groups</small>
+              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">203</h1>
+              <small className="text-[#B2B2B2] text-base">Opened Groups</small>
             </aside>
           </article>
-          <hr className="w-[50%] mx-auto my-5 border-dashed border-[#D9D9D9]" />
+          <hr className="w-[60%] mx-auto my-5 border-dashed border-[#D9D9D9]" />
           <article className="flex justify-center items-center gap-4">
-            <div className="max-w-[10vw]">
+            <div className="max-w-[15vw]">
               <Image src="/collected.svg" width={128} height={128} alt=" group" />
             </div>
             <aside className="flex flex-col items-start">
-              <h1 className="lg:text-3xl text-2xl text-[#1F92CE]">100,000$</h1>
-              <small className="text-[#B2B2B2] text-sm">Collected Volume</small>
+              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">100,000$</h1>
+              <small className="text-[#B2B2B2] text-base">Collected Volume</small>
             </aside>
           </article>
         </section>
