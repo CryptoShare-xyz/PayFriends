@@ -156,7 +156,7 @@ contract GroupSplit {
                     msg.sender,
                     _ownerNickname,
                     block.timestamp,
-                    block.difficulty,
+                    block.prevrandao,
                     groups.length
                 )
             )
