@@ -106,13 +106,6 @@ export interface GroupSplit extends BaseContract {
 
     activeGroups(): NonPayableTransactionObject<string>;
 
-    addParticipantToGroup(
-      _groupId: number | string | BN,
-      _participantAddress: string,
-      _nickname: string,
-      _deposit: number | string | BN
-    ): NonPayableTransactionObject<void>;
-
     createGroup(
       _groupName: string,
       _ownerNickname: string,
