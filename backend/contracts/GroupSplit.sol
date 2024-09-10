@@ -22,6 +22,7 @@ contract GroupSplit {
         address participantAddress;
         string nickname;
         uint256 totalDeposits;
+        uint256 lastDeposited;
     }
 
     struct Group {
@@ -81,13 +82,17 @@ contract GroupSplit {
             group
                 .participantDetails[_participantAddress]
                 .totalDeposits += _deposit;
+
+            group.participantDetails[_participantAddress].lastDeposited = block
+                .timestamp;
         } else {
             // Create a new participant
 
             Participant memory newParticipant = Participant({
                 participantAddress: _participantAddress,
                 nickname: _nickname,
-                totalDeposits: _deposit
+                totalDeposits: _deposit,
+                lastDeposited: block.timestamp
             });
             group.participantDetails[_participantAddress] = newParticipant;
 
