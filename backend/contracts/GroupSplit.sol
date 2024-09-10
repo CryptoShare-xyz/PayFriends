@@ -8,6 +8,8 @@
 */
 
 // SPDX-License-Identifier: MIT
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 pragma solidity ^0.8.20;
 
 contract GroupSplit {
@@ -25,6 +27,8 @@ contract GroupSplit {
     struct Group {
         uint256 groupId;
         string groupName;
+        bool isUSDC; // New field to indicate if this group deals with USDC (true) or ETH (false)
+
         uint256 status;
         uint256 creationTime;
         address owner;
@@ -41,9 +45,12 @@ contract GroupSplit {
     mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
     uint256 public activeGroups = 0;
 
-    constructor() {
+    IERC20 public USDC;
+
+    constructor(address _usdcTokenAddress) {
         // make genesis group unvalid
         groups.push();
+        USDC = IERC20(_usdcTokenAddress);
     }
 
     // Modifier to check if the group is open
@@ -87,9 +94,6 @@ contract GroupSplit {
 
             group.participantsAddresses.push(_participantAddress);
         }
-        // Update group's balance and totalCollected
-        group.balance += _deposit;
-        group.totalCollected += _deposit;
     }
 
     // Define events for logging
@@ -97,42 +101,49 @@ contract GroupSplit {
         uint256 indexed groupId,
         address indexed owner,
         string indexed groupName,
-        uint256 creationTime
+        uint256 creationTime,
+        bool isUSDC
     );
     event logGroupClosed(
         uint256 indexed groupId,
         address indexed owner,
         string indexed groupName,
-        uint256 closingTime
+        uint256 closingTime,
+        bool isUSDC
     );
     event logGroupOpened(
         uint256 indexed groupId,
         address indexed owner,
         string indexed groupName,
-        uint256 openingTime
+        uint256 openingTime,
+        bool isUSDC
     );
     event logGroupDepositReceived(
         uint256 indexed groupId,
         address indexed participant,
         string nickname,
-        uint256 deposit
+        uint256 deposit,
+        bool isUSDC
     );
     event logGroupWithdrawal(
         uint256 indexed groupId,
         uint256 amountWithdrawn,
         uint256 time,
         uint256 totalCollected,
-        uint256 totalWithdrawn
+        uint256 totalWithdrawn,
+        bool isUSDC
     );
     event logWithdrawalFailed(
         uint256 indexed groupId,
         address indexed owner,
-        uint256 amount
+        uint256 amount,
+        bool isUSDC
     );
 
     function createGroup(
         string memory _groupName,
-        string memory _ownerNickname
+        string memory _ownerNickname,
+        bool isUSDC // New flag to indicate if the group will use USDC or ETH
     ) public {
         // add to groups:
         Group storage newGroup = groups.push();
@@ -160,6 +171,7 @@ contract GroupSplit {
         newGroup.balance = 0; // the current group balance
         newGroup.totalCollected = 0; // the total payments received to the group by the participants
         newGroup.totalWithdrawn = 0; // the total withdrawals from the group by the owner
+        newGroup.isUSDC = isUSDC;  // Store whether the group will deal with USDC or ETH
 
         // add group to groups list and mapping
         uint256 index = groups.length - 1;
@@ -174,29 +186,14 @@ contract GroupSplit {
             newGroup.groupId,
             newGroup.owner,
             newGroup.groupName,
-            newGroup.creationTime
+            newGroup.creationTime,
+            newGroup.isUSDC
         );
     }
 
     function getGroupIndexById(uint256 _groupId) public view returns (uint256) {
         require(groupIndexById[_groupId] != 0, "Group does not exist");
         return groupIndexById[_groupId];
-    }
-
-    function closeGroup(uint256 _groupId) public {
-        uint256 index = getGroupIndexById(_groupId);
-        Group storage group = groups[index];
-
-        require(msg.sender == group.owner, "Only group owner can close group");
-        require(group.balance == 0, "Can't close group with balance");
-
-        group.status = _GROUP_CLOSED;
-        emit logGroupClosed(
-            _groupId,
-            group.owner,
-            group.groupName,
-            block.timestamp
-        );
     }
 
     // Function to return all group IDs
@@ -212,6 +209,7 @@ contract GroupSplit {
         returns (
             uint256,
             string memory,
+            bool,
             address,
             string memory,
             uint256,
@@ -227,6 +225,7 @@ contract GroupSplit {
         return (
             group.groupId,
             group.groupName,
+            group.isUSDC,
             group.owner,
             group.ownerNickname,
             group.creationTime,
@@ -244,13 +243,37 @@ contract GroupSplit {
 
     function depositToGroup(
         uint256 _groupId,
-        string memory _nickname
+        string memory _nickname,
+        bool isUSDCDeposit,
+        uint256 usdcAmount // Specify the USDC amount in case of USDC deposit
     ) external payable isGroupOpen(_groupId) {
-        require(msg.value > 0, "Deposit amount must be greater than zero");
-        uint256 _deposit = msg.value;
-        // add participant address and nickname to list
+        uint256 index = getGroupIndexById(_groupId); // Get the index of the group
+        Group storage group = groups[index]; // Load the group struct
+
+        // Check if the deposit is in USDC or ETH
+        require(group.isUSDC == isUSDCDeposit, "Invalid deposit type for this group");
+
+        uint256 _deposit;
+
+        if (isUSDCDeposit) {
+            // For USDC, ensure the deposit amount is specified
+            require(usdcAmount > 0, "Deposit amount must be greater than zero");
+            // Transfer USDC from the sender to the contract
+            require(USDC.transferFrom(msg.sender, address(this), usdcAmount), "USDC Transfer failed");
+            _deposit = usdcAmount;
+        }
+        else {
+            require(msg.value > 0, "Deposit amount must be greater than zero");
+            _deposit = msg.value;
+            // add participant address and nickname to list    
+        }
+
         addParticipantToGroup(_groupId, msg.sender, _nickname, _deposit);
-        emit logGroupDepositReceived(_groupId, msg.sender, _nickname, _deposit);
+        // Update group's balance and totalCollected
+        group.balance += _deposit;
+        group.totalCollected += _deposit;
+        emit logGroupDepositReceived(_groupId, msg.sender, _nickname, _deposit,group.isUSDC);
+
     }
 
     function withdrawFromGroup(uint256 _groupId) public payable {
@@ -260,27 +283,50 @@ contract GroupSplit {
         require(msg.sender == group.owner, "Only group owner can withdraw");
         require(group.balance > 0, "No balance to withdraw");
 
+        bool success;
         uint256 amount = group.balance;
 
         // Update state before the external call to avoid reentrancy
         group.totalWithdrawn += amount;
         group.balance = 0;
 
-        (bool success, ) = payable(group.owner).call{value: amount}("");
+        if (group.isUSDC) {
+        // For USDC withdrawal
+            success = USDC.transfer(group.owner, amount);
+            require(success, "USDC Transfer failed");
+        } else {
+        // For ETH withdrawal
+            (success, ) = payable(group.owner).call{value: amount}("");
+            require(success, "ETH Transfer failed");
+        }
+
+
         if (!success) {
             // In case of failure, revert the balance changes
             group.balance = amount;
             group.totalWithdrawn -= amount;
-            emit logWithdrawalFailed(_groupId, group.owner, group.balance);
+            emit logWithdrawalFailed(_groupId, group.owner, group.balance, group.isUSDC);
             return;
         }
+
+        group.status = _GROUP_CLOSED;
 
         emit logGroupWithdrawal(
             _groupId,
             amount,
             block.timestamp,
             group.totalCollected,
-            group.totalWithdrawn
+            group.totalWithdrawn,
+            group.isUSDC
+        );
+
+        emit logGroupClosed(
+            _groupId,
+            group.owner,
+            group.groupName,
+            block.timestamp,
+            group.isUSDC
+
         );
     }
 
