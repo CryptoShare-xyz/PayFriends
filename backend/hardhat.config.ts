@@ -8,7 +8,7 @@ const dummyKey = '0x' + '0'.repeat(32 * 2)
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.9",
+    version: "0.8.20",
     settings: {
       optimizer: {
         enabled: true

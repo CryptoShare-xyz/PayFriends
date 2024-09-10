@@ -8,7 +8,7 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 contract GroupSplit {
     // Use uint256 instead of bool for group state, see:
