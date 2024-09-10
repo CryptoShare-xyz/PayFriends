@@ -28,7 +28,6 @@ contract GroupSplit {
         uint256 groupId;
         string groupName;
         bool isUSDC; // New field to indicate if this group deals with USDC (true) or ETH (false)
-
         uint256 status;
         uint256 creationTime;
         address owner;
@@ -171,7 +170,7 @@ contract GroupSplit {
         newGroup.balance = 0; // the current group balance
         newGroup.totalCollected = 0; // the total payments received to the group by the participants
         newGroup.totalWithdrawn = 0; // the total withdrawals from the group by the owner
-        newGroup.isUSDC = isUSDC;  // Store whether the group will deal with USDC or ETH
+        newGroup.isUSDC = isUSDC; // Store whether the group will deal with USDC or ETH
 
         // add group to groups list and mapping
         uint256 index = groups.length - 1;
@@ -251,29 +250,41 @@ contract GroupSplit {
         Group storage group = groups[index]; // Load the group struct
 
         // Check if the deposit is in USDC or ETH
-        require(group.isUSDC == isUSDCDeposit, "Invalid deposit type for this group");
+        require(
+            group.isUSDC == isUSDCDeposit,
+            "Invalid deposit type for this group"
+        );
 
         uint256 _deposit;
 
         if (isUSDCDeposit) {
             // For USDC, ensure the deposit amount is specified
             require(usdcAmount > 0, "Deposit amount must be greater than zero");
+            require(msg.value == 0, "No ether should be sent");
+
             // Transfer USDC from the sender to the contract
-            require(USDC.transferFrom(msg.sender, address(this), usdcAmount), "USDC Transfer failed");
+            require(
+                USDC.transferFrom(msg.sender, address(this), usdcAmount),
+                "USDC Transfer failed"
+            );
             _deposit = usdcAmount;
-        }
-        else {
+        } else {
             require(msg.value > 0, "Deposit amount must be greater than zero");
             _deposit = msg.value;
-            // add participant address and nickname to list    
+            // add participant address and nickname to list
         }
 
         addParticipantToGroup(_groupId, msg.sender, _nickname, _deposit);
         // Update group's balance and totalCollected
         group.balance += _deposit;
         group.totalCollected += _deposit;
-        emit logGroupDepositReceived(_groupId, msg.sender, _nickname, _deposit,group.isUSDC);
-
+        emit logGroupDepositReceived(
+            _groupId,
+            msg.sender,
+            _nickname,
+            _deposit,
+            group.isUSDC
+        );
     }
 
     function withdrawFromGroup(uint256 _groupId) public payable {
@@ -291,21 +302,25 @@ contract GroupSplit {
         group.balance = 0;
 
         if (group.isUSDC) {
-        // For USDC withdrawal
+            // For USDC withdrawal
             success = USDC.transfer(group.owner, amount);
             require(success, "USDC Transfer failed");
         } else {
-        // For ETH withdrawal
+            // For ETH withdrawal
             (success, ) = payable(group.owner).call{value: amount}("");
             require(success, "ETH Transfer failed");
         }
-
 
         if (!success) {
             // In case of failure, revert the balance changes
             group.balance = amount;
             group.totalWithdrawn -= amount;
-            emit logWithdrawalFailed(_groupId, group.owner, group.balance, group.isUSDC);
+            emit logWithdrawalFailed(
+                _groupId,
+                group.owner,
+                group.balance,
+                group.isUSDC
+            );
             return;
         }
 
@@ -326,7 +341,6 @@ contract GroupSplit {
             group.groupName,
             block.timestamp,
             group.isUSDC
-
         );
     }
 
