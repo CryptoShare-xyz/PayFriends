@@ -65,7 +65,7 @@ contract GroupSplit {
         address _participantAddress,
         string memory _nickname,
         uint256 _deposit
-    ) public {
+    ) private {
         uint256 index = getGroupIndexById(_groupId);
         // Ensure the group exists
         require(groups[index].groupId == _groupId, "Group does not exist");
