@@ -3,16 +3,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import Link from "next/link";
 import { useState } from "react";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -29,7 +19,6 @@ import { Input } from "@/components/ui/input";
 
 
 import { useContract } from "@/contexts/ContractProvider";
-import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ConnectKitButton, useModal } from "connectkit";
 import { useRouter } from "next/navigation";
@@ -87,7 +76,7 @@ function CreateGroupDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="my-2 mr-auto bg-[#6c63ff] text-slate-100">
+        <Button className="my-4 w-[70%] bg-gradient-to-br from-[#009BEB] to-[#005885] text-slate-100 text-lg">
           <span>Create group</span>
         </Button>
       </DialogTrigger>
@@ -133,7 +122,7 @@ function CreateGroupDialog() {
               )}
             />
             <DialogFooter>
-              <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
+              <Button variant="outline" className="bg-[#009BEB] text-slate-50" type="submit" disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
             </DialogFooter>
           </form>
         </Form>
@@ -152,59 +141,49 @@ export default function Home() {
 
   return (
     <main className="lg:max-w-[80%] mx-auto">
-      <section id="hero" className="bg-slate-700 px-4 py-4 lg:rounded-2xl">
-        <nav className="flex mb-4 lg:mb-16 justify-end gap-4">
-          {/* {isConnected && <Button variant="secondary" className="bg-[#6c63ff] text-slate-100"><Link href="dashboard">Dashboard</Link></Button>} */}
+      <section id="hero" className="p-8 lg:rounded-2xl">
+        <nav className="flex mb-8 lg:mb-16 justify-end gap-4">
           <ConnectKitButton />
         </nav>
-        <div className="flex flex-wrap gap-8 justify-center text-center lg:mb-48 mb-8">
-          <div className="my-auto">
-            <h1 className="text-slate-50 font-extrabold tracking-[6px] lg:text-6xl text-4xl my-2">CryptoShare</h1>
-            <h2 className="text-slate-400 my-2 w-[80%] mx-auto ">A group payments app to split different payments among friends</h2>
-            <CreateGroupDialog />
+        <div className="flex flex-wrap gap-4 items-center">
+          <h1 className="text-[#1F92CE] font-extrabold tracking-[2px] lg:text-7xl text-5xl">PayFriends</h1>
+          <div className="flex justify-center items-center gap-4 text-left">
+            <div className="my-auto w-[70%] mr-auto">
+              <h2 className="text-black my-2">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
+              <CreateGroupDialog />
+            </div>
+            <aside className="w-[30%] max-w-[480px] my-2 mx-auto">
+              <Image src="/hero.svg" width={320} height={320} alt=" hero" />
+            </aside>
           </div>
-          <aside className="w-[80%] max-w-[480px] my-2 mx-auto">
-            <Image src="/hero.svg" width={640} height={640} alt=" hero" />
-          </aside>
         </div>
       </section>
 
-      <div className="lg:max-w-[80%] bg-slate-100 mx-auto min-h-screen lg:rounded-2xl lg:-mt-24 py-4">
-        <section id="stats" className="flex flex-col text-center lg:flex-row justify-evenly py-8 mx-auto gap-4 ">
-          <article className="text-slate-700 lg:text-2xl text-xl" >
-            <h1 className="uppercase ">cash flow</h1>
-            <small>{cashFlow} ETH</small>
+      <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl">
+        <section id="stats" className="flex flex-col text-center lg:flex-row justify-evenly mx-auto gap-4 mb-8 ">
+          <article className="flex justify-center items-center gap-4">
+            <div className="max-w-[15vw]">
+              <Image src="/group.svg" width={128} height={128} alt=" group" />
+            </div>
+            <aside className="flex flex-col items-start">
+              <h1 className="lg:text-3xl text-2xl text-[#1F92CE]">203</h1>
+              <small className="text-[#B2B2B2] text-sm">Opened Groups</small>
+            </aside>
           </article>
-          <article className="text-slate-700 lg:text-2xl text-xl" >
-            <h1 className="uppercase">total expenses</h1>
-            <small>{totalExpenses}</small>
-          </article>
-          <article className="text-slate-700 lg:text-2xl text-xl" >
-            <h1 className="uppercase">active expenses</h1>
-            <small>{activeExpenses}</small>
+          <hr className="w-[50%] mx-auto my-5 border-dashed border-[#D9D9D9]" />
+          <article className="flex justify-center items-center gap-4">
+            <div className="max-w-[10vw]">
+              <Image src="/collected.svg" width={128} height={128} alt=" group" />
+            </div>
+            <aside className="flex flex-col items-start">
+              <h1 className="lg:text-3xl text-2xl text-[#1F92CE]">100,000$</h1>
+              <small className="text-[#B2B2B2] text-sm">Collected Volume</small>
+            </aside>
           </article>
         </section>
 
-        <hr className="w-[90%] mx-auto bg-slate-200 h-[2px] my-8" />
-
-        <section id="Expenses" className="py-8 w-[90%] mx-auto max-w-[48rem]">
-          <Table>
-            <TableCaption >All active expenses on contract <Link target="_blank" className="hover:underline" href={`https://sepolia.basescan.org/address/${process.env.NEXT_PUBLIC_CONTACT_ADDRESS}`}>{formatAddress(process.env.NEXT_PUBLIC_CONTACT_ADDRESS)}</Link></TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Request address</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {expenses.map((expense) => (
-                <TableRow key={expense.id}>
-                  <TableCell className="font-medium">{formatAddress(expense.from)}</TableCell>
-                  <TableCell className="text-right">{expense.amount}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <section id="image" className="mx-auto max-w-[48rem]">
+          <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
         </section>
 
       </div>
