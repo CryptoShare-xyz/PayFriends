@@ -12,9 +12,18 @@ describe("GroupSplit", function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
+  async function deployUSDCFixture() {
+    const USDCMock = await hre.ethers.getContractFactory("USDCMock");
+    const usdcMock = await USDCMock.deploy();
+    await usdcMock.waitForDeployment();
+
+    return { usdcMock };
+  }
+
   async function deployFixture() {
     // Contracts are deployed using the first signer/account by default
     const [owner, user1, user2, user3] = await hre.ethers.getSigners();
+    const { usdcMock } = await loadFixture(deployUSDCFixture);
 
     const GroupSplit = await hre.ethers.getContractFactory("GroupSplit");
     const groupSplit = await GroupSplit.deploy();
