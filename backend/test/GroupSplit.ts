@@ -30,7 +30,6 @@ describe("GroupSplit", function () {
     const groupSplit = await GroupSplit.deploy(await usdcMock.getAddress());
     await groupSplit.waitForDeployment();
 
-    console.log(await groupSplit.getAddress())
     await usdcMock.mint(owner.address, 1000000);
     await usdcMock.mint(user1.address, 1000000);
     await usdcMock.mint(user2.address, 1000000);

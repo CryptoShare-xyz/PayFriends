@@ -8,8 +8,6 @@ contract USDCMock is ERC20 {
     constructor() ERC20("USDC", "USC") {}
 
     function mint(address to, uint256 amount) public {
-        console.log("Minting %s tokens to the address %s", amount, to);
         _mint(to, amount);
-        console.log("Post Mint");
     }
 }
