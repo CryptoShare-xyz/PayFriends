@@ -18,6 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 
+
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useContract } from "@/contexts/ContractProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ConnectKitButton, useModal } from "connectkit";
@@ -34,7 +36,11 @@ type Expense = {
 
 const createGroupSchema = z.object({
   groupName: z.string().min(1).max(20),
-  ownerNickname: z.string().min(1).max(20)
+  ownerNickname: z.string().min(1).max(20),
+  currency: z.union([
+    z.literal('ETH'),
+    z.literal('USDC'),
+  ])
 })
 
 function CreateGroupDialog() {
@@ -48,16 +54,19 @@ function CreateGroupDialog() {
     resolver: zodResolver(createGroupSchema),
     defaultValues: {
       groupName: "",
-      ownerNickname: ""
+      ownerNickname: "",
+      currency: "ETH"
     }
   })
 
   async function onSubmit(values: z.infer<typeof createGroupSchema>) {
-    const { groupName, ownerNickname } = values
+    const { groupName, ownerNickname, currency } = values
     setLoading(true)
 
+    const isUSDC = currency === "USDC"
+
     try {
-      const group = await contract.methods.createGroup(groupName, ownerNickname).send({ from: address });
+      const group = await contract.methods.createGroup(groupName, ownerNickname, isUSDC).send({ from: address });
       const groupId = group.events?.logGroupCreated.returnValues.groupId
       push(`/group/${groupId}`)
     } finally {
@@ -125,6 +134,25 @@ function CreateGroupDialog() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="currency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Currency</FormLabel>
+                  <FormDescription>
+                    This currency to be used in group, this cannot be changed later.
+                  </FormDescription>
+                  <FormControl>
+                    <ToggleGroup type="single" defaultValue="ETH" value={form.watch("currency")} onValueChange={(value) => form.setValue("currency", value)}>
+                      <ToggleGroupItem value="ETH">ETH</ToggleGroupItem>
+                      <ToggleGroupItem value="USDC">USDC</ToggleGroupItem>
+                    </ToggleGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <DialogFooter>
               <Button variant="outline" className="bg-[#009BEB] text-slate-50" type="submit" disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
             </DialogFooter>
@@ -149,7 +177,7 @@ export default function Home() {
         <nav className="flex mb-8 lg:mb-16 justify-end gap-4">
           <ConnectKitButton />
         </nav>
-        <div className="flex flex-wrap gap-4 items-center">
+        <div className="mx-auto">
           <h1 className="text-[#1F92CE] font-extrabold tracking-[2px] lg:text-7xl text-5xl">PayFriends</h1>
           <div className="flex justify-center items-center gap-4 text-left">
             <div className="my-auto w-[70%] mr-auto">
@@ -163,8 +191,8 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl">
-        <section id="stats" className="flex flex-col text-center lg:flex-row justify-evenly mx-auto gap-4 mb-8 ">
+      <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-wrap">
+        <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 ">
           <article className="flex justify-center items-center gap-4">
             <div className="max-w-[20vw]">
               <Image src="/group.svg" width={128} height={128} alt=" group" />
