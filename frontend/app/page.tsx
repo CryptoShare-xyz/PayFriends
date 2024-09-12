@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+import Link from "next/link";
 
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -169,56 +170,85 @@ export default function Home() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [cashFlow, setCashFlow] = useState(0);
-  const [activeExpenses, setActiveExpenses] = useState(0);
 
   return (
-    <main className="lg:max-w-[80%] mx-auto">
-      <section id="hero" className="p-8 lg:rounded-2xl">
-        <nav className="flex mb-8 lg:mb-16 justify-end gap-4">
-          <ConnectKitButton />
-        </nav>
-        <div className="mx-auto">
-          <h1 className="text-[#1F92CE] font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl">PayFriends</h1>
-          <div className="flex justify-center items-center gap-4 text-left">
-            <div className="my-auto w-[70%] mr-auto">
-              <h2 className="text-black my-2 lg:text-2xl text-lg md:text-2xl">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
-              <CreateGroupDialog />
+    <>
+      <main className="lg:max-w-[80%] mx-auto">
+        <section id="hero" className="p-8 lg:rounded-2xl">
+          <nav className="flex mb-8 lg:mb-16 justify-end gap-4">
+            <ConnectKitButton />
+          </nav>
+          <div className="mx-auto">
+            <h1 className="text-[#1F92CE] font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl">PayFriends</h1>
+            <div className="flex justify-center items-center gap-4 text-left">
+              <div className="my-auto w-[70%] mr-auto">
+                <h2 className="text-black my-2 lg:text-2xl text-lg md:text-2xl">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
+                <CreateGroupDialog />
+              </div>
+              <aside className="w-[30%] my-2 mx-auto">
+                <Image src="/hero.svg" width={320} height={320} alt=" hero" />
+              </aside>
             </div>
-            <aside className="w-[30%] my-2 mx-auto">
-              <Image src="/hero.svg" width={320} height={320} alt=" hero" />
-            </aside>
           </div>
-        </div>
-      </section>
-
-      <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row-reverse md:px-8">
-        <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
-          <article className="flex justify-center items-center gap-4">
-            <div className="max-w-[20vw]">
-              <Image src="/group.svg" width={128} height={128} alt=" group" />
-            </div>
-            <aside className="flex flex-col items-start">
-              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">203</h1>
-              <small className="text-[#B2B2B2] text-base text-left">Opened Groups</small>
-            </aside>
-          </article>
-          <hr className="w-[60%] mx-auto my-5 border-dashed border-[#D9D9D9]" />
-          <article className="flex justify-center items-center gap-4">
-            <div className="max-w-[15vw]">
-              <Image src="/collected.svg" width={128} height={128} alt=" group" />
-            </div>
-            <aside className="flex flex-col items-start">
-              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">100,000$</h1>
-              <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
-            </aside>
-          </article>
         </section>
 
-        <figure id="image" className="max-w-[48rem] md:w-[50%]">
-          <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
-        </figure>
+        <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row-reverse md:px-8">
+          <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
+            <article className="flex justify-center items-center gap-4">
+              <div className="max-w-[20vw]">
+                <Image src="/group.svg" width={128} height={128} alt=" group" />
+              </div>
+              <aside className="flex flex-col items-start">
+                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">203</h1>
+                <small className="text-[#B2B2B2] text-base text-left">Opened Groups</small>
+              </aside>
+            </article>
+            <hr className="w-[60%] mx-auto my-5 border-dashed border-[#D9D9D9]" />
+            <article className="flex justify-center items-center gap-4">
+              <div className="max-w-[15vw]">
+                <Image src="/collected.svg" width={128} height={128} alt=" group" />
+              </div>
+              <aside className="flex flex-col items-start">
+                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">100,000$</h1>
+                <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
+              </aside>
+            </article>
+          </section>
 
-      </div>
-    </main>
+          <figure id="image" className="max-w-[48rem] md:w-[50%]">
+            <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
+          </figure>
+
+        </div>
+      </main>
+
+      <hr className="my-8" />
+
+      <footer className="flex flex-col justify-center items-center gap-2 p-4">
+        <section className="flex justify-evenly items-center gap-2">
+          <Link href="https://github.com/CryptoShare-xyz/cryptoshare" target="_blank">
+            <div className="max-w-[48px] w-[8vw]">
+              <Image src="/github.svg" width={128} height={128} alt="github" />
+            </div>
+          </Link>
+          <Link href="#" target="_blank">
+            <div className="max-w-[48px] w-[8vw]">
+              <Image src="/telegram.svg" width={128} height={128} alt="telegram" />
+            </div>
+          </Link>
+          <Link href="#" target="_blank">
+            <div className="max-w-[48px] w-[8vw]">
+              <Image src="/linkdin.svg" width={128} height={128} alt="linkdin" />
+            </div>
+          </Link>
+          <Link href="#" target="_blank">
+            <div className="max-w-[48px] w-[8vw]">
+              <Image src="/information.svg" width={128} height={128} alt="information" />
+            </div>
+          </Link>
+        </section>
+        <h2 className="text-[#858585] text-sm">© PayFriends - 2024</h2>
+      </footer>
+    </>
   );
 }

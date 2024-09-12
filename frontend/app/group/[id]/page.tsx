@@ -303,7 +303,7 @@ const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
 const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
-    const { address, isConnected } = useAccount();
+    const { address } = useAccount();
     const { toast } = useToast()
     const contract = useContract()
 
@@ -422,11 +422,12 @@ type Group = {
     owner: string,
     ownerNickname: string,
     creationTime: string,
-    status: bool,
+    status: boolean,
     balance: string,
     totalCollected: string,
     totalWithdrawn: string,
-    participantsAddresses: Participant[]
+    participantsAddresses: Participant[],
+    isUSDC: boolean,
 }
 
 type Participant = {
@@ -442,7 +443,7 @@ export default function Page({ params }: { params: { id: string } }) {
     const [isParticipant, setIsParticipant] = useState(false)
     const [group, setGroup] = useState<Group | undefined>(undefined);
     const [loading, setLoading] = useState(true)
-    const { address, isConnected } = useAccount();
+    const { address } = useAccount();
     const contract = useContract()
 
     async function getGroupInfo(id: string) {
@@ -450,8 +451,8 @@ export default function Page({ params }: { params: { id: string } }) {
 
         try {
             const groupInfo = await contract.methods.getGroupInfoById(id).call()
-
-            const participants: Participant[] = await Promise.all<Participant>(groupInfo[9].map(async (participantsAddress: string): Promise<Participant> => {
+            console.log(groupInfo)
+            const participants: Participant[] = await Promise.all<Participant>(groupInfo[10].map(async (participantsAddress: string): Promise<Participant> => {
                 const participant = await contract.methods.getParticipantDetails(groupInfo[0], participantsAddress).call();
                 return participant
             }))
@@ -459,20 +460,21 @@ export default function Page({ params }: { params: { id: string } }) {
             setGroup({
                 groupId: groupInfo[0],
                 groupName: groupInfo[1],
-                owner: groupInfo[2],
-                ownerNickname: groupInfo[3],
-                creationTime: groupInfo[4],
-                status: Number.parseInt(groupInfo[5]) === _GROUP_OPEN,
-                balance: groupInfo[6],
-                totalCollected: groupInfo[7],
-                totalWithdrawn: groupInfo[8],
+                isUSDC: groupInfo[2],
+                owner: groupInfo[3],
+                ownerNickname: groupInfo[4],
+                creationTime: groupInfo[5],
+                status: Number.parseInt(groupInfo[6]) === _GROUP_OPEN,
+                balance: groupInfo[7],
+                totalCollected: groupInfo[8],
+                totalWithdrawn: groupInfo[9],
                 participantsAddresses: participants
             })
 
             setIsOwner(groupInfo[2] === address);
-            setIsParticipant(groupInfo[2] === address || groupInfo[9].some((participantsAddress: string) => participantsAddress === address));
+            setIsParticipant(groupInfo[3] === address || groupInfo[10].some((participantsAddress: string) => participantsAddress === address));
 
-        } catch {
+        } catch (e) {
             console.log(`Group id: ${id} not found`)
             setGroup(undefined)
         } finally {

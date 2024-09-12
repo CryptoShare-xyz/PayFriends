@@ -32,33 +32,7 @@ export default function RootLayout({
           >
             {children}
 
-            <hr className="my-8" />
-
-            <footer className="flex flex-col justify-center items-center gap-2 p-4">
-              <section className="flex justify-evenly items-center gap-2">
-                <Link href="https://github.com/CryptoShare-xyz/cryptoshare" target="_blank">
-                  <div className="max-w-[48px] w-[8vw]">
-                    <Image src="/github.svg" width={128} height={128} alt="github" />
-                  </div>
-                </Link>
-                <Link href="#" target="_blank">
-                  <div className="max-w-[48px] w-[8vw]">
-                    <Image src="/telegram.svg" width={128} height={128} alt="telegram" />
-                  </div>
-                </Link>
-                <Link href="#" target="_blank">
-                  <div className="max-w-[48px] w-[8vw]">
-                    <Image src="/linkdin.svg" width={128} height={128} alt="linkdin" />
-                  </div>
-                </Link>
-                <Link href="#" target="_blank">
-                  <div className="max-w-[48px] w-[8vw]">
-                    <Image src="/information.svg" width={128} height={128} alt="information" />
-                  </div>
-                </Link>
-              </section>
-              <h2 className="text-[#858585] text-sm">© PayFriends - 2024</h2>
-            </footer>
+          
           </body>
         </ContractProvider>
       </WalletProvider>
