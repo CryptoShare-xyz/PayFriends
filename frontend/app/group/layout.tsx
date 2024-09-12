@@ -1,37 +1,10 @@
 'use client'
 
-import { cn } from "@/lib/utils";
 import { ConnectKitButton } from "connectkit";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { useMediaQuery } from 'react-responsive';
-import { useAccount } from "wagmi";
 
-
-function MainNav({
-    className,
-    ...props
-}: React.HTMLAttributes<HTMLElement>) {
-    return (
-        <nav
-            className={cn("flex items-center space-x-4 lg:space-x-6", className)}
-            {...props}
-        >
-            <Link
-                href="/"
-                className="text-sm  transition-colors hover:text-primary text-[#6c63ff] font-bold"
-            >
-                Overview
-            </Link>
-            {/* <Link
-                href="#"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-            >
-                Settings
-            </Link> */}
-        </nav>
-    )
-}
 
 export default function DashboardLayout({
     children,
@@ -41,32 +14,22 @@ export default function DashboardLayout({
     const notMobile = useMediaQuery({
         query: '(min-width: 640px)'
     })
-    const { isConnected } = useAccount();
-    const [mounted, setMounted] = useState<Boolean>(false);
-
-    // TODO: probably should use middleware/nextauth
-    // useEffect(() => {
-    //     setMounted(true);
-    //     if (!isConnected) {
-    //         redirect("/");
-    //     }
-    // }, [isConnected])
-
-    // if (!mounted) {
-    //     return <></>
-    // }
-
     return (
-        <div className="flex-col md:flex px-8 lg:max-w-[70%] mx-auto bg-slate-100 min-h-screen lg:rounded-2xl" >
-            <div className="border-b mb-6">
-                <div className="flex h-16 items-center px-4">
-                    <MainNav className="mx-6" />
-                    <div className="ml-auto flex items-center space-x-4">
-                        <ConnectKitButton showBalance={notMobile} />
-                    </div>
+        <div className="flex flex-col lg:max-w-[60%] mx-auto  min-h-screen " >
+            <nav className="flex py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
+                <Link
+                    href="/"
+                >
+                    <ArrowLeft className="text-[#009BEB]" size={24} />
+                </Link>
+                <span className="text-sm  font-bold">Overview</span>
+                <div className="ml-auto flex items-center space-x-4">
+                    <ConnectKitButton showBalance={notMobile} />
                 </div>
-            </div>
-            {children}
-        </div >
+            </nav>
+            <main>
+                {children}
+            </main>
+        </div>
     )
 }

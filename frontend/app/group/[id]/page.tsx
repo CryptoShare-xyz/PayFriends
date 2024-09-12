@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
     DialogClose,
@@ -32,9 +31,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import { Lock } from "lucide-react";
 import moment from "moment";
 
 import {
@@ -43,12 +40,13 @@ import {
     Coins,
     Copy,
     EllipsisVertical,
-    LinkIcon,
-    Stamp,
-    User
+    Lock,
+    Share2,
+    Stamp
 } from "lucide-react";
 
 import { useContract } from "@/contexts/ContractProvider";
+import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -74,10 +72,7 @@ function ShareGroup() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <LinkIcon className="mr-2 h-4 w-4" />
-                    <span>Share group</span>
-                </DropdownMenuItem>
+                <aside className="absolute top-[1rem] right-[4rem]"><Share2 className="bg-[#1F92CE] rounded-full p-[0.3rem]" size={48} /></aside>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md" showOverlay={false}>
                 <DialogHeader>
@@ -97,7 +92,7 @@ function ShareGroup() {
                             readOnly
                         />
                     </div>
-                    <Button type="submit" size="sm" className="px-3 bg-[#6c63ff]" onClick={copyText}>
+                    <Button type="submit" size="sm" className="px-3 bg-[#009BEB]" onClick={copyText}>
                         <span className="sr-only">Copy</span>
                         {!copied ?
                             <Copy className="h-4 w-4" />
@@ -494,85 +489,19 @@ export default function Page({ params }: { params: { id: string } }) {
         return <span>Group {params.id} no found</span>
     }
 
-
     return (
-        <div className="p-8 bg-slate-50 md:rounded-2xl md:max-w-[80%] w-full mx-auto">
-            <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold tracking-tight flex justify-center items-center gap-4">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+        <>
+            <header className="relative px-16 flex flex-col items-start justify-center bg-[#E7F1FA] pb-8 rounded-b-2xl">
+                <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
                     <Lock className="mr-1 h-3 w-3" />
                     Closed
                 </span>}</h2>
-                {group.status &&
-                    <div className="flex items-center space-x-2">
-                        {isParticipant ? <GroupActionsMenu isOwner={isOwner} groupId={group.groupId} /> : <JoinGroupDialog groupId={group.groupId} />}
-                    </div>
-                }
-            </div>
-            <p className="text-muted-foreground text-xs">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
-
-            <div className="flex flex-col my-8 ">
-                <div className="mb-4 flex justify-evenly xl:flex-row flex-col gap-2">
-                    <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
-                        <CardHeader>
-                            <CardTitle className="mb-2 capitalize">
-                                collected
-                            </CardTitle>
-                        </CardHeader >
-                        <CardContent>
-                            <span className="flex text-md text-slate-800">
-                                {group.totalCollected} WEI
-                            </span>
-                        </CardContent>
-                    </Card>
-                    <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
-                        <CardHeader>
-                            <CardTitle className="mb-2 capitalize">
-                                withdrawn
-                            </CardTitle>
-                        </CardHeader >
-                        <CardContent>
-                            <span className="flex text-md text-slate-800">
-                                {group.totalWithdrawn} WEI
-                            </span>
-                        </CardContent>
-                    </Card>
-                    <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
-                        <CardHeader>
-                            <CardTitle className="mb-2 capitalize">
-                                balance
-                            </CardTitle>
-                        </CardHeader >
-                        <CardContent>
-                            <span className="flex text-md text-slate-800">
-                                {group.balance} WEI
-                            </span>
-                        </CardContent>
-                    </Card>
-
-                </div>
-                <aside className="mt-2">
-                    <div className="flex p-1 mb-4 items-center">
-                        <small className="mr-2"><User size={16} className="text-muted-foreground" /></small>
-                        <h1 className="font-semibold text-md">Participants</h1>
-                    </div>
-                    <Table className="bg-white border border-separate rounded-xl">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Participant</TableHead>
-                                <TableHead>Amount</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress }) => (
-                                <TableRow key={participantAddress}>
-                                    <TableCell className="font-medium capitalize">{nickname}</TableCell>
-                                    <TableCell>{totalDeposits} WEI</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </aside>
-            </div>
-        </div >
+                <p className="text-muted-foreground text-lg mb-4">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
+                <p className="text-muted-foreground text-sm">Group owner: {group.ownerNickname}</p>
+                <p className="text-muted-foreground text-sm">Owner address: {formatAddress(group.owner)}...</p>
+                <ShareGroup />
+            </header>
+        </>
     )
+
 } 
