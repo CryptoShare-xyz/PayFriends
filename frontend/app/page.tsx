@@ -89,7 +89,7 @@ function CreateGroupDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={onOpenDialog} className="my-4 w-[70%] bg-gradient-to-br from-[#009BEB] to-[#005885] text-slate-100 text-lg">
+        <Button onClick={onOpenDialog} className="my-4 w-[70%] max-w-[360px] bg-gradient-to-br from-[#009BEB] to-[#005885] text-slate-100 text-lg">
           <span>Create group</span>
         </Button>
       </DialogTrigger>
@@ -178,28 +178,28 @@ export default function Home() {
           <ConnectKitButton />
         </nav>
         <div className="mx-auto">
-          <h1 className="text-[#1F92CE] font-extrabold tracking-[2px] lg:text-7xl text-5xl">PayFriends</h1>
+          <h1 className="text-[#1F92CE] font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl">PayFriends</h1>
           <div className="flex justify-center items-center gap-4 text-left">
             <div className="my-auto w-[70%] mr-auto">
-              <h2 className="text-black my-2">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
+              <h2 className="text-black my-2 lg:text-2xl text-lg md:text-2xl">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
               <CreateGroupDialog />
             </div>
-            <aside className="w-[30%] max-w-[480px] my-2 mx-auto">
+            <aside className="w-[30%] my-2 mx-auto">
               <Image src="/hero.svg" width={320} height={320} alt=" hero" />
             </aside>
           </div>
         </div>
       </section>
 
-      <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-wrap">
-        <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 ">
+      <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row-reverse md:px-8">
+        <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
           <article className="flex justify-center items-center gap-4">
             <div className="max-w-[20vw]">
               <Image src="/group.svg" width={128} height={128} alt=" group" />
             </div>
             <aside className="flex flex-col items-start">
               <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">203</h1>
-              <small className="text-[#B2B2B2] text-base">Opened Groups</small>
+              <small className="text-[#B2B2B2] text-base text-left">Opened Groups</small>
             </aside>
           </article>
           <hr className="w-[60%] mx-auto my-5 border-dashed border-[#D9D9D9]" />
@@ -209,14 +209,14 @@ export default function Home() {
             </div>
             <aside className="flex flex-col items-start">
               <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">100,000$</h1>
-              <small className="text-[#B2B2B2] text-base">Collected Volume</small>
+              <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
             </aside>
           </article>
         </section>
 
-        <section id="image" className="mx-auto max-w-[48rem]">
+        <figure id="image" className="max-w-[48rem] md:w-[50%]">
           <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
-        </section>
+        </figure>
 
       </div>
     </main>
