@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -11,15 +10,6 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/dialog";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import {
     Form,
     FormControl,
@@ -38,9 +28,8 @@ import Image from "next/image";
 
 import {
     Check,
-    ChevronsLeftRight,
+    CircleChevronDown,
     Copy,
-    EllipsisVertical,
     Lock,
     Share2,
     User
@@ -58,7 +47,7 @@ import web3 from "web3";
 import { z } from "zod";
 
 const joinGroupSchema = z.object({
-    nickname: z.string().min(1).max(20),
+    nickname: z.string().min(1).max(20).optional(),
     amount: z.coerce.number().positive().min(1)
 })
 
@@ -95,14 +84,14 @@ function ShareGroup() {
                             readOnly
                         />
                     </div>
-                    <Button type="submit" size="sm" className="px-3 bg-[#009BEB]" onClick={copyText}>
+                    <div className="p-3 bg-[#009BEB] hover:cursor-pointer text-white rounded-lg" onClick={copyText}>
                         <span className="sr-only">Copy</span>
                         {!copied ?
                             <Copy className="h-4 w-4" />
                             :
                             <Check className="h-4 w-4" />
                         }
-                    </Button>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
@@ -110,34 +99,7 @@ function ShareGroup() {
 }
 
 
-function GroupActionsMenu({ isOwner, groupId }: { isOwner: boolean, groupId: string }) {
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <EllipsisVertical className="hover:cursor-pointer hover:opacity-60" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Group actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <PayGroupDialog groupId={groupId} />
-                    {isOwner && <WithdrawDialog groupId={groupId} />}
-                    <ShareGroup />
-                </DropdownMenuGroup>
-                {isOwner &&
-                    <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <CloseDialog groupId={groupId} />
-                        </DropdownMenuGroup>
-                    </>}
-            </DropdownMenuContent>
-        </DropdownMenu>
-    )
-}
-
-
-const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
+const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC: boolean }> = ({ groupId, isParticipant, isUSDC }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
     const { address } = useAccount();
@@ -146,17 +108,28 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const form = useForm<z.infer<typeof joinGroupSchema>>({
         resolver: zodResolver(joinGroupSchema),
         defaultValues: {
-            nickname: "",
+            nickname: undefined,
             amount: 0
         },
     })
 
     async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
-        const { nickname, amount } = values;
+        let { nickname, amount } = values;
+
         setLoading(true)
+
+        if (isParticipant) {
+            nickname = ""
+        }
+
         try {
-            const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
-            const tx = await contract.methods.depositToGroup(groupId, nickname).send({ from: address, value: wei });
+            if (isUSDC) {
+                const tx = await contract.methods.depositToGroup(groupId, nickname, true, amount).send({ from: address });
+            } else {
+                const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
+                const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({ from: address, value: wei });
+
+            }
             toast({ description: "Payed group" })
             window.location.reload()
         } catch (error) {
@@ -174,15 +147,20 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-[#6c63ff]">Join group</Button>
+                <Button className="text-2xl bg-[#009BEB] border-1 border-[#1F92CE] text-white py-2 w-[90%]">{isParticipant ? "Deposit" : "Join group"}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Join group</DialogTitle>
+                    {
+                        isParticipant
+                            ? <DialogTitle>Deposit group</DialogTitle>
+                            : <DialogTitle>Join group</DialogTitle>
+                    }
+
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-                        <FormField
+                        {!isParticipant && <FormField
                             control={form.control}
                             name="nickname"
                             render={({ field }) => (
@@ -197,7 +175,7 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        />
+                        />}
                         <FormField
                             control={form.control}
                             name="amount"
@@ -207,79 +185,11 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                                     <FormDescription>
                                         This is the amount of wei to deposit to the group.
                                     </FormDescription>
-                                    <FormControl>
-                                        <Input type="number" placeholder="1337" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <DialogFooter>
-                            <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
-    const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(false)
-    const { address } = useAccount();
-    const { toast } = useToast()
-    const contract = useContract()
-    const form = useForm<z.infer<typeof joinGroupSchema>>({
-        resolver: zodResolver(joinGroupSchema),
-        defaultValues: {
-            nickname: "PAY", // patch
-            amount: 0
-        },
-    })
-
-    async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
-        const { nickname, amount } = values;
-        setLoading(true)
-        try {
-            const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
-            const tx = await contract.methods.depositToGroup(groupId, "").send({ from: address, value: wei });
-            toast({ description: "Payed group" })
-            window.location.reload()
-        } catch (error) {
-            if (error instanceof Error) {
-                toast({ variant: "destructive", description: error.message })
-            }
-        } finally {
-            setOpen(false)
-            setLoading(false)
-            form.reset()
-        }
-
-    }
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger className="" asChild>
-                <Button className="text-2xl bg-[#009BEB] border-1 border-[#1F92CE] text-white py-2 w-[90%]">Deposit</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Pay group</DialogTitle>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-                        <FormField
-                            control={form.control}
-                            name="amount"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Amount to deposit</FormLabel>
-                                    <FormDescription>
-                                        This is the amount of wei to deposit to the group.
-                                    </FormDescription>
-                                    <FormControl>
-                                        <Input type="number" placeholder="1337" {...field} />
+                                    <FormControl >
+                                        <div className="relative">
+                                            <Input type="number" placeholder="1337" {...field} />
+                                            <small className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">{isUSDC ? "USDC" : "WETH"}</small>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -322,24 +232,23 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <ChevronsLeftRight className="mr-2 h-4 w-4" />
-                    <span>Withdraw balance</span>
-                </DropdownMenuItem>
+                <Button className="text-lg bg-[#E7F1FA] border-2 border-dashed border-[#19A5ED] text-[#1F92CE] py-2 w-[90%]">Withdraw Now <CircleChevronDown className="ml-1" size={16} /> </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Are you sure you want to withdraw ?</DialogTitle>
                 </DialogHeader>
-                <DialogFooter className="flex items-center justify-center sm:justify-center gap-4">
-                    <DialogTrigger asChild>
-                        <Button className="bg-[#6c63ff]" onClick={handleWithdraw} disabled={loading}>{loading ? "Withdrawing..." : "Withdraw balance"}</Button>
-                    </DialogTrigger>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">
+                <DialogFooter>
+                    <div className="flex flex-row w-full gap-2 justify-center items-center">
+                        <Button className="bg-[#009BEB]" onClick={handleWithdraw} disabled={loading}>{loading ? "Withdrawing..." : "Withdraw balance"}</Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setOpen(false)}
+                        >
                             Close
                         </Button>
-                    </DialogClose>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -413,8 +322,8 @@ export default function Page({ params }: { params: { id: string } }) {
                 participantsAddresses: participants
             })
 
-            setIsOwner(groupInfo[2] === address);
-            setIsParticipant(groupInfo[3] === address || groupInfo[10].some((participantsAddress: string) => participantsAddress === address));
+            setIsOwner(groupInfo[3] === address);
+            setIsParticipant(groupInfo[4] === address || groupInfo[10].some((participantsAddress: string) => participantsAddress === address));
 
         } catch (e) {
             console.log(`Group id: ${id} not found`)
@@ -487,7 +396,7 @@ export default function Page({ params }: { params: { id: string } }) {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Address</TableHead>
                                 <TableHead>Amount</TableHead>
-                                <TableHead>Date</TableHead>
+                                <TableHead>Last update</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -504,7 +413,7 @@ export default function Page({ params }: { params: { id: string } }) {
                                     <TableCell className="capitalize">{nickname}</TableCell>
                                     <TableCell>{formatAddress(participantAddress)}</TableCell>
                                     <TableCell>{totalDeposits}</TableCell>
-                                    <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                                    <TableCell>{moment.unix(Number(lastDeposited)).format('L')}</TableCell>
                                 </TableRow>
                             ))}
                             {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
@@ -512,7 +421,7 @@ export default function Page({ params }: { params: { id: string } }) {
                                     <TableCell className="capitalize">{nickname}</TableCell>
                                     <TableCell>{formatAddress(participantAddress)}</TableCell>
                                     <TableCell>{totalDeposits}</TableCell>
-                                    <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                                    <TableCell>{moment.unix(Number(lastDeposited)).format('L')}</TableCell>
                                 </TableRow>
                             ))}
                             {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
@@ -520,7 +429,7 @@ export default function Page({ params }: { params: { id: string } }) {
                                     <TableCell className="capitalize">{nickname}</TableCell>
                                     <TableCell>{formatAddress(participantAddress)}</TableCell>
                                     <TableCell>{totalDeposits}</TableCell>
-                                    <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                                    <TableCell>{moment.unix(Number(lastDeposited)).format('L')}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -528,9 +437,12 @@ export default function Page({ params }: { params: { id: string } }) {
                 </section>
             </ScrollArea>
 
-            <div className="flex flex-col items-center justify-center p-4 border-t">
-                <PayGroupDialog groupId={group.groupId} />
-            </div>
+            {group.status &&
+                <div className="flex flex-col items-center justify-center p-4 border-t gap-4">
+                    {isOwner && <WithdrawDialog groupId={group.groupId} />}
+                    <PayGroupDialog groupId={group.groupId} isParticipant={isParticipant} isUSDC={group.isUSDC} />
+                </div>
+            }
 
         </div>
     )
