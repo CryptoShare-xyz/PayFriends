@@ -34,6 +34,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import moment from "moment";
 
+import Image from "next/image";
+
 import {
     Check,
     ChevronsLeftRight,
@@ -501,6 +503,18 @@ export default function Page({ params }: { params: { id: string } }) {
                 <p className="text-muted-foreground text-sm">Owner address: {formatAddress(group.owner)}...</p>
                 <ShareGroup />
             </header>
+            <section className="p-8">
+                <div className="flex p-8 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
+                    <span>
+                        <h1 className="text-[#009BEB] text-center text-4xl font-bold">{group.balance}</h1>
+                        <h2 className="text-lg text-center font-semibold">Balance</h2>
+                    </span>
+                    <figure className="flex flex-col items-center justify-center w-[30%]">
+                        <Image src={group.isUSDC ? "/usdc.svg" : "/eth.svg"} width={64} height={64} alt="coin image" />
+                        <small className="text-[#858585] text-center text-small">{group.isUSDC ? "USDC" : "WETH"}</small>
+                    </figure>
+                </div>
+            </section>
         </>
     )
 
