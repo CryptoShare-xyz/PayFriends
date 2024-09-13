@@ -44,9 +44,11 @@ import {
     EllipsisVertical,
     Lock,
     Share2,
-    Stamp
+    Stamp,
+    User
 } from "lucide-react";
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -431,6 +433,7 @@ type Participant = {
     participantAddress: string;
     nickname: string;
     totalDeposits: string;
+    lastDeposited: string
 }
 
 
@@ -448,9 +451,9 @@ export default function Page({ params }: { params: { id: string } }) {
 
         try {
             const groupInfo = await contract.methods.getGroupInfoById(id).call()
-            console.log(groupInfo)
             const participants: Participant[] = await Promise.all<Participant>(groupInfo[10].map(async (participantsAddress: string): Promise<Participant> => {
                 const participant = await contract.methods.getParticipantDetails(groupInfo[0], participantsAddress).call();
+                console.log(participant)
                 return participant
             }))
 
@@ -504,8 +507,8 @@ export default function Page({ params }: { params: { id: string } }) {
                 <ShareGroup />
             </header>
 
-            <section className="flex flex-col md:flex-row p-8 gap-8">
-                <div className="flex flex-grow p-8 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
+            <section className="flex flex-col md:flex-row px-8 py-4 gap-4">
+                <div className="flex flex-grow px-8 py-4 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
                     <span>
                         <h1 className="text-[#009BEB] text-center text-4xl font-bold">{group.balance}</h1>
                         <h2 className="text-lg text-center font-semibold">Balance</h2>
@@ -526,6 +529,35 @@ export default function Page({ params }: { params: { id: string } }) {
                         <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
                     </div>
                 </aside>
+            </section>
+
+            <hr className="w-[90%] mx-auto my-2 border-dashed border-[#D9D9D9]" />
+
+            <section className="px-8 py-2">
+                <div className="flex p-1 mb-4 items-center">
+                    <div className="mr-2 max-w-[32px] lg:max-w-[48px]"><User size={32} className="text-muted-foreground" /></div>
+                    <h1 className="font-semibold text-base lg:text-2xl">Members</h1>
+                </div>
+                <Table className="overflow-y-scroll">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Address</TableHead>
+                            <TableHead>Amount</TableHead>
+                            <TableHead>Date</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
+                            <TableRow key={participantAddress}>
+                                <TableCell className="capitalize">{nickname}</TableCell>
+                                <TableCell>{formatAddress(participantAddress)}</TableCell>
+                                <TableCell>{totalDeposits}</TableCell>
+                                <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </section>
         </>
     )

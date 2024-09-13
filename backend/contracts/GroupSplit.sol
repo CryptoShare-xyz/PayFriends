@@ -364,7 +364,8 @@ contract GroupSplit {
         returns (
             address participantAddress,
             string memory nickname,
-            uint256 totalDeposits
+            uint256 totalDeposits,
+            uint256 lastDeposited
         )
     {
         // Ensure the group exists
@@ -384,7 +385,8 @@ contract GroupSplit {
         return (
             participant.participantAddress,
             participant.nickname,
-            participant.totalDeposits
+            participant.totalDeposits,
+            participant.lastDeposited
         );
     }
 }
