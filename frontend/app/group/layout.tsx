@@ -15,7 +15,7 @@ export default function DashboardLayout({
         query: '(min-width: 640px)'
     })
     return (
-        <div className="flex flex-col lg:max-w-[60%] mx-auto  min-h-screen " >
+        <div className="flex flex-col lg:max-w-[60%] mx-auto min-h-screen" >
             <nav className="flex py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
                 <Link
                     href="/"

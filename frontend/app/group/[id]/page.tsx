@@ -39,15 +39,14 @@ import Image from "next/image";
 import {
     Check,
     ChevronsLeftRight,
-    Coins,
     Copy,
     EllipsisVertical,
     Lock,
     Share2,
-    Stamp,
     User
 } from "lucide-react";
 
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
@@ -228,7 +227,7 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
 const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
-    const { address, isConnected } = useAccount();
+    const { address } = useAccount();
     const { toast } = useToast()
     const contract = useContract()
     const form = useForm<z.infer<typeof joinGroupSchema>>({
@@ -261,11 +260,8 @@ const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Coins className="mr-2 h-4 w-4" />
-                    <span>Pay group</span>
-                </DropdownMenuItem>
+            <DialogTrigger className="" asChild>
+                <Button className="text-2xl bg-[#009BEB] border-1 border-[#1F92CE] text-white py-2 w-[90%]">Deposit</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -290,7 +286,7 @@ const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                             )}
                         />
                         <DialogFooter>
-                            <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
+                            <Button className="bg-[#009BEB]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
                         </DialogFooter>
                     </form>
                 </Form>
@@ -351,59 +347,6 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
 }
 
 
-const CloseDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
-    const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(false)
-    const { address, isConnected } = useAccount();
-    const { toast } = useToast()
-    const contract = useContract()
-
-    const handleClose = async (e: React.MouseEvent<HTMLElement>) => {
-        e.preventDefault()
-        setLoading(true)
-        try {
-            const tx = await contract.methods.closeGroup(groupId).send({ from: address });
-            toast({ description: "Closed group" })
-            window.location.reload()
-        } catch (error) {
-            if (error instanceof Error) {
-                toast({ variant: "destructive", description: error.message })
-            }
-        } finally {
-            setOpen(false)
-            setLoading(false)
-        }
-    }
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Stamp className="mr-2 h-4 w-4 text-red-700" />
-                    <span className="text-red-700">Close group</span>
-                </DropdownMenuItem>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Are you sure you want to close group ?</DialogTitle>
-                </DialogHeader>
-                <DialogFooter className="flex items-center justify-center sm:justify-center gap-4">
-                    <DialogTrigger asChild>
-                        <Button className="bg-red-700" onClick={handleClose} disabled={loading}>{loading ? "Closing..." : "Close group"}</Button>
-                    </DialogTrigger>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">
-                            Close
-                        </Button>
-                    </DialogClose>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-
-
 function Loading() {
     return (
         <div className="flex h-screen w-full items-center justify-center">
@@ -453,7 +396,6 @@ export default function Page({ params }: { params: { id: string } }) {
             const groupInfo = await contract.methods.getGroupInfoById(id).call()
             const participants: Participant[] = await Promise.all<Participant>(groupInfo[10].map(async (participantsAddress: string): Promise<Participant> => {
                 const participant = await contract.methods.getParticipantDetails(groupInfo[0], participantsAddress).call();
-                console.log(participant)
                 return participant
             }))
 
@@ -495,7 +437,7 @@ export default function Page({ params }: { params: { id: string } }) {
     }
 
     return (
-        <>
+        <div className="flex flex-col h-screen">
             <header className="relative px-16 flex flex-col items-start justify-center bg-[#E7F1FA] pb-8 rounded-b-2xl">
                 <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
                     <Lock className="mr-1 h-3 w-3" />
@@ -533,33 +475,64 @@ export default function Page({ params }: { params: { id: string } }) {
 
             <hr className="w-[90%] mx-auto my-2 border-dashed border-[#D9D9D9]" />
 
-            <section className="px-8 py-2">
-                <div className="flex p-1 mb-4 items-center">
-                    <div className="mr-2 max-w-[32px] lg:max-w-[48px]"><User size={32} className="text-muted-foreground" /></div>
-                    <h1 className="font-semibold text-base lg:text-2xl">Members</h1>
-                </div>
-                <Table className="overflow-y-scroll">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Address</TableHead>
-                            <TableHead>Amount</TableHead>
-                            <TableHead>Date</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
-                            <TableRow key={participantAddress}>
-                                <TableCell className="capitalize">{nickname}</TableCell>
-                                <TableCell>{formatAddress(participantAddress)}</TableCell>
-                                <TableCell>{totalDeposits}</TableCell>
-                                <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+            <ScrollArea className="flex-grow p-4">
+                <section className="px-8 py-2">
+                    <div className="flex p-1 mb-4 items-center">
+                        <div className="mr-2 max-w-[32px] lg:max-w-[48px]"><User size={32} className="text-muted-foreground" /></div>
+                        <h1 className="font-semibold text-base lg:text-2xl">Members</h1>
+                    </div>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Address</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead>Date</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </section>
-        </>
+                        </TableHeader>
+                        <TableBody>
+                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
+                                <TableRow key={participantAddress}>
+                                    <TableCell className="capitalize">{nickname}</TableCell>
+                                    <TableCell>{formatAddress(participantAddress)}</TableCell>
+                                    <TableCell>{totalDeposits}</TableCell>
+                                    <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                                </TableRow>
+                            ))}
+                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
+                                <TableRow key={participantAddress}>
+                                    <TableCell className="capitalize">{nickname}</TableCell>
+                                    <TableCell>{formatAddress(participantAddress)}</TableCell>
+                                    <TableCell>{totalDeposits}</TableCell>
+                                    <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                                </TableRow>
+                            ))}
+                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
+                                <TableRow key={participantAddress}>
+                                    <TableCell className="capitalize">{nickname}</TableCell>
+                                    <TableCell>{formatAddress(participantAddress)}</TableCell>
+                                    <TableCell>{totalDeposits}</TableCell>
+                                    <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                                </TableRow>
+                            ))}
+                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
+                                <TableRow key={participantAddress}>
+                                    <TableCell className="capitalize">{nickname}</TableCell>
+                                    <TableCell>{formatAddress(participantAddress)}</TableCell>
+                                    <TableCell>{totalDeposits}</TableCell>
+                                    <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </section>
+            </ScrollArea>
+
+            <div className="flex flex-col items-center justify-center p-4 border-t">
+                <PayGroupDialog groupId={group.groupId} />
+            </div>
+
+        </div>
     )
 
 } 
