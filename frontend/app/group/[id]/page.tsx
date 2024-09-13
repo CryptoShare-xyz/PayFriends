@@ -24,6 +24,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import moment from "moment";
 
+import { useMediaQuery } from 'react-responsive';
+
 import Image from "next/image";
 
 import {
@@ -298,6 +300,12 @@ export default function Page({ params }: { params: { id: string } }) {
     const { address } = useAccount();
     const contract = useContract()
 
+    const notMobile = useMediaQuery({
+        query: '(min-width: 640px)'
+    })
+
+    const format = notMobile ? (str: string) => str : formatAddress;
+
     async function getGroupInfo(id: string) {
         const _GROUP_OPEN = 2;
 
@@ -354,7 +362,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 </span>}</h2>
                 <p className="text-muted-foreground text-lg mb-4">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
                 <p className="text-muted-foreground text-sm">Group owner: {group.ownerNickname}</p>
-                <p className="text-muted-foreground text-sm">Owner address: {formatAddress(group.owner)}...</p>
+                <p className="text-muted-foreground text-sm">Owner address: {format(group.owner)}</p>
                 <ShareGroup />
             </header>
 
@@ -403,7 +411,7 @@ export default function Page({ params }: { params: { id: string } }) {
                             {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
                                 <TableRow key={participantAddress}>
                                     <TableCell className="capitalize">{nickname}</TableCell>
-                                    <TableCell>{formatAddress(participantAddress)}</TableCell>
+                                    <TableCell>{format(participantAddress)}</TableCell>
                                     <TableCell>{totalDeposits}</TableCell>
                                     <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
                                 </TableRow>
