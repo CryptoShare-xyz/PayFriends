@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -29,11 +29,6 @@ import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
 import { z } from "zod";
 
-type Expense = {
-  id: string,
-  amount: string,
-  from: string
-}
 
 const createGroupSchema = z.object({
   groupName: z.string().min(1).max(20),
@@ -167,9 +162,32 @@ function CreateGroupDialog() {
 
 
 export default function Home() {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [totalExpenses, setTotalExpenses] = useState(0);
-  const [cashFlow, setCashFlow] = useState(0);
+  const [openedGroups, setOpenedGroups] = useState(0);
+  const [collectedUSDC, setCollectedUSDC] = useState(0);
+  const [collectedEth, setCollectedEth] = useState(0);
+  const contract = useContract()
+
+  async function getContractStats() {
+
+    try {
+      let res = await contract.methods.contractOpenedGroupsStat().call()
+      setOpenedGroups(Number.parseInt(res))
+
+      res = await contract.methods.contractTotalCollectedUSDCStat().call()
+      setCollectedUSDC(Number.parseInt(res))
+
+      res = await contract.methods.contractTotalCollectedEthStat().call()
+      setCollectedEth(Number.parseInt(res))
+
+    } catch {
+      alert("Failed loading contract")
+    }
+
+  }
+
+  useEffect(() => {
+    getContractStats()
+  }, [])
 
   return (
     <>
@@ -199,7 +217,7 @@ export default function Home() {
                 <Image src="/group.svg" width={128} height={128} alt=" group" />
               </div>
               <aside className="flex flex-col items-start">
-                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">203</h1>
+                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{openedGroups}</h1>
                 <small className="text-[#B2B2B2] text-base text-left">Opened Groups</small>
               </aside>
             </article>
@@ -208,8 +226,27 @@ export default function Home() {
               <div className="max-w-[15vw]">
                 <Image src="/collected.svg" width={128} height={128} alt=" group" />
               </div>
-              <aside className="flex flex-col items-start">
-                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">100,000$</h1>
+              <aside className="flex flex-col items-start gap-2">
+                <div className="flex items-center space-x-2">
+                  <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{collectedEth}</h1>
+                  <Image
+                    src="/eth.svg"
+                    alt="eth icon"
+                    width={24}
+                    height={24}
+                    className="w-10 h-10"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{collectedUSDC}</h1>
+                  <Image
+                    src="/usdc.svg"
+                    alt="usdc icon"
+                    width={24}
+                    height={24}
+                    className="w-10 h-10"
+                  />
+                </div>
                 <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
               </aside>
             </article>

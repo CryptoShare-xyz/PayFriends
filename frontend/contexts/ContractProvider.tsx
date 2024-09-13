@@ -1,5 +1,5 @@
 import GroupSplitABI from "@/artifacts/contracts/GroupSplit.sol/GroupSplit.json";
-import { GroupSplit } from "@/typechain-types";
+import { GroupSplit } from "@/typechain-types/contracts";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 import React, { createContext, useContext, useMemo } from 'react';
 import Web3 from 'web3';
@@ -43,5 +43,5 @@ export const useContract = () => {
     if (!context) {
         throw new Error('useContractContext must be used within a ContractProvider');
     }
-    return context;
+    return context as GroupSplit;
 };
