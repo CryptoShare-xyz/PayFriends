@@ -503,17 +503,29 @@ export default function Page({ params }: { params: { id: string } }) {
                 <p className="text-muted-foreground text-sm">Owner address: {formatAddress(group.owner)}...</p>
                 <ShareGroup />
             </header>
-            <section className="p-8">
-                <div className="flex p-8 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
+
+            <section className="flex flex-col md:flex-row p-8 gap-8">
+                <div className="flex flex-grow p-8 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
                     <span>
                         <h1 className="text-[#009BEB] text-center text-4xl font-bold">{group.balance}</h1>
                         <h2 className="text-lg text-center font-semibold">Balance</h2>
                     </span>
-                    <figure className="flex flex-col items-center justify-center w-[30%]">
+                    <figure className="flex flex-col items-center justify-center w-[20%]">
                         <Image src={group.isUSDC ? "/usdc.svg" : "/eth.svg"} width={64} height={64} alt="coin image" />
                         <small className="text-[#858585] text-center text-small">{group.isUSDC ? "USDC" : "WETH"}</small>
                     </figure>
                 </div>
+
+                <aside className="flex flex-grow flex-row md:flex-col justify-evenly items-center gap-4">
+                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg">
+                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalWithdrawn}</h1>
+                        <small className="text-[#858585]  lg:text-xl text-sm">Withdrawn</small>
+                    </div>
+                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg">
+                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalCollected}</h1>
+                        <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
+                    </div>
+                </aside>
             </section>
         </>
     )
