@@ -408,30 +408,6 @@ export default function Page({ params }: { params: { id: string } }) {
                                     <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
                                 </TableRow>
                             ))}
-                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
-                                <TableRow key={participantAddress}>
-                                    <TableCell className="capitalize">{nickname}</TableCell>
-                                    <TableCell>{formatAddress(participantAddress)}</TableCell>
-                                    <TableCell>{totalDeposits}</TableCell>
-                                    <TableCell>{moment.unix(Number(lastDeposited)).format('L')}</TableCell>
-                                </TableRow>
-                            ))}
-                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
-                                <TableRow key={participantAddress}>
-                                    <TableCell className="capitalize">{nickname}</TableCell>
-                                    <TableCell>{formatAddress(participantAddress)}</TableCell>
-                                    <TableCell>{totalDeposits}</TableCell>
-                                    <TableCell>{moment.unix(Number(lastDeposited)).format('L')}</TableCell>
-                                </TableRow>
-                            ))}
-                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
-                                <TableRow key={participantAddress}>
-                                    <TableCell className="capitalize">{nickname}</TableCell>
-                                    <TableCell>{formatAddress(participantAddress)}</TableCell>
-                                    <TableCell>{totalDeposits}</TableCell>
-                                    <TableCell>{moment.unix(Number(lastDeposited)).format('L')}</TableCell>
-                                </TableRow>
-                            ))}
                         </TableBody>
                     </Table>
                 </section>
