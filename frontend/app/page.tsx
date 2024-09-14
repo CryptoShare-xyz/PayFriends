@@ -169,21 +169,28 @@ function CreateGroupDialog() {
 
 export default function Home() {
   const [openedGroups, setOpenedGroups] = useState(0);
-  const [collectedUSDC, setCollectedUSDC] = useState(0);
-  const [collectedEth, setCollectedEth] = useState(0);
+  const [collected, setCollected] = useState(0);
   const { contract } = useContract()
 
   async function getContractStats() {
 
     try {
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+      const data = await response.json();
+
+      // Extract prices from the response
+      const ethPriceInUSD = data.ethereum.usd;
+
       let res = await contract.methods.contractOpenedGroupsStat().call()
       setOpenedGroups(Number.parseInt(res))
 
       res = await contract.methods.contractTotalCollectedUSDCStat().call()
-      setCollectedUSDC(Math.floor(Number.parseInt(res) / 10 ** 6))
+      const collectedUSDC = Math.floor(Number.parseInt(res) / 10 ** 6)
 
       res = await contract.methods.contractTotalCollectedEthStat().call()
-      setCollectedEth(Number.parseInt(res))
+      const collectedEth = Math.floor((Number.parseInt(res) / 10 ** 18) * ethPriceInUSD)
+
+      setCollected(collectedUSDC + collectedEth);
 
     } catch {
       alert("Failed loading contract")
@@ -191,9 +198,11 @@ export default function Home() {
 
   }
 
+
   useEffect(() => {
-    getContractStats()
+    getContractStats();
   }, [])
+
 
   return (
     <>
@@ -233,26 +242,7 @@ export default function Home() {
                 <Image src="/collected.svg" width={128} height={128} alt=" group" />
               </div>
               <aside className="flex flex-col items-start gap-2">
-                <div className="flex items-center space-x-2">
-                  <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{collectedEth}</h1>
-                  <Image
-                    src="/eth.svg"
-                    alt="eth icon"
-                    width={24}
-                    height={24}
-                    className="w-10 h-10"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{collectedUSDC}</h1>
-                  <Image
-                    src="/usdc.svg"
-                    alt="usdc icon"
-                    width={24}
-                    height={24}
-                    className="w-10 h-10"
-                  />
-                </div>
+                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{collected}$</h1>
                 <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
               </aside>
             </article>
