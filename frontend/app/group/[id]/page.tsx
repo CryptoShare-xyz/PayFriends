@@ -121,11 +121,17 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
 
         setLoading(true)
 
-        if (isParticipant) {
-            nickname = ""
-        }
 
         try {
+            if (nickname === undefined) {
+                // should only happen if already participant
+                if (!isParticipant) {
+                    throw new Error('No nickname for new participant!');
+                }
+                nickname = ""
+
+            }
+
             if (isUSDC) {
                 const usdc = amount * (10 ** 6); // usdc decimal is 6 
                 const tx1 = await usdcContract.methods.approve(contractAddress, usdc).send({ from: address });

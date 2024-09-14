@@ -82,6 +82,12 @@ function CreateGroupDialog() {
     setOpen(true)
   }
 
+  const onCurrencyChange = (value: string) => {
+    if (value === "ETH" || value === "USDC") {
+      form.setValue("currency", value)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -140,7 +146,7 @@ function CreateGroupDialog() {
                     This currency to be used in group, this cannot be changed later.
                   </FormDescription>
                   <FormControl>
-                    <ToggleGroup type="single" defaultValue="ETH" value={form.watch("currency")} onValueChange={(value) => form.setValue("currency", value)}>
+                    <ToggleGroup type="single" defaultValue="ETH" value={form.watch("currency")} onValueChange={onCurrencyChange}>
                       <ToggleGroupItem value="ETH">ETH</ToggleGroupItem>
                       <ToggleGroupItem value="USDC">USDC</ToggleGroupItem>
                     </ToggleGroup>
