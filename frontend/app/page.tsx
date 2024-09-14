@@ -218,9 +218,9 @@ export default function Home() {
                 <h2 className="text-black my-2 lg:text-2xl text-lg md:text-2xl">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
                 <CreateGroupDialog />
               </div>
-              <aside className="w-[30%] my-2 mx-auto">
+              {/* <aside className="w-[30%] my-2 mx-auto">
                 <Image src="/hero.svg" width={320} height={320} alt=" hero" />
-              </aside>
+              </aside> */}
             </div>
           </div>
         </section>
