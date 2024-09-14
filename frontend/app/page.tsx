@@ -174,7 +174,7 @@ export default function Home() {
       setOpenedGroups(Number.parseInt(res))
 
       res = await contract.methods.contractTotalCollectedUSDCStat().call()
-      setCollectedUSDC(Number.parseInt(res))
+      setCollectedUSDC(Math.floor(Number.parseInt(res) / 10 ** 6))
 
       res = await contract.methods.contractTotalCollectedEthStat().call()
       setCollectedEth(Number.parseInt(res))
