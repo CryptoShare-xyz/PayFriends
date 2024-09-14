@@ -147,8 +147,8 @@ function CreateGroupDialog() {
                   </FormDescription>
                   <FormControl>
                     <ToggleGroup type="single" defaultValue="ETH" value={form.watch("currency")} onValueChange={onCurrencyChange}>
-                      <ToggleGroupItem value="ETH">ETH</ToggleGroupItem>
-                      <ToggleGroupItem value="USDC">USDC</ToggleGroupItem>
+                      <ToggleGroupItem value="ETH"><Image className="mr-2" src="/eth.svg" width={16} height={16} alt="eth icon" />ETH</ToggleGroupItem>
+                      <ToggleGroupItem value="USDC"><Image className="mr-2" src="/usdc.svg" width={24} height={24} alt="usdc icon" />USDC</ToggleGroupItem>
                     </ToggleGroup>
                   </FormControl>
                   <FormMessage />
