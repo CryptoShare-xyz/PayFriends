@@ -280,7 +280,6 @@ export default function Home() {
             </div>
           </Link>
         </section>
-        <h2 className="text-[#858585] text-sm">© PayFriends - 2024</h2>
       </footer>
     </>
   );
