@@ -26,16 +26,17 @@ import moment from "moment";
 
 import { useMediaQuery } from 'react-responsive';
 
-import Image from "next/image";
-
+import { ConnectKitButton } from "connectkit";
 import {
-    Check,
+    ArrowLeft, Check,
     CircleChevronDown,
     Copy,
     Lock,
     Share2,
     User
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -356,7 +357,18 @@ export default function Page({ params }: { params: { id: string } }) {
     }
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col lg:max-w-[60%] mx-auto min-h-screen" >
+            <nav className="flex py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
+                <Link
+                    href="/"
+                >
+                    <ArrowLeft className="text-[#009BEB]" size={24} />
+                </Link>
+                <span className="text-sm  font-bold">Overview</span>
+                <div className="ml-auto flex items-center space-x-4">
+                    <ConnectKitButton showBalance={notMobile} />
+                </div>
+            </nav>
             <header className="relative px-16 flex flex-col items-start justify-center bg-[#E7F1FA] pb-8 rounded-b-2xl">
                 <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
                     <Lock className="mr-1 h-3 w-3" />
@@ -431,6 +443,5 @@ export default function Page({ params }: { params: { id: string } }) {
             }
 
         </div>
-    )
-
+    );
 } 
