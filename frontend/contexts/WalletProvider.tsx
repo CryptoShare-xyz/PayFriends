@@ -15,7 +15,7 @@ if (isDevelopment) {
                 ),
             },
             walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
-            appName: "CryptoShareDEV",
+            appName: "PayFriendsDEV",
         })
     );
 } else {
@@ -28,7 +28,7 @@ if (isDevelopment) {
                 ),
             },
             walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
-            appName: "CryptoShare",
+            appName: "PayFriends",
         })
     );
 }

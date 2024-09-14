@@ -104,7 +104,11 @@ export interface GroupSplit extends BaseContract {
   methods: {
     USDC(): NonPayableTransactionObject<string>;
 
-    activeGroups(): NonPayableTransactionObject<string>;
+    contractOpenedGroupsStat(): NonPayableTransactionObject<string>;
+
+    contractTotalCollectedEthStat(): NonPayableTransactionObject<string>;
+
+    contractTotalCollectedUSDCStat(): NonPayableTransactionObject<string>;
 
     createGroup(
       _groupName: string,
@@ -118,8 +122,6 @@ export interface GroupSplit extends BaseContract {
       isUSDCDeposit: boolean,
       usdcAmount: number | string | BN
     ): PayableTransactionObject<void>;
-
-    getActivegroups(): NonPayableTransactionObject<string>;
 
     getAllGroupIds(): NonPayableTransactionObject<string[]>;
 
@@ -148,9 +150,11 @@ export interface GroupSplit extends BaseContract {
       participantAddress: string;
       nickname: string;
       totalDeposits: string;
+      lastDeposited: string;
       0: string;
       1: string;
       2: string;
+      3: string;
     }>;
 
     groupIds(arg0: number | string | BN): NonPayableTransactionObject<string>;

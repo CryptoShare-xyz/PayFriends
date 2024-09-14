@@ -1,10 +1,10 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
+const GroupSplit = buildModule("GroupSplit", (m) => {
+    const usdcAddress = m.getParameter("usdcAddress");
+    const groupSplit = m.contract("GroupSplit", [usdcAddress], {});
 
-const GroupSplitModule = buildModule("GroupSplitModule", (m) => {
-    const group_split = m.contract("GroupSplit", [], {});
-
-    return { group_split };
+    return { groupSplit };
 });
 
-export default GroupSplitModule
+export default GroupSplit

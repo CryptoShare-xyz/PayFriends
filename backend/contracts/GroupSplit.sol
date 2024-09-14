@@ -43,7 +43,11 @@ contract GroupSplit {
     Group[] public groups;
     uint256[] public groupIds;
     mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
-    uint256 public activeGroups = 0;
+
+    // stats
+    uint256 public contractOpenedGroupsStat = 0;
+    uint256 public contractTotalCollectedEthStat = 0;
+    uint256 public contractTotalCollectedUSDCStat = 0;
 
     IERC20 public USDC;
 
@@ -151,7 +155,9 @@ contract GroupSplit {
     ) external {
         // add to groups:
         Group storage newGroup = groups.push();
-        activeGroups += 1;
+
+        // global stat update
+        contractOpenedGroupsStat += 1;
 
         // initiate all parameters:
         newGroup.groupId = uint256(
@@ -285,6 +291,14 @@ contract GroupSplit {
         // Update group's balance and totalCollected
         group.balance += _deposit;
         group.totalCollected += _deposit;
+
+        // global stat update
+        if (isUSDCDeposit) {
+            contractTotalCollectedUSDCStat += _deposit;
+        } else {
+            contractTotalCollectedEthStat += _deposit;
+        }
+
         emit logGroupDepositReceived(
             _groupId,
             msg.sender,
@@ -351,10 +365,6 @@ contract GroupSplit {
         );
     }
 
-    function getActivegroups() public view returns (uint256) {
-        return activeGroups;
-    }
-
     function getParticipantDetails(
         uint256 _groupId,
         address _participantAddress
@@ -364,7 +374,8 @@ contract GroupSplit {
         returns (
             address participantAddress,
             string memory nickname,
-            uint256 totalDeposits
+            uint256 totalDeposits,
+            uint256 lastDeposited
         )
     {
         // Ensure the group exists
@@ -384,7 +395,8 @@ contract GroupSplit {
         return (
             participant.participantAddress,
             participant.nickname,
-            participant.totalDeposits
+            participant.totalDeposits,
+            participant.lastDeposited
         );
     }
 }

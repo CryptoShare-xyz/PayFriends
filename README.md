@@ -1,5 +1,5 @@
-# [CryptoShare](https://cryptoshare-phi.vercel.app/)
-A group payments app to split different payments among friends.
+# [PayFriends](https://cryptoshare-phi.vercel.app/)
+Share Expenses, Save on Fees Powered by Crypto
 
 ## Getting started
 
@@ -16,12 +16,6 @@ A group payments app to split different payments among friends.
 
 ### Testing contract
 Run `npx hardhat test` to test the contract
-
-## TODO
-- [ ] consider supporting USDC instead of eth transfers
-- [ ] make code more efficient
-- [ ] make transaction **a lot** cheaper
-
 
 
 

@@ -1,10 +1,8 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -12,15 +10,6 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/dialog";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import {
     Form,
     FormControl,
@@ -32,23 +21,27 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import { Lock } from "lucide-react";
 import moment from "moment";
 
+import { useMediaQuery } from 'react-responsive';
+
+import { ConnectKitButton } from "connectkit";
 import {
-    Check,
-    ChevronsLeftRight,
-    Coins,
+    ArrowLeft, Check,
+    CircleChevronDown,
     Copy,
-    EllipsisVertical,
-    LinkIcon,
-    Stamp,
+    Lock,
+    Share2,
     User
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
-import { useContract } from "@/contexts/ContractProvider";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { contractAddress, useContract } from "@/contexts/ContractProvider";
+import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -57,7 +50,7 @@ import web3 from "web3";
 import { z } from "zod";
 
 const joinGroupSchema = z.object({
-    nickname: z.string().min(1).max(20),
+    nickname: z.string().min(1).max(20).optional(),
     amount: z.coerce.number().positive().min(1)
 })
 
@@ -74,10 +67,7 @@ function ShareGroup() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <LinkIcon className="mr-2 h-4 w-4" />
-                    <span>Share group</span>
-                </DropdownMenuItem>
+                <aside className="absolute top-[1rem] right-[4rem]"><Share2 className="bg-[#1F92CE] rounded-full p-[0.3rem]" size={48} /></aside>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md" showOverlay={false}>
                 <DialogHeader>
@@ -97,14 +87,14 @@ function ShareGroup() {
                             readOnly
                         />
                     </div>
-                    <Button type="submit" size="sm" className="px-3 bg-[#6c63ff]" onClick={copyText}>
+                    <div className="p-3 bg-[#009BEB] hover:cursor-pointer text-white rounded-lg" onClick={copyText}>
                         <span className="sr-only">Copy</span>
                         {!copied ?
                             <Copy className="h-4 w-4" />
                             :
                             <Check className="h-4 w-4" />
                         }
-                    </Button>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
@@ -112,53 +102,39 @@ function ShareGroup() {
 }
 
 
-function GroupActionsMenu({ isOwner, groupId }: { isOwner: boolean, groupId: string }) {
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <EllipsisVertical className="hover:cursor-pointer hover:opacity-60" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Group actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <PayGroupDialog groupId={groupId} />
-                    {isOwner && <WithdrawDialog groupId={groupId} />}
-                    <ShareGroup />
-                </DropdownMenuGroup>
-                {isOwner &&
-                    <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <CloseDialog groupId={groupId} />
-                        </DropdownMenuGroup>
-                    </>}
-            </DropdownMenuContent>
-        </DropdownMenu>
-    )
-}
-
-
-const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
+const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC: boolean }> = ({ groupId, isParticipant, isUSDC }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
     const { address } = useAccount();
     const { toast } = useToast()
-    const contract = useContract()
+    const { contract, usdcContract } = useContract()
     const form = useForm<z.infer<typeof joinGroupSchema>>({
         resolver: zodResolver(joinGroupSchema),
         defaultValues: {
-            nickname: "",
+            nickname: undefined,
             amount: 0
         },
     })
 
     async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
-        const { nickname, amount } = values;
+        let { nickname, amount } = values;
+
         setLoading(true)
+
+        if (isParticipant) {
+            nickname = ""
+        }
+
         try {
-            const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
-            const tx = await contract.methods.depositToGroup(groupId, nickname).send({ from: address, value: wei });
+            if (isUSDC) {
+                const usdc = amount * (10 ** 6); // usdc decimal is 6 
+                const tx1 = await usdcContract.methods.approve(contractAddress, usdc).send({ from: address });
+                const tx2 = await contract.methods.depositToGroup(groupId, nickname, true, usdc).send({ from: address });
+            } else {
+                const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
+                const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({ from: address, value: wei });
+
+            }
             toast({ description: "Payed group" })
             window.location.reload()
         } catch (error) {
@@ -176,15 +152,20 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-[#6c63ff]">Join group</Button>
+                <Button className="text-2xl bg-[#009BEB] border-1 border-[#1F92CE] text-white py-2 w-[90%]">{isParticipant ? "Deposit" : "Join group"}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Join group</DialogTitle>
+                    {
+                        isParticipant
+                            ? <DialogTitle>Deposit group</DialogTitle>
+                            : <DialogTitle>Join group</DialogTitle>
+                    }
+
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-                        <FormField
+                        {!isParticipant && <FormField
                             control={form.control}
                             name="nickname"
                             render={({ field }) => (
@@ -199,7 +180,7 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        />
+                        />}
                         <FormField
                             control={form.control}
                             name="amount"
@@ -209,89 +190,18 @@ const JoinGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                                     <FormDescription>
                                         This is the amount of wei to deposit to the group.
                                     </FormDescription>
-                                    <FormControl>
-                                        <Input type="number" placeholder="1337" {...field} />
+                                    <FormControl >
+                                        <div className="relative">
+                                            <Input type="number" placeholder="1337" {...field} />
+                                            <small className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">{isUSDC ? "USDC" : "WETH"}</small>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                         <DialogFooter>
-                            <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
-    const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(false)
-    const { address, isConnected } = useAccount();
-    const { toast } = useToast()
-    const contract = useContract()
-    const form = useForm<z.infer<typeof joinGroupSchema>>({
-        resolver: zodResolver(joinGroupSchema),
-        defaultValues: {
-            nickname: "PAY", // patch
-            amount: 0
-        },
-    })
-
-    async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
-        const { nickname, amount } = values;
-        setLoading(true)
-        try {
-            const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
-            const tx = await contract.methods.depositToGroup(groupId, "").send({ from: address, value: wei });
-            toast({ description: "Payed group" })
-            window.location.reload()
-        } catch (error) {
-            if (error instanceof Error) {
-                toast({ variant: "destructive", description: error.message })
-            }
-        } finally {
-            setOpen(false)
-            setLoading(false)
-            form.reset()
-        }
-
-    }
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Coins className="mr-2 h-4 w-4" />
-                    <span>Pay group</span>
-                </DropdownMenuItem>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Pay group</DialogTitle>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-                        <FormField
-                            control={form.control}
-                            name="amount"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Amount to deposit</FormLabel>
-                                    <FormDescription>
-                                        This is the amount of wei to deposit to the group.
-                                    </FormDescription>
-                                    <FormControl>
-                                        <Input type="number" placeholder="1337" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <DialogFooter>
-                            <Button className="bg-[#6c63ff]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
+                            <Button className="bg-[#009BEB]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
                         </DialogFooter>
                     </form>
                 </Form>
@@ -303,9 +213,9 @@ const PayGroupDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
 const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
-    const { address, isConnected } = useAccount();
+    const { address } = useAccount();
     const { toast } = useToast()
-    const contract = useContract()
+    const { contract } = useContract()
 
     const handleWithdraw = async (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault()
@@ -327,82 +237,28 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <ChevronsLeftRight className="mr-2 h-4 w-4" />
-                    <span>Withdraw balance</span>
-                </DropdownMenuItem>
+                <Button className="text-lg bg-[#E7F1FA] border-2 border-dashed border-[#19A5ED] text-[#1F92CE] py-2 w-[90%]">Withdraw Now <CircleChevronDown className="ml-1" size={16} /> </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Are you sure you want to withdraw ?</DialogTitle>
                 </DialogHeader>
-                <DialogFooter className="flex items-center justify-center sm:justify-center gap-4">
-                    <DialogTrigger asChild>
-                        <Button className="bg-[#6c63ff]" onClick={handleWithdraw} disabled={loading}>{loading ? "Withdrawing..." : "Withdraw balance"}</Button>
-                    </DialogTrigger>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">
+                <DialogFooter>
+                    <div className="flex flex-row w-full gap-2 justify-center items-center">
+                        <Button className="bg-[#009BEB]" onClick={handleWithdraw} disabled={loading}>{loading ? "Withdrawing..." : "Withdraw balance"}</Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setOpen(false)}
+                        >
                             Close
                         </Button>
-                    </DialogClose>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     )
 }
-
-
-const CloseDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
-    const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(false)
-    const { address, isConnected } = useAccount();
-    const { toast } = useToast()
-    const contract = useContract()
-
-    const handleClose = async (e: React.MouseEvent<HTMLElement>) => {
-        e.preventDefault()
-        setLoading(true)
-        try {
-            const tx = await contract.methods.closeGroup(groupId).send({ from: address });
-            toast({ description: "Closed group" })
-            window.location.reload()
-        } catch (error) {
-            if (error instanceof Error) {
-                toast({ variant: "destructive", description: error.message })
-            }
-        } finally {
-            setOpen(false)
-            setLoading(false)
-        }
-    }
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Stamp className="mr-2 h-4 w-4 text-red-700" />
-                    <span className="text-red-700">Close group</span>
-                </DropdownMenuItem>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Are you sure you want to close group ?</DialogTitle>
-                </DialogHeader>
-                <DialogFooter className="flex items-center justify-center sm:justify-center gap-4">
-                    <DialogTrigger asChild>
-                        <Button className="bg-red-700" onClick={handleClose} disabled={loading}>{loading ? "Closing..." : "Close group"}</Button>
-                    </DialogTrigger>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">
-                            Close
-                        </Button>
-                    </DialogClose>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
 
 
 function Loading() {
@@ -422,17 +278,19 @@ type Group = {
     owner: string,
     ownerNickname: string,
     creationTime: string,
-    status: bool,
+    status: boolean,
     balance: string,
     totalCollected: string,
     totalWithdrawn: string,
-    participantsAddresses: Participant[]
+    participantsAddresses: Participant[],
+    isUSDC: boolean,
 }
 
 type Participant = {
     participantAddress: string;
     nickname: string;
     totalDeposits: string;
+    lastDeposited: string
 }
 
 
@@ -442,16 +300,21 @@ export default function Page({ params }: { params: { id: string } }) {
     const [isParticipant, setIsParticipant] = useState(false)
     const [group, setGroup] = useState<Group | undefined>(undefined);
     const [loading, setLoading] = useState(true)
-    const { address, isConnected } = useAccount();
-    const contract = useContract()
+    const { address } = useAccount();
+    const { contract } = useContract()
+
+    const notMobile = useMediaQuery({
+        query: '(min-width: 640px)'
+    })
+
+    const format = notMobile ? (str: string) => str : formatAddress;
 
     async function getGroupInfo(id: string) {
         const _GROUP_OPEN = 2;
 
         try {
             const groupInfo = await contract.methods.getGroupInfoById(id).call()
-
-            const participants: Participant[] = await Promise.all<Participant>(groupInfo[9].map(async (participantsAddress: string): Promise<Participant> => {
+            const participants: Participant[] = await Promise.all<Participant>(groupInfo[10].map(async (participantsAddress: string): Promise<Participant> => {
                 const participant = await contract.methods.getParticipantDetails(groupInfo[0], participantsAddress).call();
                 return participant
             }))
@@ -459,20 +322,21 @@ export default function Page({ params }: { params: { id: string } }) {
             setGroup({
                 groupId: groupInfo[0],
                 groupName: groupInfo[1],
-                owner: groupInfo[2],
-                ownerNickname: groupInfo[3],
-                creationTime: groupInfo[4],
-                status: Number.parseInt(groupInfo[5]) === _GROUP_OPEN,
-                balance: groupInfo[6],
-                totalCollected: groupInfo[7],
-                totalWithdrawn: groupInfo[8],
+                isUSDC: groupInfo[2],
+                owner: groupInfo[3],
+                ownerNickname: groupInfo[4],
+                creationTime: groupInfo[5],
+                status: Number.parseInt(groupInfo[6]) === _GROUP_OPEN,
+                balance: groupInfo[7],
+                totalCollected: groupInfo[8],
+                totalWithdrawn: groupInfo[9],
                 participantsAddresses: participants
             })
 
-            setIsOwner(groupInfo[2] === address);
-            setIsParticipant(groupInfo[2] === address || groupInfo[9].some((participantsAddress: string) => participantsAddress === address));
+            setIsOwner(groupInfo[3] === address);
+            setIsParticipant(groupInfo[4] === address || groupInfo[10].some((participantsAddress: string) => participantsAddress === address));
 
-        } catch {
+        } catch (e) {
             console.log(`Group id: ${id} not found`)
             setGroup(undefined)
         } finally {
@@ -492,85 +356,92 @@ export default function Page({ params }: { params: { id: string } }) {
         return <span>Group {params.id} no found</span>
     }
 
-
     return (
-        <div className="p-8 bg-slate-50 md:rounded-2xl md:max-w-[80%] w-full mx-auto">
-            <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold tracking-tight flex justify-center items-center gap-4">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+        <div className="flex flex-col lg:max-w-[60%] mx-auto min-h-screen" >
+            <nav className="flex py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
+                <Link
+                    href="/"
+                >
+                    <ArrowLeft className="text-[#009BEB]" size={24} />
+                </Link>
+                <span className="text-sm  font-bold">Overview</span>
+                <div className="ml-auto flex items-center space-x-4">
+                    <ConnectKitButton showBalance={notMobile} />
+                </div>
+            </nav>
+            <header className="relative px-16 flex flex-col items-start justify-center bg-[#E7F1FA] pb-8 rounded-b-2xl">
+                <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
                     <Lock className="mr-1 h-3 w-3" />
                     Closed
                 </span>}</h2>
-                {group.status &&
-                    <div className="flex items-center space-x-2">
-                        {isParticipant ? <GroupActionsMenu isOwner={isOwner} groupId={group.groupId} /> : <JoinGroupDialog groupId={group.groupId} />}
-                    </div>
-                }
-            </div>
-            <p className="text-muted-foreground text-xs">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
+                <p className="text-muted-foreground text-lg mb-4">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
+                <p className="text-muted-foreground text-sm">Group owner: {group.ownerNickname}</p>
+                <p className="text-muted-foreground text-sm">Owner address: {format(group.owner)}</p>
+                <ShareGroup />
+            </header>
 
-            <div className="flex flex-col my-8 ">
-                <div className="mb-4 flex justify-evenly xl:flex-row flex-col gap-2">
-                    <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
-                        <CardHeader>
-                            <CardTitle className="mb-2 capitalize">
-                                collected
-                            </CardTitle>
-                        </CardHeader >
-                        <CardContent>
-                            <span className="flex text-md text-slate-800">
-                                {group.totalCollected} WEI
-                            </span>
-                        </CardContent>
-                    </Card>
-                    <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
-                        <CardHeader>
-                            <CardTitle className="mb-2 capitalize">
-                                withdrawn
-                            </CardTitle>
-                        </CardHeader >
-                        <CardContent>
-                            <span className="flex text-md text-slate-800">
-                                {group.totalWithdrawn} WEI
-                            </span>
-                        </CardContent>
-                    </Card>
-                    <Card className="h-[8rem] xl:w-[12rem] w-[60%] mx-auto">
-                        <CardHeader>
-                            <CardTitle className="mb-2 capitalize">
-                                balance
-                            </CardTitle>
-                        </CardHeader >
-                        <CardContent>
-                            <span className="flex text-md text-slate-800">
-                                {group.balance} WEI
-                            </span>
-                        </CardContent>
-                    </Card>
-
+            <section className="flex flex-col md:flex-row px-8 py-4 gap-4">
+                <div className="flex flex-grow px-8 py-4 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
+                    <span>
+                        <h1 className="text-[#009BEB] text-center text-4xl font-bold">{group.isUSDC ? Number.parseInt(group.balance) / 10 ** 6 : group.balance}</h1>
+                        <h2 className="text-lg text-center font-semibold">Balance</h2>
+                    </span>
+                    <figure className="flex flex-col items-center justify-center w-[20%]">
+                        <Image src={group.isUSDC ? "/usdc.svg" : "/eth.svg"} width={64} height={64} alt="coin image" />
+                        <small className="text-[#858585] text-center text-small">{group.isUSDC ? "USDC" : "WETH"}</small>
+                    </figure>
                 </div>
-                <aside className="mt-2">
-                    <div className="flex p-1 mb-4 items-center">
-                        <small className="mr-2"><User size={16} className="text-muted-foreground" /></small>
-                        <h1 className="font-semibold text-md">Participants</h1>
+
+                <aside className="flex flex-grow flex-row md:flex-col justify-evenly items-center gap-4">
+                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg">
+                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalWithdrawn) / 10 ** 6 : group.totalWithdrawn}</h1>
+                        <small className="text-[#858585]  lg:text-xl text-sm">Withdrawn</small>
                     </div>
-                    <Table className="bg-white border border-separate rounded-xl">
+                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg">
+                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalCollected) / 10 ** 6 : group.totalCollected}</h1>
+                        <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
+                    </div>
+                </aside>
+            </section>
+
+            <hr className="w-[90%] mx-auto my-2 border-dashed border-[#D9D9D9]" />
+
+            <ScrollArea className="flex-grow p-4">
+                <section className="px-8 py-2">
+                    <div className="flex p-1 mb-4 items-center">
+                        <div className="mr-2 max-w-[32px] lg:max-w-[48px]"><User size={32} className="text-muted-foreground" /></div>
+                        <h1 className="font-semibold text-base lg:text-2xl">Members</h1>
+                    </div>
+                    <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Participant</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Address</TableHead>
                                 <TableHead>Amount</TableHead>
+                                <TableHead>Last update</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress }) => (
+                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
                                 <TableRow key={participantAddress}>
-                                    <TableCell className="font-medium capitalize">{nickname}</TableCell>
-                                    <TableCell>{totalDeposits} WEI</TableCell>
+                                    <TableCell className="capitalize">{nickname}</TableCell>
+                                    <TableCell>{format(participantAddress)}</TableCell>
+                                    <TableCell>{group.isUSDC ? Number.parseInt(totalDeposits) / 10 ** 6 : totalDeposits}</TableCell>
+                                    <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
-                </aside>
-            </div>
-        </div >
-    )
+                </section>
+            </ScrollArea>
+
+            {group.status &&
+                <div className="flex flex-col items-center justify-center p-4 border-t gap-4">
+                    {isOwner && <WithdrawDialog groupId={group.groupId} />}
+                    <PayGroupDialog groupId={group.groupId} isParticipant={isParticipant} isUSDC={group.isUSDC} />
+                </div>
+            }
+
+        </div>
+    );
 } 

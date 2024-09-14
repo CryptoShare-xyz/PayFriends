@@ -4,6 +4,8 @@ import { ContractProvider } from "@/contexts/ContractProvider";
 import { WalletProvider } from "@/contexts/WalletProvider";
 import { cn } from "@/lib/utils";
 import { Inter as FontSans } from "next/font/google";
+import Image from "next/image";
+import Link from "next/link";
 import "./globals.css";
 
 
@@ -24,11 +26,13 @@ export default function RootLayout({
         <ContractProvider>
           <body
             className={cn(
-              "min-h-screen bg-background font-sans antialiased bg-slate-200",
+              "min-h-screen bg-background font-sans antialiased bg-white",
               fontSans.variable
             )}
           >
             {children}
+
+          
           </body>
         </ContractProvider>
       </WalletProvider>
