@@ -67,7 +67,7 @@ function ShareGroup() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <aside className="absolute top-[1rem] right-[4rem]"><Share2 className="bg-[#1F92CE] rounded-full p-[0.3rem]" size={48} /></aside>
+                <aside className="absolute top-[1rem] right-[4rem]"><Share2 className="bg-[#1F92CE] rounded-full p-[0.5rem]" size={32} /></aside>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md" showOverlay={false}>
                 <DialogHeader>
