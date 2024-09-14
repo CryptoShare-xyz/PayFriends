@@ -5,9 +5,9 @@ import React, { createContext, useContext, useMemo } from 'react';
 import Web3 from 'web3';
 import type { Contract } from "web3-eth-contract";
 import type { AbiItem } from 'web3-utils';
-import USDCAbi from "./USDC.json";
+import ERC20ABI from "./erc20.json";
 // Context to hold the contract instance
-const ContractContext = createContext<{ contract: GroupSplit | undefined, usdcContract: Contract<typeof USDCAbi> }>({ contract: undefined, usdcContract: undefined });
+const ContractContext = createContext<{ contract: GroupSplit | undefined, usdcContract: Contract<typeof ERC20ABI> | undefined }>({ contract: undefined, usdcContract: undefined });
 
 export const contractAddress = process.env.NEXT_PUBLIC_CONTACT_ADDRESS
 export const usdcContractAddress = process.env.NEXT_PUBLIC_USDC_CONTACT_ADDRESS
@@ -36,9 +36,9 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const usdcContract = useMemo(() => {
         const web3 = createWeb3()
         return new web3.eth.Contract(
-            USDCAbi as AbiItem[],
+            ERC20ABI as AbiItem[],
             usdcContractAddress
-        ) as any as Contract<typeof USDCAbi>;
+        ) as any as Contract<typeof ERC20ABI>;
     }, []);
 
     return (
@@ -54,5 +54,5 @@ export const useContract = () => {
         throw new Error('useContractContext must be used within a ContractProvider');
     }
 
-    return { contract, usdcContract } as { contract: GroupSplit, usdcContract: Contract<typeof USDCAbi> };
+    return { contract, usdcContract } as { contract: GroupSplit, usdcContract: Contract<typeof ERC20ABI> };
 };

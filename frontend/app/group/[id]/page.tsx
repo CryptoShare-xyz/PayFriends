@@ -126,8 +126,9 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
 
         try {
             if (isUSDC) {
-                const tx1 = await usdcContract.methods.approve(contractAddress, amount).call();
-                const tx2 = await contract.methods.depositToGroup(groupId, nickname, true, amount).send({ from: address });
+                const usdc = amount * (10 ** 6); // usdc decimal is 6 
+                const tx1 = await usdcContract.methods.approve(contractAddress, usdc).send({ from: address });
+                const tx2 = await contract.methods.depositToGroup(groupId, nickname, true, usdc).send({ from: address });
             } else {
                 const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
                 const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({ from: address, value: wei });
@@ -370,7 +371,7 @@ export default function Page({ params }: { params: { id: string } }) {
             <section className="flex flex-col md:flex-row px-8 py-4 gap-4">
                 <div className="flex flex-grow px-8 py-4 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
                     <span>
-                        <h1 className="text-[#009BEB] text-center text-4xl font-bold">{group.balance}</h1>
+                        <h1 className="text-[#009BEB] text-center text-4xl font-bold">{group.isUSDC ? Number.parseInt(group.balance) / 10 ** 6 : group.balance}</h1>
                         <h2 className="text-lg text-center font-semibold">Balance</h2>
                     </span>
                     <figure className="flex flex-col items-center justify-center w-[20%]">
@@ -381,11 +382,11 @@ export default function Page({ params }: { params: { id: string } }) {
 
                 <aside className="flex flex-grow flex-row md:flex-col justify-evenly items-center gap-4">
                     <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg">
-                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalWithdrawn}</h1>
+                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalWithdrawn) / 10 ** 6 : group.totalWithdrawn}</h1>
                         <small className="text-[#858585]  lg:text-xl text-sm">Withdrawn</small>
                     </div>
                     <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg">
-                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalCollected}</h1>
+                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalCollected) / 10 ** 6 : group.totalCollected}</h1>
                         <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
                     </div>
                 </aside>
@@ -413,7 +414,7 @@ export default function Page({ params }: { params: { id: string } }) {
                                 <TableRow key={participantAddress}>
                                     <TableCell className="capitalize">{nickname}</TableCell>
                                     <TableCell>{format(participantAddress)}</TableCell>
-                                    <TableCell>{totalDeposits}</TableCell>
+                                    <TableCell>{group.isUSDC ? Number.parseInt(totalDeposits) / 10 ** 6 : totalDeposits}</TableCell>
                                     <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
                                 </TableRow>
                             ))}
