@@ -39,7 +39,7 @@ import {
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useContract } from "@/contexts/ContractProvider";
+import { contractAddress, useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
@@ -106,7 +106,7 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
     const [loading, setLoading] = useState(false)
     const { address } = useAccount();
     const { toast } = useToast()
-    const contract = useContract()
+    const { contract, usdcContract } = useContract()
     const form = useForm<z.infer<typeof joinGroupSchema>>({
         resolver: zodResolver(joinGroupSchema),
         defaultValues: {
@@ -126,7 +126,8 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
 
         try {
             if (isUSDC) {
-                const tx = await contract.methods.depositToGroup(groupId, nickname, true, amount).send({ from: address });
+                const tx1 = await usdcContract.methods.approve(contractAddress, amount).call();
+                const tx2 = await contract.methods.depositToGroup(groupId, nickname, true, amount).send({ from: address });
             } else {
                 const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
                 const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({ from: address, value: wei });
@@ -212,7 +213,7 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const [loading, setLoading] = useState(false)
     const { address } = useAccount();
     const { toast } = useToast()
-    const contract = useContract()
+    const { contract } = useContract()
 
     const handleWithdraw = async (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault()
@@ -298,7 +299,7 @@ export default function Page({ params }: { params: { id: string } }) {
     const [group, setGroup] = useState<Group | undefined>(undefined);
     const [loading, setLoading] = useState(true)
     const { address } = useAccount();
-    const contract = useContract()
+    const { contract } = useContract()
 
     const notMobile = useMediaQuery({
         query: '(min-width: 640px)'

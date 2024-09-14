@@ -45,7 +45,7 @@ function CreateGroupDialog() {
   const { push } = useRouter()
   const { address, isConnected } = useAccount();
   const { openSIWE } = useModal()
-  const contract = useContract()
+  const { contract } = useContract()
   const form = useForm<z.infer<typeof createGroupSchema>>({
     resolver: zodResolver(createGroupSchema),
     defaultValues: {
@@ -165,7 +165,7 @@ export default function Home() {
   const [openedGroups, setOpenedGroups] = useState(0);
   const [collectedUSDC, setCollectedUSDC] = useState(0);
   const [collectedEth, setCollectedEth] = useState(0);
-  const contract = useContract()
+  const { contract } = useContract()
 
   async function getContractStats() {
 
