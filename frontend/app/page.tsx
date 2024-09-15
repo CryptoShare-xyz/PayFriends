@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -20,8 +20,10 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
 
+
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useContract } from "@/contexts/ContractProvider";
+import { getEthRate } from "@/lib/ethRate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ConnectKitButton, useModal } from "connectkit";
 import { useRouter } from "next/navigation";
@@ -165,21 +167,13 @@ function CreateGroupDialog() {
   )
 }
 
-
-
 export default function Home() {
   const [openedGroups, setOpenedGroups] = useState(0);
   const [collected, setCollected] = useState(0);
   const { contract } = useContract()
-  const ethPriceInUSD = useMemo(async () => {
-    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
-    const data = await response.json();
-    return data.ethereum.usd;
-
-  }, [])
 
   async function getContractStats() {
-
+    const ethRate = await getEthRate();
     try {
       let res = await contract.methods.contractOpenedGroupsStat().call()
       setOpenedGroups(Number.parseInt(res))
@@ -188,7 +182,7 @@ export default function Home() {
       const collectedUSDC = Math.floor(Number.parseInt(res) / 10 ** 6)
 
       res = await contract.methods.contractTotalCollectedEthStat().call()
-      const collectedEth = Math.floor((Number.parseInt(res) / 10 ** 18) * ethPriceInUSD)
+      const collectedEth = Math.floor((Number.parseInt(res) / 10 ** 18) * ethRate)
 
       setCollected(collectedUSDC + collectedEth);
 
