@@ -63,11 +63,16 @@ function ShareGroup() {
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
-
+    
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <aside className="absolute top-[1rem] right-[4rem]"><Share2 className="bg-[#1F92CE] rounded-full p-[0.5rem]" size={32} /></aside>
+                <aside className="absolute top-[1rem] right-[4rem] cursor-pointer transition-transform hover:scale-110">
+                    <div className="relative p-3 bg-blue-500 rounded-full">
+                        <div className="absolute inset-0 border-2 border-blue-300 rounded-full"></div>
+                        <Share2 className="md:w-6 md:h-6 w-4 h-4 text-white" />
+                    </div>
+                </aside>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md" showOverlay={false}>
                 <DialogHeader>
@@ -166,7 +171,7 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="text-2xl bg-[#009BEB] border-1 border-[#1F92CE] text-white py-2 w-[90%]">{isParticipant ? "Deposit" : "Join group"}</Button>
+                <Button variant="outline" className="text-2xl bg-[#009BEB] border-1 border-[#1F92CE] text-white py-2 w-[90%]">{isParticipant ? "Deposit" : "Join group"}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -207,7 +212,7 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
                                     <FormControl >
                                         <div className="relative">
                                             <Input type="number" placeholder="1337" {...field} />
-                                            <small className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">{isUSDC ? "USDC" : "WETH"}</small>
+                                            <small className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">{isUSDC ? "USDC" : "WEI"}</small>
                                         </div>
                                     </FormControl>
                                     <FormMessage />
@@ -215,7 +220,7 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
                             )}
                         />
                         <DialogFooter>
-                            <Button className="bg-[#009BEB]" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
+                            <Button variant="outline" className="bg-[#009BEB] text-slate-50" type="submit" disabled={loading}>{loading ? "Paying..." : "Pay group"}</Button>
                         </DialogFooter>
                     </form>
                 </Form>
@@ -259,7 +264,7 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
                 </DialogHeader>
                 <DialogFooter>
                     <div className="flex flex-row w-full gap-2 justify-center items-center">
-                        <Button className="bg-[#009BEB]" onClick={handleWithdraw} disabled={loading}>{loading ? "Withdrawing..." : "Withdraw balance"}</Button>
+                        <Button variant="outline" className="bg-[#009BEB] text-slate-50" onClick={handleWithdraw} disabled={loading}>{loading ? "Withdrawing..." : "Withdraw balance"}</Button>
                         <Button
                             type="button"
                             variant="outline"
@@ -402,16 +407,16 @@ export default function Page({ params }: { params: { id: string } }) {
                     </span>
                     <figure className="flex flex-col items-center justify-center w-[20%]">
                         <Image src={group.isUSDC ? "/usdc.svg" : "/eth.svg"} width={64} height={64} alt="coin image" />
-                        <small className="text-[#858585] text-center text-small">{group.isUSDC ? "USDC" : "WETH"}</small>
+                        <small className="text-[#858585] text-center text-small">{group.isUSDC ? "USDC" : "WEI"}</small>
                     </figure>
                 </div>
 
-                <aside className="flex flex-grow flex-row md:flex-col justify-evenly items-center gap-4">
-                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg">
+                <aside className="flex flex-grow flex-wrap flex-row md:flex-col justify-evenly items-center gap-4">
+                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg w-full max-w-[80%]">
                         <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalWithdrawn) / 10 ** 6 : group.totalWithdrawn}</h1>
                         <small className="text-[#858585]  lg:text-xl text-sm">Withdrawn</small>
                     </div>
-                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg">
+                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg w-full max-w-[80%]">
                         <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalCollected) / 10 ** 6 : group.totalCollected}</h1>
                         <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
                     </div>
