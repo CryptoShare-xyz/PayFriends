@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -171,16 +171,16 @@ export default function Home() {
   const [openedGroups, setOpenedGroups] = useState(0);
   const [collected, setCollected] = useState(0);
   const { contract } = useContract()
+  const ethPriceInUSD = useMemo(async () => {
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+    const data = await response.json();
+    return data.ethereum.usd;
+
+  }, [])
 
   async function getContractStats() {
 
     try {
-      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
-      const data = await response.json();
-
-      // Extract prices from the response
-      const ethPriceInUSD = data.ethereum.usd;
-
       let res = await contract.methods.contractOpenedGroupsStat().call()
       setOpenedGroups(Number.parseInt(res))
 
