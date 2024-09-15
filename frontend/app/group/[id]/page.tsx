@@ -134,8 +134,16 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
 
             if (isUSDC) {
                 const usdc = amount * (10 ** 6); // usdc decimal is 6 
-                const tx1 = await usdcContract.methods.approve(contractAddress, usdc).send({ from: address });
-                const tx2 = await contract.methods.depositToGroup(groupId, nickname, true, usdc).send({ from: address });
+                const allowance = Number(await usdcContract.methods.allowance(address, contractAddress).call())
+                if (!Number.isInteger(allowance)) {
+                    throw new Error("Failed to get allowance")
+                }
+
+                if (allowance < usdc) {
+                    const tx2 = await usdcContract.methods.approve(contractAddress, usdc - allowance).send({ from: address });
+                }
+
+                const tx3 = await contract.methods.depositToGroup(groupId, nickname, true, usdc).send({ from: address });
             } else {
                 const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'wei'))
                 const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({ from: address, value: wei });
