@@ -63,16 +63,14 @@ function ShareGroup() {
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
-    
+
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <aside className="absolute top-[1rem] right-[4rem] cursor-pointer transition-transform hover:scale-110">
-                    <div className="relative p-3 bg-blue-500 rounded-full">
-                        <div className="absolute inset-0 border-2 border-blue-300 rounded-full"></div>
-                        <Share2 className="md:w-6 md:h-6 w-4 h-4 text-white" />
-                    </div>
-                </aside>
+                <div className="ml-auto relative p-3 bg-blue-500 rounded-full cursor-pointer transition-transform hover:scale-110">
+                    <div className="absolute inset-0 border-2 border-blue-300 rounded-full"></div>
+                    <Share2 className="md:w-6 md:h-6 w-4 h-4 text-white" />
+                </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md" showOverlay={false}>
                 <DialogHeader>
@@ -402,14 +400,18 @@ export default function Page({ params }: { params: { id: string } }) {
                 </div>
             </nav>
             <header className="relative px-16 flex flex-col items-start justify-center bg-[#E7F1FA] pb-8 rounded-b-2xl">
-                <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
-                    <Lock className="mr-1 h-3 w-3" />
-                    Closed
-                </span>}</h2>
-                <p className="text-muted-foreground text-lg mb-4">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
+                <div className="flex flex-row justify-start items-center w-full">
+                    <div className="flex flex-col items-start">
+                        <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 float-left">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+                            <Lock className="mr-1 h-3 w-3" />
+                            Closed
+                        </span>}</h2>
+                        <p className="text-muted-foreground text-lg mb-4">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
+                    </div>
+                    <ShareGroup />
+                </div>
                 <p className="text-muted-foreground text-sm">Group owner: {group.ownerNickname}</p>
                 <p className="text-muted-foreground text-sm">Owner address: {format(group.owner)}</p>
-                <ShareGroup />
             </header>
 
             <section className="flex flex-col md:flex-row px-8 py-4 gap-4">
