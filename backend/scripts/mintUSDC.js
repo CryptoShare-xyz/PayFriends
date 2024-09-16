@@ -375,4 +375,13 @@ async function mint(mintAddress, amount) {
     }
 }
 
-mint(account, 100);
+// Example function to call a contract method (like depositing into the group)
+async function balanceOf(address) {
+    try {
+        const balance = await contract.methods.balanceOf(address).call();
+
+        console.log(`balanceOf(${address}) = ${balance / 10 ** 6}`);
+    } catch (error) {
+        console.error('Transaction failed:', error);
+    }
+}
