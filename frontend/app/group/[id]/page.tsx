@@ -448,12 +448,12 @@ export default function Page({ params }: { params: { id: string } }) {
                         </figure>
                     </div>
 
-                    <aside className="flex flex-grow flex-wrap flex-row md:flex-col justify-evenly items-center gap-4">
-                        <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg w-full max-w-[80%]">
+                    <aside className="flex flex-grow flex-wrap flex-row md:flex-col md:items-end justify-evenly items-center gap-4">
+                        <div className="bg-[#E7F1FA] flex flex-col items-center justify-center py-4 rounded-lg w-full max-w-[80%]">
                             <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalWithdrawn}</h1>
                             <small className="text-[#858585]  lg:text-xl text-sm">Withdrawn</small>
                         </div>
-                        <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg w-full max-w-[80%]">
+                        <div className="bg-[#E7F1FA] flex flex-col items-center justify-center py-4 rounded-lg w-full max-w-[80%]">
                             <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalCollected}</h1>
                             <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
                         </div>
