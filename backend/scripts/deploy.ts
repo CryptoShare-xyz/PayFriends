@@ -2,7 +2,8 @@ import { ethers, ignition, network } from "hardhat";
 import GroupSplit from "../ignition/modules/GroupSplit";
 import USDCMock from "../ignition/modules/USDCMock";
 
-const USDC_CONTRACT_ADDRESS = "0x5dEaC602762362FE5f135FA5904351916053cF70" // Base sepolia  
+// const USDC_CONTRACT_ADDRESS = "0x5dEaC602762362FE5f135FA5904351916053cF70" // Base sepolia  
+const USDC_CONTRACT_ADDRESS = "0xB209bf575b13072195173619e95c1346497E98C3" // Base sepolia  
 
 async function deployDevUSDC() {
     const signers = await ethers.getSigners();
