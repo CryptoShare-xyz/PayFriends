@@ -15,7 +15,11 @@ export const formatChainAsNum = (chainIdHex: string) => {
   return chainIdNum;
 };
 
-export const formatAddress = (addr: string | undefined) => {
-  return `${addr?.substring(0, 12)}`;
+export const formatAddress = (addr: string) => {
+  if (addr.length <= 8) {
+    return addr; // Return the original string if it's 8 characters or less
+  }
+
+  return `${addr.slice(0, 6)}....${addr.slice(-4)}`;
 };
 

@@ -324,8 +324,6 @@ export default function Page({ params }: { params: { id: string } }) {
         query: '(min-width: 640px)'
     })
 
-    const format = notMobile ? (str: string) => str : formatAddress;
-
     async function getGroupInfo(id: string) {
         const _GROUP_OPEN = 2;
 
@@ -415,7 +413,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     <ShareGroup />
                 </div>
                 <p className="text-muted-foreground text-sm">Group owner: {group.ownerNickname}</p>
-                <p className="text-muted-foreground text-sm">Owner address: {format(group.owner)}</p>
+                <p className="text-muted-foreground text-sm">Owner address: {formatAddress(group.owner)}</p>
             </header>
 
             {/* content section */}
@@ -468,7 +466,7 @@ export default function Page({ params }: { params: { id: string } }) {
                                 {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
                                     <TableRow key={participantAddress}>
                                         <TableCell className="capitalize">{nickname}</TableCell>
-                                        <TableCell>{format(participantAddress)}</TableCell>
+                                        <TableCell>{formatAddress(participantAddress)}</TableCell>
                                         <TableCell>{group.isUSDC ? Number.parseInt(totalDeposits) / 10 ** 6 : totalDeposits}</TableCell>
                                         <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
                                     </TableRow>
