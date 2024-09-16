@@ -388,7 +388,9 @@ export default function Page({ params }: { params: { id: string } }) {
     }
 
     return (
-        <div className="flex flex-col lg:max-w-[60%] mx-auto min-h-screen" >
+        <div className="flex flex-col lg:max-w-[60%] mx-auto h-screen" >
+
+            {/* nav section */}
             <nav className="flex py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
                 <Link
                     href="/"
@@ -399,6 +401,8 @@ export default function Page({ params }: { params: { id: string } }) {
                     <ConnectKitButton showBalance={notMobile} />
                 </div>
             </nav>
+
+            {/* group meta section */}
             <header className="relative px-16 flex flex-col items-start justify-center bg-[#E7F1FA] pb-8 rounded-b-2xl">
                 <div className="flex flex-row justify-start items-center w-full">
                     <div className="flex flex-col items-start">
@@ -414,61 +418,68 @@ export default function Page({ params }: { params: { id: string } }) {
                 <p className="text-muted-foreground text-sm">Owner address: {format(group.owner)}</p>
             </header>
 
-            <section className="flex flex-col md:flex-row px-8 py-4 gap-4">
-                <div className="flex flex-grow px-8 py-4 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
-                    <span>
-                        <h1 className="text-[#009BEB] text-center text-4xl font-bold">{group.isUSDC ? Number.parseInt(group.balance) / 10 ** 6 : group.balance}</h1>
-                        <h2 className="text-lg text-center font-semibold">Balance</h2>
-                    </span>
-                    <figure className="flex flex-col items-center justify-center w-[20%]">
-                        <Image src={group.isUSDC ? "/usdc.svg" : "/eth.svg"} width={64} height={64} alt="coin image" />
-                        <small className="text-[#858585] text-center text-small">{group.isUSDC ? "USDC" : "WEI"}</small>
-                    </figure>
-                </div>
+            {/* content section */}
+            <div className="flex-grow overflow-auto">
 
-                <aside className="flex flex-grow flex-wrap flex-row md:flex-col justify-evenly items-center gap-4">
-                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg w-full max-w-[80%]">
-                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalWithdrawn) / 10 ** 6 : group.totalWithdrawn}</h1>
-                        <small className="text-[#858585]  lg:text-xl text-sm">Withdrawn</small>
+                {/* stats section */}
+                <section className="flex flex-col md:flex-row px-8 py-4 gap-4">
+                    <div className="flex flex-grow px-8 py-4 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
+                        <span>
+                            <h1 className="text-[#009BEB] text-center text-4xl font-bold">{group.isUSDC ? Number.parseInt(group.balance) / 10 ** 6 : group.balance}</h1>
+                            <h2 className="text-lg text-center font-semibold">Balance</h2>
+                        </span>
+                        <figure className="flex flex-col items-center justify-center w-[20%]">
+                            <Image src={group.isUSDC ? "/usdc.svg" : "/eth.svg"} width={64} height={64} alt="coin image" />
+                            <small className="text-[#858585] text-center text-small">{group.isUSDC ? "USDC" : "WEI"}</small>
+                        </figure>
                     </div>
-                    <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg w-full max-w-[80%]">
-                        <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalCollected) / 10 ** 6 : group.totalCollected}</h1>
-                        <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
-                    </div>
-                </aside>
-            </section>
 
-            <hr className="w-[90%] mx-auto my-2 border-dashed border-[#D9D9D9]" />
-
-            <ScrollArea className="flex-grow p-4">
-                <section className="px-8 py-2">
-                    <div className="flex p-1 mb-4 items-center">
-                        <div className="mr-2 max-w-[32px] lg:max-w-[48px]"><User size={32} className="text-muted-foreground" /></div>
-                        <h1 className="font-semibold text-base lg:text-2xl">Members</h1>
-                    </div>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Address</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Last update</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
-                                <TableRow key={participantAddress}>
-                                    <TableCell className="capitalize">{nickname}</TableCell>
-                                    <TableCell>{format(participantAddress)}</TableCell>
-                                    <TableCell>{group.isUSDC ? Number.parseInt(totalDeposits) / 10 ** 6 : totalDeposits}</TableCell>
-                                    <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    <aside className="flex flex-grow flex-wrap flex-row md:flex-col justify-evenly items-center gap-4">
+                        <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg w-full max-w-[80%]">
+                            <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalWithdrawn) / 10 ** 6 : group.totalWithdrawn}</h1>
+                            <small className="text-[#858585]  lg:text-xl text-sm">Withdrawn</small>
+                        </div>
+                        <div className="bg-[#E7F1FA] flex flex-col items-center justify-center px-12 py-4 rounded-lg w-full max-w-[80%]">
+                            <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.isUSDC ? Number.parseInt(group.totalCollected) / 10 ** 6 : group.totalCollected}</h1>
+                            <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
+                        </div>
+                    </aside>
                 </section>
-            </ScrollArea>
 
+                <hr className="w-[90%] mx-auto my-2 border-dashed border-[#D9D9D9]" />
+
+                {/* members section */}
+                <ScrollArea className="flex-grow p-4">
+                    <section className="px-8 py-2">
+                        <div className="flex p-1 mb-4 items-center">
+                            <div className="mr-2 max-w-[32px] lg:max-w-[48px]"><User size={32} className="text-muted-foreground" /></div>
+                            <h1 className="font-semibold text-base lg:text-2xl">Members</h1>
+                        </div>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Address</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Last update</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
+                                    <TableRow key={participantAddress}>
+                                        <TableCell className="capitalize">{nickname}</TableCell>
+                                        <TableCell>{format(participantAddress)}</TableCell>
+                                        <TableCell>{group.isUSDC ? Number.parseInt(totalDeposits) / 10 ** 6 : totalDeposits}</TableCell>
+                                        <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </section>
+                </ScrollArea>
+            </div>
+
+            {/* Fixed Button at Bottom */}
             {group.status &&
                 <div className="flex flex-col items-center justify-center p-4 border-t gap-4">
                     {isOwner && <WithdrawDialog groupId={group.groupId} />}
