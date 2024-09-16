@@ -372,7 +372,21 @@ export default function Page({ params }: { params: { id: string } }) {
     }
 
     if (group === undefined) {
-        return <span>Group {params.id} no found</span>
+        return (
+            <div className="flex flex-col lg:max-w-[60%] mx-auto min-h-screen" >
+                <nav className="flex py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
+                    <Link
+                        href="/"
+                    >
+                        <ArrowLeft className="text-[#009BEB]" size={24} />
+                    </Link>
+                    <div className="ml-auto flex items-center space-x-4">
+                        <ConnectKitButton showBalance={notMobile} />
+                    </div>
+                </nav>
+                <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 text-muted-foreground">Group not found</h2>
+            </div>
+        );
     }
 
     return (
@@ -383,7 +397,6 @@ export default function Page({ params }: { params: { id: string } }) {
                 >
                     <ArrowLeft className="text-[#009BEB]" size={24} />
                 </Link>
-                <span className="text-sm  font-bold">Overview</span>
                 <div className="ml-auto flex items-center space-x-4">
                     <ConnectKitButton showBalance={notMobile} />
                 </div>
