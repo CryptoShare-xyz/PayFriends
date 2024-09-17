@@ -45,7 +45,7 @@ import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 import web3 from "web3";
 import { z } from "zod";
 
@@ -115,7 +115,8 @@ function ShareGroup() {
 const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC: boolean }> = ({ groupId, isParticipant, isUSDC }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
-    const { address } = useAccount();
+    const { address, } = useAccount();
+    const { data } = useBalance({ address: address })
     const { toast } = useToast()
     const { contract, usdcContract } = useContract()
     const form = useForm<z.infer<typeof joinGroupSchema>>({
@@ -140,11 +141,18 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
                     throw new Error('No nickname for new participant!');
                 }
                 nickname = ""
-
             }
 
             if (isUSDC) {
                 const usdc = amount * (10 ** 6); // usdc decimal is 6 
+
+                const balance = Number(await usdcContract.methods.balanceOf(address).call())
+
+                // check user has enough balance
+                if (balance < usdc) {
+                    throw new Error(`Not enough balance (${balance / 10 ** 6} USDC)`)
+                }
+
                 const allowance = Number(await usdcContract.methods.allowance(address, contractAddress).call())
                 if (!Number.isInteger(allowance)) {
                     throw new Error("Failed to get allowance")
@@ -156,8 +164,14 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
 
                 const tx3 = await contract.methods.depositToGroup(groupId, nickname, true, usdc).send({ from: address });
             } else {
-                const wei = web3.utils.toHex(web3.utils.toWei(amount.toString(), 'ether'))
-                const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({ from: address, value: wei });
+                const wei = web3.utils.toWei(amount.toString(), 'ether')
+                const balance = Number(data?.value)
+                // check user has enough balance
+                if (balance < Number(wei)) {
+                    throw new Error(`Not enough balance (${balance / 10 ** 18} ETH)`)
+                }
+
+                const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({ from: address, value: web3.utils.toHex(wei) });
 
             }
             toast({ description: "Payed group" })
