@@ -275,6 +275,10 @@ contract GroupSplit {
             require(usdcAmount > 0, "Deposit amount must be greater than zero");
             require(msg.value == 0, "No ether should be sent");
 
+            // Check if user has enough USDC
+            uint256 userBalance = USDC.balanceOf(msg.sender);
+            require(userBalance >= usdcAmount, "Insufficient USDC balance");
+
             // Transfer USDC from the sender to the contract
             require(
                 USDC.transferFrom(msg.sender, address(this), usdcAmount),

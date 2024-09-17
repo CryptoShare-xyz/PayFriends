@@ -140,6 +140,26 @@ describe("GroupSplit", function () {
 
       });
 
+      it("depositTooMuchUSDCToGroup", async function () {
+        const { groupSplit, usdcMock, owner, user1 } = await loadFixture(deployFixture);
+        const groupName = "test_group1";
+        const ownerNickname = "owner_nick1";
+        const participantNickname = "test_nickname1";
+        const depositAmount = 10 ** 7; // 1 WEI
+        const isUSDC = true;
+
+        const tx = await groupSplit.createGroup(groupName, ownerNickname, isUSDC);
+        const receipt = await tx.wait()
+        const groupId = receipt?.logs[0]?.args[0]
+
+        await usdcMock.connect(user1).approve(await groupSplit.getAddress(), depositAmount);
+        // Perform the transaction
+        const tx2 = groupSplit.connect(user1).depositToGroup(groupId, participantNickname, isUSDC, depositAmount, { value: 0 })
+        await expect(tx2)
+          .to.revertedWith("Insufficient USDC balance")
+
+      });
+
       it("withdrawFromGroup", async function () {
         const { groupSplit, owner, user1 } = await loadFixture(deployFixture);
         const groupName = "test_group1";
