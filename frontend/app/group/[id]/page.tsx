@@ -416,7 +416,7 @@ export default function Page({ params }: { params: { id: string } }) {
     if (group === undefined) {
         return (
             <div className="flex flex-col lg:max-w-[60%] mx-auto min-h-screen" >
-                <nav className="flex py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
+                <nav className="flex py-4 lg:py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
                     <Link
                         href="/"
                     >
@@ -435,7 +435,7 @@ export default function Page({ params }: { params: { id: string } }) {
         <div className="flex flex-col lg:max-w-[60%] mx-auto h-screen" >
 
             {/* nav section */}
-            <nav className="flex py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
+            <nav className="flex py-4 lg:py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
                 <Link
                     href="/"
                 >
@@ -447,7 +447,7 @@ export default function Page({ params }: { params: { id: string } }) {
             </nav>
 
             {/* group meta section */}
-            <header className="relative px-16 flex flex-col items-start justify-center bg-[#E7F1FA] pb-8 rounded-b-2xl">
+            <header className="relative px-16 flex flex-col items-start justify-center bg-[#E7F1FA] pb-4 lg:pb-8 rounded-b-2xl">
                 <div className="flex flex-row justify-start items-center w-full">
                     <div className="flex flex-col items-start">
                         <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 float-left">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
@@ -478,7 +478,7 @@ export default function Page({ params }: { params: { id: string } }) {
             </header>
 
             {/* content section */}
-            <div className="flex-grow overflow-auto">
+            <div className="flex-grow overflow-auto md:py-4">
 
                 {/* stats section */}
                 <section className="flex flex-col md:flex-row px-8 py-4 gap-4">
@@ -494,25 +494,25 @@ export default function Page({ params }: { params: { id: string } }) {
                     </div>
 
                     <aside className="flex flex-grow flex-wrap flex-row md:flex-col md:items-end justify-evenly items-center gap-4">
-                        <div className="bg-[#E7F1FA] flex flex-col items-center justify-center py-4 rounded-lg w-full max-w-[80%]">
+                        <div className="bg-[#E7F1FA] flex flex-grow flex-col items-center justify-center py-4 rounded-lg md:w-full max-w-[80%]">
                             <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalWithdrawn}</h1>
                             <small className="text-[#858585]  lg:text-xl text-sm">Withdrawn</small>
                         </div>
-                        <div className="bg-[#E7F1FA] flex flex-col items-center justify-center py-4 rounded-lg w-full max-w-[80%]">
+                        <div className="bg-[#E7F1FA] flex flex-grow flex-col items-center justify-center py-4 rounded-lg md:w-full max-w-[80%]">
                             <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalCollected}</h1>
                             <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
                         </div>
                     </aside>
                 </section>
 
-                <hr className="w-[90%] mx-auto my-2 border-dashed border-[#D9D9D9]" />
+                <hr className="w-[90%] mx-auto md:my-4 border-dashed border-[#D9D9D9]" />
 
                 {/* members section */}
                 {/* [&>div>div[style]]:!block is a weird fix for scrollable area to have overflow-x-auto */}
                 {/* src: https://github.com/shadcn-ui/ui/issues/2090#issuecomment-2103953170 */}
                 <ScrollArea className="flex-grow p-4 [&>div>div[style]]:!block">
-                    <section className="px-8 py-2">
-                        <div className="flex p-1 mb-4 items-center">
+                    <section>
+                        <div className="flex p-1items-center">
                             <div className="mr-2 max-w-[32px] lg:max-w-[48px]"><User size={32} className="text-muted-foreground" /></div>
                             <h1 className="font-semibold text-base lg:text-2xl">Members</h1>
                         </div>
