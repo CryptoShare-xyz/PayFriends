@@ -508,7 +508,9 @@ export default function Page({ params }: { params: { id: string } }) {
                 <hr className="w-[90%] mx-auto my-2 border-dashed border-[#D9D9D9]" />
 
                 {/* members section */}
-                <ScrollArea className="flex-grow p-4">
+                {/* [&>div>div[style]]:!block is a weird fix for scrollable area to have overflow-x-auto */}
+                {/* src: https://github.com/shadcn-ui/ui/issues/2090#issuecomment-2103953170 */}
+                <ScrollArea className="flex-grow p-4 [&>div>div[style]]:!block">
                     <section className="px-8 py-2">
                         <div className="flex p-1 mb-4 items-center">
                             <div className="mr-2 max-w-[32px] lg:max-w-[48px]"><User size={32} className="text-muted-foreground" /></div>
