@@ -76,7 +76,7 @@ function ShareGroup() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <div className="ml-auto mb-auto relative p-3 bg-blue-500 rounded-full cursor-pointer transition-transform hover:scale-110">
+                <div className="ml-auto mb-auto relative p-3 bg-blue-500 rounded-full cursor-pointer transition-transform hover:scale-110 translate-x-1/2">
                     <div className="absolute inset-0 border-2 border-blue-300 rounded-full"></div>
                     <Share2 className="md:w-6 md:h-6 w-4 h-4 text-white" />
                 </div>
