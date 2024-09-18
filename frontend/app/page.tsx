@@ -220,7 +220,7 @@ export default function Home() {
         </section>
 
         <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row-reverse md:px-8">
-          <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
+          <section id="stats" className="flex flex-col text-center justify-evenly mx-auto md:gap-0 gap-4 mb-8 md:w-[30%]">
             <article className="flex justify-center items-center gap-4">
               <div className="max-w-[20vw]">
                 <Image src="/group.svg" width={128} height={128} alt=" group" />
@@ -230,7 +230,7 @@ export default function Home() {
                 <small className="text-[#B2B2B2] text-base text-left">Opened Groups</small>
               </aside>
             </article>
-            <hr className="w-[60%] mx-auto my-5 border-dashed border-[#D9D9D9]" />
+            <hr className="w-[60%] mx-auto border-dashed border-[#D9D9D9]" />
             <article className="flex justify-center items-center gap-4">
               <div className="max-w-[15vw]">
                 <Image src="/collected.svg" width={128} height={128} alt=" group" />
@@ -242,7 +242,7 @@ export default function Home() {
             </article>
           </section>
 
-          <figure id="image" className="max-w-[48rem] md:w-[50%]">
+          <figure id="image" className="max-w-[48rem] lg:w-[60%] md:w-[50%]">
             <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
           </figure>
 
