@@ -29,7 +29,9 @@ import { useMediaQuery } from 'react-responsive';
 import { ConnectKitButton } from "connectkit";
 import {
     ArrowLeft, Check,
+    CheckIcon,
     CircleChevronDown,
+    ClipboardIcon,
     Copy,
     Lock,
     Share2,
@@ -342,6 +344,20 @@ export default function Page({ params }: { params: { id: string } }) {
     const { address } = useAccount();
     const { contract } = useContract()
 
+    const [copiedOwner, setCopiedOwner] = useState(false)
+
+    const copyOwnerAddress = (address: string) => {
+        return (e: React.MouseEvent<HTMLElement>) => {
+            navigator.clipboard.writeText(address)
+            setCopiedOwner(true)
+            setTimeout(() => setCopiedOwner(false), 2000)
+        }
+    }
+
+    const copyText = (text: string) => {
+        navigator.clipboard.writeText(text)
+    }
+
     const notMobile = useMediaQuery({
         query: '(min-width: 640px)'
     })
@@ -443,7 +459,22 @@ export default function Page({ params }: { params: { id: string } }) {
                     <ShareGroup />
                 </div>
                 <p className="text-muted-foreground text-sm">Group owner: {group.ownerNickname}</p>
-                <p className="text-muted-foreground text-sm">Owner address: {formatAddress(group.owner)}</p>
+                <p className="text-muted-foreground text-sm">
+                    Owner address: {formatAddress(group.owner)}
+                    <Button
+                        variant="ghost"
+                        className="p-0 h-8 w-8 text-muted-foreground"
+                        size="sm"
+                        onClick={copyOwnerAddress(group.owner)}
+                        aria-label="Copy owner address"
+                    >
+                        {copiedOwner ? (
+                            <CheckIcon className="h-4 w-4 text-[#009BEB]" />
+                        ) : (
+                            <ClipboardIcon className="h-4 w-4" />
+                        )}
+                    </Button>
+                </p>
             </header>
 
             {/* content section */}
@@ -496,7 +527,7 @@ export default function Page({ params }: { params: { id: string } }) {
                                 {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
                                     <TableRow key={participantAddress}>
                                         <TableCell className="capitalize">{nickname}</TableCell>
-                                        <TableCell>{formatAddress(participantAddress)}</TableCell>
+                                        <TableCell className="hover:underline cursor-pointer" onClick={(e) => copyText(participantAddress)}>{formatAddress(participantAddress)}</TableCell>
                                         <TableCell>{totalDeposits}</TableCell>
                                         <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
                                     </TableRow>
