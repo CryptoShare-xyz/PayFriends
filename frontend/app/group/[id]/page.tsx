@@ -543,7 +543,7 @@ export default function Page({ params }: { params: { id: string } }) {
             {/* Fixed Button at Bottom */}
             {group.status &&
                 <div className="flex flex-col items-center justify-center p-4 border-t gap-4">
-                    {isOwner && <WithdrawDialog groupId={group.groupId} />}
+                    {isOwner && group.balance > 0 && <WithdrawDialog groupId={group.groupId} />}
                     <PayGroupDialog groupId={group.groupId} isParticipant={isParticipant} isUSDC={group.isUSDC} />
                 </div>
             }
