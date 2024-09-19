@@ -93,8 +93,8 @@ function CreateGroupDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={onOpenDialog} className="my-4 w-[70%] max-w-[360px] bg-gradient-to-br from-[#009BEB] to-[#005885] text-slate-100 text-lg">
-          <span>Create group</span>
+        <Button onClick={onOpenDialog} className="my-4 w-[60%] max-w-[240px] bg-gradient-to-br from-[#009BEB] to-[#005885] text-slate-100 text-lg">
+          Create group
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -206,20 +206,19 @@ export default function Home() {
             <ConnectKitButton />
           </nav>
           <div className="mx-auto">
-            <h1 className="text-[#1F92CE] font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl">PayFriends</h1>
-            <div className="flex justify-center items-center gap-4 text-left">
-              <div className="my-auto w-[70%] mr-auto">
-                <h2 className="text-black my-2 lg:text-2xl text-lg md:text-2xl">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
-                <CreateGroupDialog />
-              </div>
-              {/* <aside className="w-[30%] my-2 mx-auto">
-                <Image src="/hero.svg" width={320} height={320} alt=" hero" />
-              </aside> */}
+            <h1 className="text-[#1F92CE] font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl text-center md:text-left">PayFriends</h1>
+            <div className="flex flex-col w-[80%] mx-auto md:mr-auto md:ml-0 items-center md:items-start">
+              <h2 className="text-black my-2 text-base md:text-2xl text-center md:text-left">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
+              <CreateGroupDialog />
             </div>
           </div>
         </section>
 
-        <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row-reverse md:px-8">
+        <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row md:px-8 justify-center items-center">
+          <figure id="image" className="md:max-w-[48rem] max-w-[32rem] lg:w-[60%] md:w-[50%]">
+            <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
+          </figure>
+
           <section id="stats" className="flex flex-col text-center justify-evenly mx-auto md:gap-0 gap-4 mb-8 md:w-[30%]">
             <article className="flex justify-center items-center gap-4">
               <div className="max-w-[20vw]">
@@ -242,14 +241,10 @@ export default function Home() {
             </article>
           </section>
 
-          <figure id="image" className="max-w-[48rem] lg:w-[60%] md:w-[50%]">
-            <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
-          </figure>
-
         </div>
       </main>
 
-      <hr className="my-8" />
+      <hr className="my-4" />
 
       <footer className="flex flex-col justify-center items-center gap-2 p-4">
         <section className="flex justify-evenly items-center gap-2">
@@ -258,22 +253,15 @@ export default function Home() {
               <Image src="/github.svg" width={128} height={128} alt="github" />
             </div>
           </Link>
-          <Link href="#" target="_blank">
+          <Link href="https://t.me/danieli4444" target="_blank">
             <div className="max-w-[48px] w-[8vw]">
               <Image src="/telegram.svg" width={128} height={128} alt="telegram" />
             </div>
           </Link>
-          <Link href="#" target="_blank">
-            <div className="max-w-[48px] w-[8vw]">
-              <Image src="/linkdin.svg" width={128} height={128} alt="linkdin" />
-            </div>
-          </Link>
-          <Link href="#" target="_blank">
-            <div className="max-w-[48px] w-[8vw]">
-              <Image src="/information.svg" width={128} height={128} alt="information" />
-            </div>
-          </Link>
         </section>
+        <Link href="#">
+          <h1 className="text-muted-foreground">Terms of service</h1>
+        </Link>
       </footer>
     </>
   );
