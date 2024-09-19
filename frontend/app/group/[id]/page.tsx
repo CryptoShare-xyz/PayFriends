@@ -22,11 +22,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import Wallet from "@/components/ui/wallet";
 import moment from "moment";
 
-import { useMediaQuery } from 'react-responsive';
-
-import { ConnectKitButton } from "connectkit";
 import {
     ArrowLeft, Check,
     CheckIcon,
@@ -39,6 +37,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useMediaQuery } from 'react-responsive';
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -50,6 +49,7 @@ import { useForm } from "react-hook-form";
 import { useAccount, useBalance } from "wagmi";
 import web3 from "web3";
 import { z } from "zod";
+
 
 const joinGroupSchema = z.object({
     nickname: z.string().min(1).max(20).optional(),
@@ -422,8 +422,8 @@ export default function Page({ params }: { params: { id: string } }) {
                     >
                         <ArrowLeft className="text-[#009BEB]" size={24} />
                     </Link>
-                    <div className="ml-auto flex items-center space-x-4">
-                        <ConnectKitButton showBalance={notMobile} />
+                    <div className="ml-auto flex items-center space-x-4 ">
+                        <Wallet isMobile={!notMobile} />
                     </div>
                 </nav>
                 <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 text-muted-foreground">Group not found</h2>
@@ -435,43 +435,43 @@ export default function Page({ params }: { params: { id: string } }) {
         <div className="flex flex-col lg:max-w-[60%] mx-auto h-screen" >
 
             {/* nav section */}
-            <nav className="flex py-4 lg:py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
+            <nav className="flex py-2 md:py-4 lg:py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
                 <Link
                     href="/"
                 >
-                    <ArrowLeft className="text-[#009BEB]" size={24} />
+                    <ArrowLeft className="text-[#009BEB] lg:w-[32px] md:w-[24px] w-[20px]" size={32} />
                 </Link>
                 <div className="ml-auto flex items-center space-x-4">
-                    <ConnectKitButton showBalance={notMobile} />
+                    <Wallet isMobile={!notMobile} />
                 </div>
             </nav>
 
             {/* group meta section */}
-            <header className="relative px-16 flex flex-col items-start justify-center bg-[#E7F1FA] pb-4 lg:pb-8 rounded-b-2xl">
+            <header className="relative md:px-16 px-8 flex flex-col items-start justify-center bg-[#E7F1FA] pb-4 lg:pb-8 rounded-b-2xl">
                 <div className="flex flex-row justify-start items-center w-full">
-                    <div className="flex flex-col items-start">
-                        <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 float-left">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+                    <div className="flex flex-col items-start mb-4">
+                        <p className="text-muted-foreground text-xs md:text-sm">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
+                        <h2 className="lg:text-6xl md:text-4xl text-3xl font-bold tracking-tight flex justify-center items-center gap-4 float-left">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
                             <Lock className="mr-1 h-3 w-3" />
                             Closed
                         </span>}</h2>
-                        <p className="text-muted-foreground text-lg mb-4">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
                     </div>
                     <ShareGroup />
                 </div>
-                <p className="text-muted-foreground text-sm">Group owner: {group.ownerNickname}</p>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground md:text-base text-xs">Group owner: {group.ownerNickname}</p>
+                <p className="text-muted-foreground md:text-base text-xs">
                     Owner address: {formatAddress(group.owner)}
                     <Button
                         variant="ghost"
-                        className="p-0 h-8 w-8 text-muted-foreground"
+                        className="p-1 text-muted-foreground h-fit"
                         size="sm"
                         onClick={copyOwnerAddress(group.owner)}
                         aria-label="Copy owner address"
                     >
                         {copiedOwner ? (
-                            <CheckIcon className="h-4 w-4 text-[#009BEB]" />
+                            <CheckIcon className="md:h-4 md:w-4 h-3 w-3 text-[#009BEB]" />
                         ) : (
-                            <ClipboardIcon className="h-4 w-4" />
+                            <ClipboardIcon className="md:h-4 md:w-4 h-3 w-3" />
                         )}
                     </Button>
                 </p>
@@ -484,54 +484,54 @@ export default function Page({ params }: { params: { id: string } }) {
                 <section className="flex flex-col md:flex-row px-8 py-4 gap-4">
                     <div className="flex flex-grow px-8 py-4 justify-evenly gap-4 items-center bg-gradient-to-b from-[#E7F1FA] to-[#F5F5F5] border-2 border-dashed border-[#19A5ED] rounded-lg">
                         <span>
-                            <h1 className="text-[#009BEB] text-center text-4xl font-bold">{group.balance}</h1>
-                            <h2 className="text-lg text-center font-semibold">Balance</h2>
+                            <h1 className="text-[#009BEB] text-center md:text-4xl text-2xl font-bold">{group.balance}</h1>
+                            <h2 className="md:text-lg text-sm text-center font-semibold">Balance</h2>
                         </span>
-                        <figure className="flex flex-col items-center justify-center w-[20%]">
+                        <figure className="flex flex-col items-center justify-center md:w-[20%] w-[10%]">
                             <Image src={group.isUSDC ? "/usdc.svg" : "/eth.svg"} width={64} height={64} alt="coin image" />
-                            <small className="text-[#858585] text-center text-small">{group.isUSDC ? "USDC" : "ETH"}</small>
+                            <small className="text-[#858585] text-center md:text-sm text-xs">{group.isUSDC ? "USDC" : "ETH"}</small>
                         </figure>
                     </div>
 
                     <aside className="flex flex-grow flex-wrap flex-row md:flex-col md:items-end justify-evenly items-center gap-4">
                         <div className="bg-[#E7F1FA] flex flex-grow flex-col items-center justify-center py-4 rounded-lg md:w-full max-w-[80%]">
-                            <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalWithdrawn}</h1>
-                            <small className="text-[#858585]  lg:text-xl text-sm">Withdrawn</small>
+                            <h1 className="text-[#009BEB]  md:text-2xl text-lg">{group.totalWithdrawn}</h1>
+                            <small className="text-[#858585] md:text-lg text-xs">Withdrawn</small>
                         </div>
                         <div className="bg-[#E7F1FA] flex flex-grow flex-col items-center justify-center py-4 rounded-lg md:w-full max-w-[80%]">
-                            <h1 className="text-[#009BEB] lg:text-2xl text-lg">{group.totalCollected}</h1>
-                            <small className="text-[#858585]  lg:text-xl text-sm">Collected</small>
+                            <h1 className="text-[#009BEB] md:text-2xl text-lg">{group.totalCollected}</h1>
+                            <small className="text-[#858585] md:text-lg text-xs">Collected</small>
                         </div>
                     </aside>
                 </section>
 
-                <hr className="w-[90%] mx-auto md:my-4 border-dashed border-[#D9D9D9]" />
+                <hr className="w-[90%] lg:my-6 md:my-4 mx-auto border-dashed border-[#D9D9D9]" />
 
                 {/* members section */}
                 {/* [&>div>div[style]]:!block is a weird fix for scrollable area to have overflow-x-auto */}
                 {/* src: https://github.com/shadcn-ui/ui/issues/2090#issuecomment-2103953170 */}
-                <ScrollArea className="flex-grow p-4 [&>div>div[style]]:!block">
+                <ScrollArea className="flex-grow md:p-4 p-2 [&>div>div[style]]:!block">
                     <section>
-                        <div className="flex p-1items-center">
-                            <div className="mr-2 max-w-[32px] lg:max-w-[48px]"><User size={32} className="text-muted-foreground" /></div>
-                            <h1 className="font-semibold text-base lg:text-2xl">Members</h1>
+                        <div className="flex items-center md:mb-2 lg:mb-4">
+                            <User size={32} className="text-muted-foreground mr-2 max-w-[24px] md:max-w-[32px] " />
+                            <h1 className="font-semibold text-sm md:text-xl">Members</h1>
                         </div>
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Address</TableHead>
-                                    <TableHead>Amount</TableHead>
-                                    <TableHead>Last update</TableHead>
+                                    <TableHead className="text-xs sm:text-sm md:text-base">Name</TableHead>
+                                    <TableHead className="text-xs sm:text-sm md:text-base">Address</TableHead>
+                                    <TableHead className="text-xs sm:text-sm md:text-base">Amount</TableHead>
+                                    <TableHead className="text-xs sm:text-sm md:text-base">Last update</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
                                     <TableRow key={participantAddress}>
-                                        <TableCell className="capitalize">{nickname}</TableCell>
-                                        <TableCell className="hover:underline cursor-pointer" onClick={(e) => copyText(participantAddress)}>{formatAddress(participantAddress)}</TableCell>
-                                        <TableCell>{totalDeposits}</TableCell>
-                                        <TableCell>{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
+                                        <TableCell className="text-xs sm:text-sm md:text-basecapitalize">{nickname}</TableCell>
+                                        <TableCell className=" text-xs sm:text-sm md:text-basehover:underline cursor-pointer" onClick={(e) => copyText(participantAddress)}>{formatAddress(participantAddress)}</TableCell>
+                                        <TableCell className="text-xs sm:text-sm md:text-base">{totalDeposits}</TableCell>
+                                        <TableCell className="text-xs sm:text-sm md:text-base">{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
