@@ -82,7 +82,7 @@ const ListItem = React.forwardRef<
                     )}
                     {...props}
                 >
-                    <div className="text-sm font-medium leading-none lg:text-2xl md:text-lg text-muted-foreground hover:text-[#009BEB]">{title}</div>
+                    <div className="text-sm font-medium leading-none lg:text-2xl md:text-lg text-muted-foreground hover:text-[#009BEB] focus:text-[#009BEB]">{title}</div>
                 </a>
             </NavigationMenuLink>
         </li>

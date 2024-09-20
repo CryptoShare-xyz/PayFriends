@@ -76,7 +76,7 @@ function ShareGroup() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <div className="ml-auto mb-auto relative p-3 bg-blue-500 rounded-full cursor-pointer transition-transform hover:scale-110 translate-x-1/2">
+                <div className="ml-auto mb-auto relative p-3 bg-blue-500 rounded-full cursor-pointer transition-transform hover:scale-110 focus:scale-110 translate-x-1/2">
                     <div className="absolute inset-0 border-2 border-blue-300 rounded-full"></div>
                     <Share2 className="md:w-6 md:h-6 w-4 h-4 text-white" />
                 </div>
@@ -528,8 +528,8 @@ export default function Page({ params }: { params: { id: string } }) {
                             <TableBody>
                                 {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
                                     <TableRow key={participantAddress}>
-                                        <TableCell className="text-xs sm:text-sm md:text-basecapitalize">{nickname}</TableCell>
-                                        <TableCell className=" text-xs sm:text-sm md:text-basehover:underline cursor-pointer" onClick={(e) => copyText(participantAddress)}>{formatAddress(participantAddress)}</TableCell>
+                                        <TableCell className="text-xs sm:text-sm md:text-base capitalize">{nickname}</TableCell>
+                                        <TableCell className=" text-xs sm:text-sm md:text-base hover:underline focus:underline cursor-pointer" onClick={(e) => copyText(participantAddress)}>{formatAddress(participantAddress)}</TableCell>
                                         <TableCell className="text-xs sm:text-sm md:text-base">{totalDeposits}</TableCell>
                                         <TableCell className="text-xs sm:text-sm md:text-base">{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
                                     </TableRow>
