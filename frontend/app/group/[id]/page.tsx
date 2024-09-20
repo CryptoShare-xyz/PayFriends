@@ -44,9 +44,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { contractAddress, useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useModal } from "connectkit";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAccount, useBalance } from "wagmi";
+import { useAccount, useBalance, useChainId } from "wagmi";
 import web3 from "web3";
 import { z } from "zod";
 
@@ -117,10 +118,13 @@ function ShareGroup() {
 const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC: boolean }> = ({ groupId, isParticipant, isUSDC }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
-    const { address, } = useAccount();
+    const { address, chainId, isConnected } = useAccount();
     const { data } = useBalance({ address: address })
     const { toast } = useToast()
     const { contract, usdcContract } = useContract()
+    const myChain = useChainId()
+    const { openSIWE, openSwitchNetworks } = useModal()
+
     const form = useForm<z.infer<typeof joinGroupSchema>>({
         resolver: zodResolver(joinGroupSchema),
         defaultValues: {
@@ -132,9 +136,7 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
 
     async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
         let { nickname, amount } = values;
-
         setLoading(true)
-
 
         try {
             if (nickname === undefined) {
@@ -190,10 +192,26 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
 
     }
 
+    const onOpenDialog = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault()
+
+        if (!isConnected) {
+            openSIWE(true);
+            return;
+        }
+
+        if (chainId !== myChain) {
+            openSwitchNetworks()
+            return;
+        }
+
+        setOpen(true)
+    }
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="text-2xl bg-[#009BEB] border-1 border-[#1F92CE] text-white py-2 w-[90%]">{isParticipant ? "Deposit" : "Join group"}</Button>
+                <Button onClick={onOpenDialog} variant="outline" className="text-2xl bg-[#009BEB] border-1 border-[#1F92CE] text-white py-2 w-[90%]">{isParticipant ? "Deposit" : "Join group"}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
