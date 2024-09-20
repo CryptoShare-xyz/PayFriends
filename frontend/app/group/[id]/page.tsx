@@ -450,11 +450,11 @@ export default function Page({ params }: { params: { id: string } }) {
             <header className="relative md:px-16 px-8 flex flex-col items-start justify-center bg-[#E7F1FA] pb-4 lg:pb-8 rounded-b-2xl">
                 <div className="flex flex-row justify-start items-center w-full">
                     <div className="flex flex-col items-start mb-4">
-                        <p className="text-muted-foreground text-xs md:text-sm">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
                         <h2 className="lg:text-6xl md:text-4xl text-3xl font-bold tracking-tight flex justify-center items-center gap-4 float-left">{group.groupName} {!group.status && <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
                             <Lock className="mr-1 h-3 w-3" />
                             Closed
                         </span>}</h2>
+                        <p className="text-muted-foreground text-xs md:text-sm">created {moment.unix(Number(group.creationTime)).fromNow()}</p>
                     </div>
                     <ShareGroup />
                 </div>
