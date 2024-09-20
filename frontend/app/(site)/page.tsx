@@ -21,15 +21,15 @@ import { Input } from "@/components/ui/input";
 
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useToast } from "@/components/ui/use-toast";
 import { useContract } from "@/contexts/ContractProvider";
 import { getEthRate } from "@/lib/ethRate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useModal } from "connectkit";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { z } from "zod";
-
 
 const createGroupSchema = z.object({
   groupName: z.string().min(1).max(20),
@@ -44,9 +44,12 @@ function CreateGroupDialog() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const { push } = useRouter()
-  const { address, isConnected } = useAccount();
-  const { openSIWE } = useModal()
+  const { address, isConnected, chainId } = useAccount();
+  const { openSIWE, openSwitchNetworks } = useModal()
   const { contract } = useContract()
+  const { toast } = useToast()
+  const myChain = useChainId()
+
   const form = useForm<z.infer<typeof createGroupSchema>>({
     resolver: zodResolver(createGroupSchema),
     defaultValues: {
@@ -60,12 +63,17 @@ function CreateGroupDialog() {
     const { groupName, ownerNickname, currency } = values
     setLoading(true)
 
+
     const isUSDC = currency === "USDC"
 
     try {
       const group = await contract.methods.createGroup(groupName, ownerNickname, isUSDC).send({ from: address });
       const groupId = group.events?.logGroupCreated.returnValues.groupId
       push(`/group/${groupId}`)
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({ variant: "destructive", description: error.message })
+      }
     } finally {
       setOpen(false)
       setLoading(false)
@@ -80,6 +88,11 @@ function CreateGroupDialog() {
       openSIWE(true);
       return;
     }
+    if (chainId !== myChain) {
+      openSwitchNetworks()
+      return;
+    }
+
     setOpen(true)
   }
 
