@@ -17,16 +17,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import Link from "next/link";
 
 
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useContract } from "@/contexts/ContractProvider";
 import { getEthRate } from "@/lib/ethRate";
-import { formatMoney } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ConnectKitButton, useModal } from "connectkit";
+import { useModal } from "connectkit";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
@@ -200,70 +198,45 @@ export default function Home() {
 
 
   return (
-    <>
-      <main className="lg:max-w-[80%] mx-auto">
-        <section id="hero" className="p-8 lg:rounded-2xl">
-          <nav className="flex mb-8 lg:mb-16 justify-end gap-4">
-            <ConnectKitButton />
-          </nav>
-          <div className="mx-auto">
-            <h1 className="text-[#1F92CE] font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl text-center md:text-left">PayFriends</h1>
-            <div className="flex flex-col w-[80%] mx-auto md:mr-auto md:ml-0 items-center md:items-start">
-              <h2 className="text-black my-2 text-base md:text-2xl text-center md:text-left">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
-              <CreateGroupDialog />
-            </div>
+    <div>
+      <section id="hero" className="p-4 md:p-8 lg:rounded-2xl">
+        <div className="mx-auto">
+          <h1 className="text-[#1F92CE] lg:my-8 font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl text-center md:text-left">PayFriends</h1>
+          <div className="flex flex-col w-[80%] lg:my-8 mx-auto md:mr-auto md:ml-0 items-center md:items-start">
+            <h2 className="text-black my-2 text-base md:text-2xl text-center md:text-left">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
+            <CreateGroupDialog />
           </div>
-        </section>
-
-        <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row md:px-8 justify-center items-center">
-          <figure id="image" className="md:max-w-[48rem] max-w-[32rem] lg:w-[60%] md:w-[50%]">
-            <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
-          </figure>
-
-          <section id="stats" className="flex flex-col text-center justify-evenly mx-auto md:gap-0 gap-4 mb-8 md:w-[30%]">
-            <article className="flex justify-center items-center gap-4">
-              <div className="max-w-[20vw]">
-                <Image src="/group.svg" width={128} height={128} alt=" group" />
-              </div>
-              <aside className="flex flex-col items-start">
-                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{openedGroups}</h1>
-                <small className="text-[#B2B2B2] text-base text-left">Opened Groups</small>
-              </aside>
-            </article>
-            <hr className="w-[60%] mx-auto border-dashed border-[#D9D9D9]" />
-            <article className="flex justify-center items-center gap-4">
-              <div className="max-w-[15vw]">
-                <Image src="/collected.svg" width={128} height={128} alt=" group" />
-              </div>
-              <aside className="flex flex-col items-start gap-2">
-                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{formatMoney(collected)}$</h1>
-                <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
-              </aside>
-            </article>
-          </section>
-
         </div>
-      </main>
+      </section>
 
-      <hr className="my-4" />
+      <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row md:px-8 justify-center items-center">
+        <figure id="image" className="md:max-w-[48rem] max-w-[32rem] lg:w-[60%] md:w-[50%]">
+          <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
+        </figure>
 
-      <footer className="flex flex-col justify-center items-center gap-2 p-4">
-        <section className="flex justify-evenly items-center gap-2">
-          <Link href="https://github.com/CryptoShare-xyz/cryptoshare" target="_blank">
-            <div className="max-w-[48px] w-[8vw]">
-              <Image src="/github.svg" width={128} height={128} alt="github" />
+        <section id="stats" className="flex flex-col text-center justify-evenly mx-auto md:gap-0 gap-4 mb-8 md:w-[30%]">
+          <article className="flex justify-center items-center gap-4">
+            <div className="max-w-[20vw]">
+              <Image src="/group.svg" width={128} height={128} alt=" group" />
             </div>
-          </Link>
-          <Link href="https://t.me/danieli4444" target="_blank">
-            <div className="max-w-[48px] w-[8vw]">
-              <Image src="/telegram.svg" width={128} height={128} alt="telegram" />
+            <aside className="flex flex-col items-start">
+              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{openedGroups}</h1>
+              <small className="text-[#B2B2B2] text-base text-left">Opened Groups</small>
+            </aside>
+          </article>
+          <hr className="w-[60%] mx-auto border-dashed border-[#D9D9D9]" />
+          <article className="flex justify-center items-center gap-4">
+            <div className="max-w-[15vw]">
+              <Image src="/collected.svg" width={128} height={128} alt=" group" />
             </div>
-          </Link>
+            <aside className="flex flex-col items-start gap-2">
+              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{collected}$</h1>
+              <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
+            </aside>
+          </article>
         </section>
-        <Link href="#">
-          <h1 className="text-muted-foreground">Terms of service</h1>
-        </Link>
-      </footer>
-    </>
+
+      </div>
+    </div>
   );
 }
