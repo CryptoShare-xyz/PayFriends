@@ -1,9 +1,35 @@
 "use client";
 
 import { Navbar } from "@/components/navbar/navbar";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
+const TermAndConditionsDialog = () => {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <h1 className="text-muted-foreground cursor-pointer hover:underline focus:underline">Terms of service</h1>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md" showOverlay={false}>
+                <DialogHeader>
+                    <DialogTitle>PayFriends Terms of service</DialogTitle>
+                    <DialogDescription className="text-left">
+                        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quae numquam, saepe error assumenda porro ipsum accusantium natus recusandae, odit aperiam nostrum, veritatis amet reiciendis quam maxime quaerat. Minus, quod fuga!
+                    </DialogDescription>
+                </DialogHeader>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 export default function SiteLayout({
     children,
@@ -42,9 +68,7 @@ export default function SiteLayout({
                         </div>
                     </Link>
                 </section>
-                <Link href="#">
-                    <h1 className="text-muted-foreground">Terms of service</h1>
-                </Link>
+                <TermAndConditionsDialog />
             </footer>
         </div>
     );
