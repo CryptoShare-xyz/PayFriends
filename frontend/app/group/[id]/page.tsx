@@ -415,7 +415,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
     if (group === undefined) {
         return (
-            <div className="flex flex-col lg:max-w-[60%] mx-auto min-h-screen" >
+            <div className="flex flex-col lg:max-w-[60%] mx-auto h-screen" >
                 <nav className="flex py-4 lg:py-8 items-center gap-4 bg-[#E7F1FA] lg:rounded-t-2xl px-4">
                     <Link
                         href="/"
@@ -426,7 +426,7 @@ export default function Page({ params }: { params: { id: string } }) {
                         <Wallet isMobile={!notMobile} />
                     </div>
                 </nav>
-                <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 text-muted-foreground">Group not found</h2>
+                <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 text-muted-foreground opacity-60 h-full">Group not found</h2>
             </div>
         );
     }
