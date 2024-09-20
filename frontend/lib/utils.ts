@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { number } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -23,3 +24,16 @@ export const formatAddress = (addr: string) => {
   return `${addr.slice(0, 6)}....${addr.slice(-4)}`;
 };
 
+export const formatMoney = (amount: number) => {
+  if (amount < 10 ** 3) {
+    return amount.toString()
+  } else if (amount < 10 ** 6) {
+    return Math.round(amount / 10 ** 3).toString() + "K"
+  } else if (amount < 10 ** 9) {
+    return Math.round(amount / 10 ** 6).toString() + "M"
+  } else if (amount < 10 ** 12) {
+    return Math.round(amount / 10 ** 9).toString() + "B"
+  } else {
+    return number.toString()
+  }
+};

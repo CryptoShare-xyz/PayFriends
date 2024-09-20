@@ -24,6 +24,7 @@ import Link from "next/link";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useContract } from "@/contexts/ContractProvider";
 import { getEthRate } from "@/lib/ethRate";
+import { formatMoney } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ConnectKitButton, useModal } from "connectkit";
 import { useRouter } from "next/navigation";
@@ -235,7 +236,7 @@ export default function Home() {
                 <Image src="/collected.svg" width={128} height={128} alt=" group" />
               </div>
               <aside className="flex flex-col items-start gap-2">
-                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{collected}$</h1>
+                <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{formatMoney(collected)}$</h1>
                 <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
               </aside>
             </article>
