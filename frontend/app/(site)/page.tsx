@@ -32,6 +32,8 @@ import { useForm } from "react-hook-form";
 import { useAccount, useChainId } from "wagmi";
 import { z } from "zod";
 
+import Hero2 from "@/public/hero2.png";
+
 const createGroupSchema = z.object({
   groupName: z.string().min(1).max(20),
   ownerNickname: z.string().min(1).max(20),
@@ -225,7 +227,7 @@ export default function Home() {
 
       <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row md:px-8 justify-center items-center">
         <figure id="image" className="md:max-w-[36rem] max-w-[28rem] lg:w-[60%] md:w-[50%]">
-          <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
+          <Image className="object-cover" src={Hero2} alt="friends" />
         </figure>
 
         <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
