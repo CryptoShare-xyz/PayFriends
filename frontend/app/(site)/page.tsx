@@ -24,6 +24,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/components/ui/use-toast";
 import { useContract } from "@/contexts/ContractProvider";
 import { getEthRate } from "@/lib/ethRate";
+import { formatMoney } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useModal } from "connectkit";
 import { useRouter } from "next/navigation";
@@ -212,7 +213,7 @@ export default function Home() {
 
   return (
     <div>
-      <section id="hero" className="p-4 md:p-8 lg:rounded-2xl">
+      <section id="hero" className="p-2 2xl:p-4 lg:rounded-2xl">
         <div className="mx-auto">
           <h1 className="text-[#1F92CE] lg:my-8 font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl text-center md:text-left">PayFriends</h1>
           <div className="flex flex-col w-[80%] lg:my-8 mx-auto md:mr-auto md:ml-0 items-center md:items-start">
@@ -223,13 +224,13 @@ export default function Home() {
       </section>
 
       <div className="lg:max-w-[80%] mx-auto lg:rounded-2xl flex flex-col md:flex-row md:px-8 justify-center items-center">
-        <figure id="image" className="md:max-w-[48rem] max-w-[32rem] lg:w-[60%] md:w-[50%]">
+        <figure id="image" className="md:max-w-[36rem] max-w-[28rem] lg:w-[60%] md:w-[50%]">
           <Image className="object-cover" src="/hero2.svg" width={1028} height={1028} alt="friends" />
         </figure>
 
-        <section id="stats" className="flex flex-col text-center justify-evenly mx-auto md:gap-0 gap-4 mb-8 md:w-[30%]">
+        <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
           <article className="flex justify-center items-center gap-4">
-            <div className="max-w-[20vw]">
+            <div className="max-w-[6rem]">
               <Image src="/group.svg" width={128} height={128} alt=" group" />
             </div>
             <aside className="flex flex-col items-start">
@@ -239,11 +240,11 @@ export default function Home() {
           </article>
           <hr className="w-[60%] mx-auto border-dashed border-[#D9D9D9]" />
           <article className="flex justify-center items-center gap-4">
-            <div className="max-w-[15vw]">
+            <div className="max-w-[6rem]">
               <Image src="/collected.svg" width={128} height={128} alt=" group" />
             </div>
-            <aside className="flex flex-col items-start gap-2">
-              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{collected}$</h1>
+            <aside className="flex flex-col items-start">
+              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{formatMoney(collected)}$</h1>
               <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
             </aside>
           </article>
