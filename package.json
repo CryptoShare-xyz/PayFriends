@@ -4,6 +4,6 @@
     "deploy-dev": "(cd backend/ && rm -rf ignition/deployments/chain-31337 ; npx hardhat run scripts/deploy.ts --network localhost)"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^9.0.1"
   }
 }
