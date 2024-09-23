@@ -35,7 +35,7 @@ export default function About() {
                             </div>
                             <aside className="w-[80%]">
                                 <h2 className="font-semibold lg:text-lg 2xl:text-xl">3. Withdraw funds</h2>
-                                <p className="text-sm lg:text-base 2xl:text-lg">Click “Withdraw Now” once you are ready. Only the group creator (owner) can withdraw the funds. After that, users won't be able to deposit to group.</p>
+                                <p className="text-sm lg:text-base 2xl:text-lg">Click “Withdraw Now” once you are ready. Only the group creator (owner) can withdraw the funds. After that, users won&apos;t be able to deposit to group.</p>
                             </aside>
                         </li>
                     </ul>
@@ -46,7 +46,7 @@ export default function About() {
                         <li>Currently support USDC and ETH on Base.</li>
                         <li>The app is completely backendless.</li>
                         <li>Contract and website code is open source.</li>
-                        <li>We don't charge any fees beyond gas.</li>
+                        <li>We don&apos;t charge any fees beyond gas.</li>
                         <li>You can try it out also in Base Sepolia.</li>
                         <li>Contact us for feedback or questions.</li>
                     </ul>
