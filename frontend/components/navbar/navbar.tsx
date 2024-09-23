@@ -26,7 +26,7 @@ export function Navbar() {
     const isHome = pathname === "/";
 
     return (
-        <nav className="w-full flex flex-row p-4 mb-2 md:mb-4 lg:mb-8 items-center">
+        <nav className="w-full flex flex-row p-4 items-center">
             <NavMenu isMobile={isMobile}>
                 {!isHome && <ListItem href="/" title="Home" />}
                 <ListItem href="/about" title="About" />
