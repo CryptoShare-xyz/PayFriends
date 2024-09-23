@@ -57,7 +57,7 @@ export default function SiteLayout({
 
             <footer className="flex flex-col justify-center items-center gap-2 p-4 max-h-[20vh]">
                 <section className="flex justify-evenly items-center gap-2">
-                    <Link href="https://github.com/CryptoShare-xyz/cryptoshare" target="_blank">
+                    <Link href="https://github.com/CryptoShare-xyz/PayFriends" target="_blank">
                         <div className="max-w-[48px] w-[8vw]">
                             <Image src="/github.svg" width={128} height={128} alt="github" />
                         </div>
