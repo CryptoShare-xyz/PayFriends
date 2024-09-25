@@ -1,7 +1,9 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
+import * as Sentry from "@sentry/browser";
 import Image from "next/image";
+
 
 import { useEffect, useState } from "react";
 
@@ -76,6 +78,7 @@ function CreateGroupDialog() {
     } catch (error) {
       if (error instanceof Error) {
         toast({ variant: "destructive", description: error.message })
+        Sentry.captureException(error);
       }
     } finally {
       setOpen(false)
@@ -201,8 +204,10 @@ export default function Home() {
 
       setCollected(collectedUSDC + collectedEth);
 
-    } catch {
+    } catch (error) {
       alert("Failed loading contract")
+      Sentry.captureException(error);
+
     }
 
   }

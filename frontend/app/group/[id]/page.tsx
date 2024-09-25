@@ -25,6 +25,7 @@ import { useToast } from "@/components/ui/use-toast";
 import Wallet from "@/components/ui/wallet";
 import moment from "moment";
 
+import * as Sentry from "@sentry/browser";
 import {
     ArrowLeft, Check,
     CheckIcon,
@@ -184,6 +185,7 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
             if (error instanceof Error) {
                 toast({ variant: "destructive", description: error.message })
             }
+            Sentry.captureException(error);
         } finally {
             setOpen(false)
             setLoading(false)
@@ -287,6 +289,7 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
             if (error instanceof Error) {
                 toast({ variant: "destructive", description: error.message })
             }
+            Sentry.captureException(error);
         } finally {
             setOpen(false)
             setLoading(false)
@@ -415,7 +418,7 @@ export default function Page({ params }: { params: { id: string } }) {
             setIsOwner(groupInfo[3] === address);
             setIsParticipant(groupInfo[4] === address || groupInfo[10].some((participantsAddress: string) => participantsAddress === address));
 
-        } catch (e) {
+        } catch (error) {
             console.log(`Group id: ${id} not found`)
             setGroup(undefined)
         } finally {
