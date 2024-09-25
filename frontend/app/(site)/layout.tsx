@@ -42,8 +42,8 @@ export default function SiteLayout({
                         </div>
                     </Link>
                 </section>
-                <Link href="https://www.gnu.org/licenses/gpl-3.0.en.html#license-text" target="_blank">
-                    <h1 className="text-muted-foreground cursor-pointer hover:underline focus:underline">Terms and conditions</h1>
+                <Link href="/terms">
+                    <h1 className="text-muted-foreground cursor-pointer hover:underline focus:underline">Terms of Service</h1>
                 </Link>
             </footer>
         </div>
