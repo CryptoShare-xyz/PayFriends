@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const ETHERSCAN_URL = `https://sepolia.basescan.org/address/${process.env.NEXT_PUBLIC_CONTACT_ADDRESS}`
+
 export default function SiteLayout({
     children,
 }: {
@@ -42,9 +44,15 @@ export default function SiteLayout({
                         </div>
                     </Link>
                 </section>
-                <Link href="/terms">
-                    <h1 className="text-muted-foreground cursor-pointer hover:underline focus:underline">Terms of Service</h1>
-                </Link>
+                <div className="flex flex-row justify-center items-center space-x-4">
+                    <Link href="/terms">
+                        <h1 className="text-muted-foreground cursor-pointer hover:underline focus:underline">Terms of Service</h1>
+                    </Link>
+                    <div className="w-px h-4 bg-gray-300" aria-hidden="true" />
+                    <Link href={ETHERSCAN_URL} target="_blank">
+                        <h1 className="text-muted-foreground cursor-pointer hover:underline focus:underline">Contract</h1>
+                    </Link>
+                </div>
             </footer>
         </div>
     );
