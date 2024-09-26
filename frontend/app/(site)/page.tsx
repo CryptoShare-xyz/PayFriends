@@ -222,7 +222,7 @@ export default function Home() {
     <div>
       <section id="hero" className="p-2 2xl:p-4 lg:rounded-2xl">
         <div className="mx-auto">
-          <h1 className="text-[#1F92CE] lg:my-8 font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl text-center md:text-left">PayFriends</h1>
+          <h1 className="text-[#1F92CE] lg:my-2 font-extrabold tracking-[2px] lg:text-[6rem] md:text-7xl text-5xl text-center md:text-left">PayFriends</h1>
           <div className="flex flex-col w-[80%] lg:my-8 mx-auto md:mr-auto md:ml-0 items-center md:items-start">
             <h2 className="text-black my-2 text-base md:text-2xl text-center md:text-left">Share Expenses, Save on Fees <br /> Powered by Crypto</h2>
             <CreateGroupDialog />
