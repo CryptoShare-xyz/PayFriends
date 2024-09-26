@@ -70,4 +70,6 @@ export type BlockType =
   | "earliest"
   | number
   | BN;
+
+// @ts-ignore
 export type BaseContract = Omit<Contract, "clone" | "once">;
