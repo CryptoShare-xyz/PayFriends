@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const ETHERSCAN_URL = `https://sepolia.basescan.org/address/${process.env.NEXT_PUBLIC_CONTACT_ADDRESS}`
+const ETHERSCAN_URL = `https://basescan.org/address/${process.env.NEXT_PUBLIC_CONTACT_ADDRESS}`
 
 export default function SiteLayout({
     children,
