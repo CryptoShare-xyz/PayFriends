@@ -147,8 +147,6 @@ export interface GroupSplitV2 extends BaseContract {
 
     getGroupsNum(): NonPayableTransactionObject<string>;
 
-    getGroupsNumV2(): NonPayableTransactionObject<string>;
-
     getParticipantDetails(
       _groupId: number | string | BN,
       _participantAddress: string

@@ -16,8 +16,8 @@ pragma solidity ^0.8.20;
 contract GroupSplit is Initializable {
     // Use uint256 instead of bool for group state, see:
     // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/58f635312aa21f947cae5f8578638a85aa2519f5/contracts/security/ReentrancyGuard.sol#L23-L27
-    uint256 private constant _GROUP_CLOSED = 1;
-    uint256 private constant _GROUP_OPEN = 2;
+    uint256 internal constant _GROUP_CLOSED = 1;
+    uint256 internal constant _GROUP_OPEN = 2;
 
     struct Participant {
         address participantAddress;
@@ -43,7 +43,7 @@ contract GroupSplit is Initializable {
 
     Group[] public groups;
     uint256[] public groupIds;
-    mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
+    mapping(uint256 => uint256) internal groupIndexById; // Mapping from groupId to index in the groups array
 
     // stats
     uint256 public contractOpenedGroupsStat;
@@ -73,7 +73,7 @@ contract GroupSplit is Initializable {
         address _participantAddress,
         string memory _nickname,
         uint256 _deposit
-    ) private {
+    ) internal virtual {
         uint256 index = getGroupIndexById(_groupId);
         // Ensure the group exists
         require(groups[index].groupId == _groupId, "Group does not exist");
@@ -155,7 +155,7 @@ contract GroupSplit is Initializable {
         string memory _groupName,
         string memory _ownerNickname,
         bool isUSDC // New flag to indicate if the group will use USDC or ETH
-    ) external {
+    ) external virtual {
         // add to groups:
         Group storage newGroup = groups.push();
 
@@ -206,13 +206,13 @@ contract GroupSplit is Initializable {
 
     function getGroupIndexById(
         uint256 _groupId
-    ) private view returns (uint256) {
+    ) internal view virtual returns (uint256) {
         require(groupIndexById[_groupId] != 0, "Group does not exist");
         return groupIndexById[_groupId];
     }
 
     // Function to return all group IDs
-    function getAllGroupIds() public view returns (uint256[] memory) {
+    function getAllGroupIds() public view virtual returns (uint256[] memory) {
         return groupIds;
     }
 
@@ -221,6 +221,7 @@ contract GroupSplit is Initializable {
     )
         external
         view
+        virtual
         returns (
             uint256,
             string memory,
@@ -261,7 +262,7 @@ contract GroupSplit is Initializable {
         string memory _nickname,
         bool isUSDCDeposit,
         uint256 usdcAmount // Specify the USDC amount in case of USDC deposit
-    ) external payable isGroupOpen(_groupId) {
+    ) external payable virtual isGroupOpen(_groupId) {
         uint256 index = getGroupIndexById(_groupId); // Get the index of the group
         Group storage group = groups[index]; // Load the group struct
 
@@ -315,7 +316,7 @@ contract GroupSplit is Initializable {
         );
     }
 
-    function withdrawFromGroup(uint256 _groupId) external payable {
+    function withdrawFromGroup(uint256 _groupId) external payable virtual {
         uint256 index = getGroupIndexById(_groupId);
         Group storage group = groups[index];
         // make sure the msg.sender is the group owner
@@ -378,6 +379,7 @@ contract GroupSplit is Initializable {
     )
         public
         view
+        virtual
         returns (
             address participantAddress,
             string memory nickname,
