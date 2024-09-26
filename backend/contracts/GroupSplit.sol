@@ -1,12 +1,3 @@
-/* ToDo:
-[] test new withdrawFromGroup (with reentrancy protection)
-[] test USDC supporting version
-[X] improve generateRandomNumber (gpt recommendation)
-[] revise again withdrawFromGroup for edge cases
-[] implement open/close group
-[] consider using a proxy contract
-*/
-
 // SPDX-License-Identifier: MIT
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
