@@ -9,10 +9,11 @@
 
 // SPDX-License-Identifier: MIT
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 pragma solidity ^0.8.20;
 
-contract GroupSplit {
+contract GroupSplit is Initializable {
     // Use uint256 instead of bool for group state, see:
     // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/58f635312aa21f947cae5f8578638a85aa2519f5/contracts/security/ReentrancyGuard.sol#L23-L27
     uint256 private constant _GROUP_CLOSED = 1;
@@ -45,14 +46,16 @@ contract GroupSplit {
     mapping(uint256 => uint256) private groupIndexById; // Mapping from groupId to index in the groups array
 
     // stats
-    uint256 public contractOpenedGroupsStat = 0;
-    uint256 public contractTotalCollectedEthStat = 0;
-    uint256 public contractTotalCollectedUSDCStat = 0;
+    uint256 public contractOpenedGroupsStat;
+    uint256 public contractTotalCollectedEthStat;
+    uint256 public contractTotalCollectedUSDCStat;
 
     IERC20 public USDC;
 
-    constructor(address _usdcTokenAddress) {
-        // make genesis group unvalid
+    function initialize(address _usdcTokenAddress) public initializer {
+        contractOpenedGroupsStat = 0;
+        contractTotalCollectedEthStat = 0;
+        contractTotalCollectedUSDCStat = 0;
         groups.push();
         USDC = IERC20(_usdcTokenAddress);
     }
