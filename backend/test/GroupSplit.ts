@@ -27,7 +27,7 @@ describe("GroupSplit", function () {
     const { usdcMock } = await loadFixture(deployUSDCFixture);
 
     const GroupSplit = await hre.ethers.getContractFactory("GroupSplit");
-    const groupSplit = await GroupSplit.deploy(await usdcMock.getAddress());
+    const groupSplit = await hre.upgrades.deployProxy(GroupSplit, [await usdcMock.getAddress()]);
     await groupSplit.waitForDeployment();
 
     await usdcMock.mint(owner.address, 1000000);

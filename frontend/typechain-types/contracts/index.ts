@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { GroupSplit } from "./GroupSplit";
+export type { GroupSplitV2 } from "./GroupSplitV2";
 export type { USDCMock } from "./USDCMock";

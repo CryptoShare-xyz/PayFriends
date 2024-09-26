@@ -1,6 +1,4 @@
-import { ethers, ignition, network } from "hardhat";
-import GroupSplit from "../ignition/modules/GroupSplit";
-import USDCMock from "../ignition/modules/USDCMock";
+import { ethers, network, upgrades } from "hardhat";
 
 const USDC_CONTRACT_ADDRESS = "0xB209bf575b13072195173619e95c1346497E98C3" // Base sepolia  
 
@@ -10,7 +8,8 @@ async function deployDevUSDC() {
     const amount = "1000"
 
     console.log("Deploying USDCMock...");
-    const { usdcMock } = await ignition.deploy(USDCMock);
+    const USDCMock = await ethers.getContractFactory("USDCMock");
+    const usdcMock = await USDCMock.deploy();
     await usdcMock.waitForDeployment();
 
     const mintAmount = ethers.parseUnits(amount, 6);
@@ -28,9 +27,18 @@ async function deployDevUSDC() {
 }
 
 async function deployGroupSplitter(usdcAddress: string) {
-    const { groupSplit } = await ignition.deploy(GroupSplit, { parameters: { GroupSplit: { usdcAddress } } });
+    const GroupSplit = await ethers.getContractFactory("GroupSplit")
+    const groupSplit = await upgrades.deployProxy(GroupSplit, [usdcAddress]);
     const deployedAddress = await groupSplit.getAddress();
-    console.log(`Deployed GroupSplitter to ${deployedAddress}`);
+    console.log(`Proxy Address to ${deployedAddress}`);
+    console.log(
+        "Implementation Address:",
+        await upgrades.erc1967.getImplementationAddress(deployedAddress)
+    );
+    console.log(
+        "Admin Address:",
+        await upgrades.erc1967.getAdminAddress(deployedAddress)
+    );
     return deployedAddress;
 }
 
@@ -39,7 +47,7 @@ async function main() {
     switch (network.name) {
         case "localhost":
             const usdcAddress = await deployDevUSDC();
-            await deployGroupSplitter(USDC_CONTRACT_ADDRESS);
+            await deployGroupSplitter(usdcAddress);
             break;
         case "base_sepolia":
             await deployGroupSplitter(USDC_CONTRACT_ADDRESS)

@@ -1,4 +1,5 @@
 import "@nomicfoundation/hardhat-toolbox";
+import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import * as dotenv from 'dotenv';
 import { HardhatUserConfig } from "hardhat/config";

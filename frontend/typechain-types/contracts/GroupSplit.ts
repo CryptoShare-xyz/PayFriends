@@ -21,6 +21,10 @@ export interface EventOptions {
   topics?: string[];
 }
 
+export type Initialized = ContractEventLog<{
+  version: string;
+  0: string;
+}>;
 export type logGroupClosed = ContractEventLog<{
   groupId: string;
   owner: string;
@@ -182,11 +186,19 @@ export interface GroupSplit extends BaseContract {
       9: string;
     }>;
 
+    initialize(_usdcTokenAddress: string): NonPayableTransactionObject<void>;
+
     withdrawFromGroup(
       _groupId: number | string | BN
     ): PayableTransactionObject<void>;
   };
   events: {
+    Initialized(cb?: Callback<Initialized>): EventEmitter;
+    Initialized(
+      options?: EventOptions,
+      cb?: Callback<Initialized>
+    ): EventEmitter;
+
     logGroupClosed(cb?: Callback<logGroupClosed>): EventEmitter;
     logGroupClosed(
       options?: EventOptions,
@@ -227,6 +239,13 @@ export interface GroupSplit extends BaseContract {
 
     allEvents(options?: EventOptions, cb?: Callback<EventLog>): EventEmitter;
   };
+
+  once(event: "Initialized", cb: Callback<Initialized>): void;
+  once(
+    event: "Initialized",
+    options: EventOptions,
+    cb: Callback<Initialized>
+  ): void;
 
   once(event: "logGroupClosed", cb: Callback<logGroupClosed>): void;
   once(
