@@ -1,0 +1,269 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0xe90cA8dce67433eFE075C7D3FeB4696B8005dD69",
+      "txHash": "0x51de428ecf06ff73180e4c35873320e7d356d357f932f4a1fb5655a1207041dc",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "c3b85f56b092ba42e0f6ad6938578624fd6d05fa3e8908bc8e1fb42a72902d56": {
+      "address": "0xcc1b05Bee9f06fd33F7769c7FDE8eCCdF185f1EB",
+      "txHash": "0x03641108f4580b8e05e7da5c2d1715687c7bdb0f2b2135453f9a72da34525a23",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "groups",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_array(t_struct(Group)381_storage)dyn_storage",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:44"
+          },
+          {
+            "label": "groupIds",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)dyn_storage",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:45"
+          },
+          {
+            "label": "groupIndexById",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:46"
+          },
+          {
+            "label": "contractOpenedGroupsStat",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:49"
+          },
+          {
+            "label": "contractTotalCollectedEthStat",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:50"
+          },
+          {
+            "label": "contractTotalCollectedUSDCStat",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:51"
+          },
+          {
+            "label": "USDC",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_contract(IERC20)331",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:53"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)7_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Group)381_storage)dyn_storage": {
+            "label": "struct GroupSplit.Group[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC20)331": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_struct(Participant)352_storage)": {
+            "label": "mapping(address => struct GroupSplit.Participant)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Group)381_storage": {
+            "label": "struct GroupSplit.Group",
+            "members": [
+              {
+                "label": "groupId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "groupName",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "isUSDC",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "creationTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "ownerNickname",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "balance",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "7"
+              },
+              {
+                "label": "totalCollected",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "8"
+              },
+              {
+                "label": "totalWithdrawn",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "9"
+              },
+              {
+                "label": "participantsAddresses",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "10"
+              },
+              {
+                "label": "participantDetails",
+                "type": "t_mapping(t_address,t_struct(Participant)352_storage)",
+                "offset": 0,
+                "slot": "11"
+              }
+            ],
+            "numberOfBytes": "384"
+          },
+          "t_struct(Participant)352_storage": {
+            "label": "struct GroupSplit.Participant",
+            "members": [
+              {
+                "label": "participantAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "nickname",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "totalDeposits",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "lastDeposited",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
