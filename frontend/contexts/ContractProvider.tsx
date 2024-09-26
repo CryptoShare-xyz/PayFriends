@@ -18,7 +18,8 @@ const createWeb3 = () => {
         const provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545")
         return new Web3(provider)
     } else {
-        const alchemyUrl = `wss://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+        // const alchemyUrl = `wss://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+        const alchemyUrl = `wss://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
         return createAlchemyWeb3(alchemyUrl);
     }
 }

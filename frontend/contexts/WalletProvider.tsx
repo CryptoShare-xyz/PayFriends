@@ -2,7 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import React, { ReactNode } from "react";
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { baseSepolia, hardhat } from "wagmi/chains";
+// import { baseSepolia, hardhat } from "wagmi/chains";
+import { base, hardhat } from "wagmi/chains";
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 if (isDevelopment) {
@@ -21,10 +22,16 @@ if (isDevelopment) {
 } else {
     var config = createConfig(
         getDefaultConfig({
-            chains: [baseSepolia],
+            // chains: [baseSepolia],
+            // transports: {
+            //     [baseSepolia.id]: http(
+            //         `https://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
+            //     ),
+            // },
+            chains: [base],
             transports: {
-                [baseSepolia.id]: http(
-                    `https://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
+                [base.id]: http(
+                    `https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
                 ),
             },
             walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",

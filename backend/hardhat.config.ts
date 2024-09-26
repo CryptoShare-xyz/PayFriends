@@ -36,6 +36,12 @@ const config: HardhatUserConfig = {
       accounts: [`${process.env.PRIVATE_KEY || dummyKey}`],
       url: `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
     },
+
+    base: {
+      accounts: [`${process.env.PRIVATE_KEY || dummyKey}`],
+      url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+    },
+    
   },
   paths: {
     artifacts: '../frontend/artifacts'
