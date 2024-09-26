@@ -1,6 +1,6 @@
 import { ethers, network, upgrades } from "hardhat";
 
-const USDC_CONTRACT_ADDRESS = "0xB209bf575b13072195173619e95c1346497E98C3" // Base sepolia  
+const USDC_CONTRACT_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // Base sepolia  
 
 async function deployDevUSDC() {
     const signers = await ethers.getSigners();
@@ -49,7 +49,8 @@ async function main() {
             const usdcAddress = await deployDevUSDC();
             await deployGroupSplitter(usdcAddress);
             break;
-        case "base_sepolia":
+        // case "base_sepolia":
+        case "base":
             await deployGroupSplitter(USDC_CONTRACT_ADDRESS)
             break
         default:
