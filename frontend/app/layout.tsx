@@ -15,8 +15,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'PayFriends',
     description: 'Share Expenses, Save on Fees - Powered by Crypto',
-    images: "/frontend/public/hero2.png",
+    images: "/og_image.png",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: 'PayFriends',
+    description: 'Share Expenses, Save on Fees - Powered by Crypto',
+    images: "/og_image.png",
   }
 };
 
