@@ -12,7 +12,7 @@ const ContractContext = createContext<{ contract: GroupSplit | undefined, usdcCo
 export const contractAddress = process.env.NEXT_PUBLIC_CONTACT_ADDRESS
 export const usdcContractAddress = process.env.NEXT_PUBLIC_USDC_CONTACT_ADDRESS
 
-const createWeb3 = () => {
+export const createWeb3 = () => {
     const isDevelopment = process.env.NODE_ENV === 'development';
     if (isDevelopment) {
         const provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545")
@@ -22,6 +22,12 @@ const createWeb3 = () => {
         const alchemyUrl = `wss://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
         return createAlchemyWeb3(alchemyUrl);
     }
+}
+
+export async function fetchBaseLowGasPrice() {
+    const web3 = createWeb3()
+    const currentGasPrice = Number.parseInt(await web3.eth.getGasPrice()); // Fetch the average gas price in Wei
+    return Math.floor(currentGasPrice * 0.8).toString();  // Estimate a lower gas price, e.g., 80% of the average
 }
 
 

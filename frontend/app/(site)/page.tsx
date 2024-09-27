@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
+import { fetchBaseLowGasPrice } from "@/contexts/ContractProvider";
 
 
 
@@ -55,6 +55,8 @@ function CreateGroupDialog() {
   const { toast } = useToast()
   const myChain = useChainId()
 
+
+
   const form = useForm<z.infer<typeof createGroupSchema>>({
     resolver: zodResolver(createGroupSchema),
     defaultValues: {
@@ -72,7 +74,13 @@ function CreateGroupDialog() {
     const isUSDC = currency === "USDC"
 
     try {
-      const group = await contract.methods.createGroup(groupName, ownerNickname, isUSDC).send({ from: address });
+      const lowGasPrice = await fetchBaseLowGasPrice();
+      const gasLimit = await contract.methods.createGroup(groupName, ownerNickname, isUSDC).estimateGas({ from: address });
+      const group = await contract.methods.createGroup(groupName, ownerNickname, isUSDC).send({
+        from: address,
+        gasPrice: lowGasPrice,
+        gas: gasLimit
+      });
       const groupId = group.events?.logGroupCreated.returnValues.groupId
       push(`/group/${groupId}`)
     } catch (error) {

@@ -42,7 +42,7 @@ import { useMediaQuery } from 'react-responsive';
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { contractAddress, useContract } from "@/contexts/ContractProvider";
+import { contractAddress, fetchBaseLowGasPrice, useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useModal } from "connectkit";
@@ -138,6 +138,7 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
     async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
         let { nickname, amount } = values;
         setLoading(true)
+        const lowGasPrice = await fetchBaseLowGasPrice();
 
         try {
             if (nickname === undefined) {
@@ -164,10 +165,21 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
                 }
 
                 if (allowance < usdc) {
-                    const tx2 = await usdcContract.methods.approve(contractAddress, usdc - allowance).send({ from: address });
+                    const gasLimit = Number(await usdcContract.methods.approve(contractAddress, usdc - allowance).estimateGas({ from: address }));
+                    const tx2 = await usdcContract.methods.approve(contractAddress, usdc - allowance).send({
+                        from: address,
+                        gasPrice: lowGasPrice,
+                        gas: gasLimit.toString()
+
+                    });
                 }
 
-                const tx3 = await contract.methods.depositToGroup(groupId, nickname, true, usdc).send({ from: address });
+                const gasLimit = await contract.methods.depositToGroup(groupId, nickname, true, usdc).estimateGas({ from: address });
+                const tx3 = await contract.methods.depositToGroup(groupId, nickname, true, usdc).send({
+                    from: address,
+                    gasPrice: lowGasPrice,
+                    gas: gasLimit
+                });
             } else {
                 const wei = web3.utils.toWei(amount.toString(), 'ether')
                 const balance = Number(data?.value)
@@ -175,8 +187,13 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
                 if (balance < Number(wei)) {
                     throw new Error(`Not enough balance (${balance / 10 ** 18} ETH)`)
                 }
-
-                const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({ from: address, value: web3.utils.toHex(wei) });
+                const gasLimit = await contract.methods.depositToGroup(groupId, nickname, false, 0).estimateGas({ from: address, value: web3.utils.toHex(wei) });
+                const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({
+                    from: address,
+                    value: web3.utils.toHex(wei),
+                    gasPrice: lowGasPrice,
+                    gas: gasLimit
+                });
 
             }
             toast({ description: "Payed group" })
@@ -279,10 +296,16 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const { contract } = useContract()
 
     const handleWithdraw = async (e: React.MouseEvent<HTMLElement>) => {
+        const lowGasPrice = await fetchBaseLowGasPrice();
         e.preventDefault()
         setLoading(true)
         try {
-            const tx = await contract.methods.withdrawFromGroup(groupId).send({ from: address });
+            const gasLimit = await contract.methods.withdrawFromGroup(groupId).estimateGas({ from: address });
+            const tx = await contract.methods.withdrawFromGroup(groupId).send({
+                from: address,
+                gasPrice: lowGasPrice,
+                gas: gasLimit
+            });
             toast({ description: "Withdrawn from group" })
             window.location.reload()
         } catch (error) {
