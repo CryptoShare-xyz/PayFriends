@@ -28,7 +28,10 @@ import { useContract } from "@/contexts/ContractProvider";
 import { getEthRate } from "@/lib/ethRate";
 import { formatMoney } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useModal } from "connectkit";
+import {
+  useChainModal,
+  useConnectModal
+} from '@rainbow-me/rainbowkit';
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useAccount, useChainId } from "wagmi";
@@ -50,7 +53,8 @@ function CreateGroupDialog() {
   const [loading, setLoading] = useState(false)
   const { push } = useRouter()
   const { address, isConnected, chainId } = useAccount();
-  const { openSIWE, openSwitchNetworks } = useModal()
+  const { openConnectModal } = useConnectModal();
+  const { openChainModal } = useChainModal();
   const { contract } = useContract()
   const { toast } = useToast()
   const myChain = useChainId()
@@ -98,12 +102,12 @@ function CreateGroupDialog() {
   const onOpenDialog = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault()
 
-    if (!isConnected) {
-      openSIWE(true);
+    if (!isConnected && openConnectModal) {
+      openConnectModal();
       return;
     }
-    if (chainId !== myChain) {
-      openSwitchNetworks()
+    if (chainId !== myChain && openChainModal) {
+      openChainModal()
       return;
     }
 

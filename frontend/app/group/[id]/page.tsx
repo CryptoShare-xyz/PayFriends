@@ -45,7 +45,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { contractAddress, fetchBaseLowGasPrice, useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useModal } from "connectkit";
+import {
+    useChainModal,
+    useConnectModal
+} from '@rainbow-me/rainbowkit';
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAccount, useBalance, useChainId } from "wagmi";
@@ -124,7 +127,8 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
     const { toast } = useToast()
     const { contract, usdcContract } = useContract()
     const myChain = useChainId()
-    const { openSIWE, openSwitchNetworks } = useModal()
+    const { openConnectModal } = useConnectModal();
+    const { openChainModal } = useChainModal();
 
     const form = useForm<z.infer<typeof joinGroupSchema>>({
         resolver: zodResolver(joinGroupSchema),
@@ -214,13 +218,13 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
     const onOpenDialog = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault()
 
-        if (!isConnected) {
-            openSIWE(true);
+        if (!isConnected && openConnectModal) {
+            openConnectModal();
             return;
         }
 
-        if (chainId !== myChain) {
-            openSwitchNetworks()
+        if (chainId !== myChain && openChainModal) {
+            openChainModal()
             return;
         }
 
@@ -402,10 +406,6 @@ export default function Page({ params }: { params: { id: string } }) {
         navigator.clipboard.writeText(text)
     }
 
-    const notMobile = useMediaQuery({
-        query: '(min-width: 640px)'
-    })
-
     async function getGroupInfo(id: string) {
         const _GROUP_OPEN = 2;
 
@@ -467,7 +467,7 @@ export default function Page({ params }: { params: { id: string } }) {
                         <ArrowLeft className="text-[#009BEB]" size={24} />
                     </Link>
                     <div className="ml-auto flex items-center space-x-4 ">
-                        <Wallet isMobile={!notMobile} />
+                        <Wallet />
                     </div>
                 </nav>
                 <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 text-muted-foreground opacity-60 h-full">Group not found</h2>
@@ -486,7 +486,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     <ArrowLeft className="text-[#009BEB] lg:w-[32px] md:w-[24px] w-[20px]" size={32} />
                 </Link>
                 <div className="ml-auto flex items-center space-x-4">
-                    <Wallet isMobile={!notMobile} />
+                    <Wallet />
                 </div>
             </nav>
 

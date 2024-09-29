@@ -32,7 +32,7 @@ export function Navbar() {
                 <ListItem href="/about" title="About" />
             </NavMenu>
             <div className="ml-auto">
-                <Wallet isMobile={isMobile} />
+                <Wallet />
             </div>
         </nav>
     )
