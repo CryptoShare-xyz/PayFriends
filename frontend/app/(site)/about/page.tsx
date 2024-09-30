@@ -47,7 +47,6 @@ export default function About() {
                         <li>The app is completely backendless.</li>
                         <li>Contract and website code is open source.</li>
                         <li>We don&apos;t charge any fees beyond gas.</li>
-                        <li>You can try it out also in Base Sepolia.</li>
                         <li>Contact us for feedback or questions.</li>
                     </ul>
                 </section>
