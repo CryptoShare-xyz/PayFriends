@@ -36,7 +36,7 @@ if (isDevelopment) {
 
 export const config = getDefaultConfig({
     appName: "PayFriends",
-    appIcon: "/og_image.jpg",
+    appIcon: "https://payfriends.xyz/og_image.jpg",
     appUrl: "https://payfriends.xyz",
     appDescription: "Share Expenses, Save on Fees - Powered by Crypto",
     projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
