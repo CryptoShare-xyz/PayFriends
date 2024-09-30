@@ -73,3 +73,5 @@ yarn.lock
 templates/evm/core/pages/api
 # Sentry Config File
 .env.sentry-build-plugin
+
+certificates

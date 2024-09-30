@@ -23,7 +23,13 @@ export const metadata: Metadata = {
     title: 'PayFriends',
     description: 'Share Expenses, Save on Fees - Powered by Crypto',
     images: "/og_image.jpg",
-  }
+  },
+  icons: [
+    { rel: "apple-touch-icon", sizes: "180x180", url: "/apple-touch-icon.png" },
+    { rel: "icon", type: "image/png", sizes: "32x32", url: "/favicon-32x32.png" },
+    { rel: "icon", type: "image/png", sizes: "16x16", url: "/favicon-16x16.png" },
+    { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#1f92ce" },
+  ],
 };
 
 export default function RootLayout({
