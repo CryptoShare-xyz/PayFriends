@@ -38,11 +38,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useMediaQuery } from 'react-responsive';
 
+import type { Group } from "@/actions/GroupSplitter";
+import { depositEth, depositUSDC, getGroupInfo, withdrawFromGroup } from "@/actions/GroupSplitter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { contractAddress, fetchBaseLowGasPrice, useContract } from "@/contexts/ContractProvider";
 import { formatAddress } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -51,8 +51,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAccount, useBalance, useChainId } from "wagmi";
-import web3 from "web3";
+import { useAccount, useChainId } from "wagmi";
 import { z } from "zod";
 
 
@@ -122,10 +121,8 @@ function ShareGroup() {
 const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC: boolean }> = ({ groupId, isParticipant, isUSDC }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
-    const { address, chainId, isConnected } = useAccount();
-    const { data } = useBalance({ address: address })
+    const { chainId, isConnected } = useAccount();
     const { toast } = useToast()
-    const { contract, usdcContract } = useContract()
     const myChain = useChainId()
     const { openConnectModal } = useConnectModal();
     const { openChainModal } = useChainModal();
@@ -142,7 +139,6 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
     async function onSubmit(values: z.infer<typeof joinGroupSchema>) {
         let { nickname, amount } = values;
         setLoading(true)
-        const lowGasPrice = await fetchBaseLowGasPrice();
 
         try {
             if (nickname === undefined) {
@@ -154,51 +150,9 @@ const PayGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, isUSDC
             }
 
             if (isUSDC) {
-                const usdc = amount * (10 ** 6); // usdc decimal is 6 
-
-                const balance = Number(await usdcContract.methods.balanceOf(address).call())
-
-                // check user has enough balance
-                if (balance < usdc) {
-                    throw new Error(`Not enough balance (${balance / 10 ** 6} USDC)`)
-                }
-
-                const allowance = Number(await usdcContract.methods.allowance(address, contractAddress).call())
-                if (!Number.isInteger(allowance)) {
-                    throw new Error("Failed to get allowance")
-                }
-
-                if (allowance < usdc) {
-                    const gasLimit = Number(await usdcContract.methods.approve(contractAddress, usdc - allowance).estimateGas({ from: address }));
-                    const tx2 = await usdcContract.methods.approve(contractAddress, usdc - allowance).send({
-                        from: address,
-                        gasPrice: lowGasPrice,
-                        gas: gasLimit.toString()
-
-                    });
-                }
-
-                const gasLimit = await contract.methods.depositToGroup(groupId, nickname, true, usdc).estimateGas({ from: address });
-                const tx3 = await contract.methods.depositToGroup(groupId, nickname, true, usdc).send({
-                    from: address,
-                    gasPrice: lowGasPrice,
-                    gas: gasLimit
-                });
+                await depositUSDC(groupId, nickname, amount);
             } else {
-                const wei = web3.utils.toWei(amount.toString(), 'ether')
-                const balance = Number(data?.value)
-                // check user has enough balance
-                if (balance < Number(wei)) {
-                    throw new Error(`Not enough balance (${balance / 10 ** 18} ETH)`)
-                }
-                const gasLimit = await contract.methods.depositToGroup(groupId, nickname, false, 0).estimateGas({ from: address, value: web3.utils.toHex(wei) });
-                const tx = await contract.methods.depositToGroup(groupId, nickname, false, 0).send({
-                    from: address,
-                    value: web3.utils.toHex(wei),
-                    gasPrice: lowGasPrice,
-                    gas: gasLimit
-                });
-
+                await depositEth(groupId, nickname, amount);
             }
             toast({ description: "Payed group" })
             window.location.reload()
@@ -297,19 +251,12 @@ const WithdrawDialog: React.FC<{ groupId: string }> = ({ groupId }) => {
     const [loading, setLoading] = useState(false)
     const { address } = useAccount();
     const { toast } = useToast()
-    const { contract } = useContract()
 
     const handleWithdraw = async (e: React.MouseEvent<HTMLElement>) => {
-        const lowGasPrice = await fetchBaseLowGasPrice();
         e.preventDefault()
         setLoading(true)
         try {
-            const gasLimit = await contract.methods.withdrawFromGroup(groupId).estimateGas({ from: address });
-            const tx = await contract.methods.withdrawFromGroup(groupId).send({
-                from: address,
-                gasPrice: lowGasPrice,
-                gas: gasLimit
-            });
+            await withdrawFromGroup(groupId);
             toast({ description: "Withdrawn from group" })
             window.location.reload()
         } catch (error) {
@@ -361,37 +308,12 @@ function Loading() {
     )
 }
 
-type Group = {
-    groupId: string,
-    groupName: string,
-    owner: string,
-    ownerNickname: string,
-    creationTime: string,
-    status: boolean,
-    balance: number,
-    totalCollected: number,
-    totalWithdrawn: number,
-    participantsAddresses: Participant[],
-    isUSDC: boolean,
-}
-
-type Participant = {
-    participantAddress: string;
-    nickname: string;
-    totalDeposits: number;
-    lastDeposited: string
-}
-
-
-
 export default function Page({ params }: { params: { id: string } }) {
     const [isOwner, setIsOwner] = useState(false)
     const [isParticipant, setIsParticipant] = useState(false)
-    const [group, setGroup] = useState<Group | undefined>(undefined);
+    const [group, setGroup] = useState<Group>();
     const [loading, setLoading] = useState(true)
     const { address } = useAccount();
-    const { contract } = useContract()
-
     const [copiedOwner, setCopiedOwner] = useState(false)
 
     const copyOwnerAddress = (address: string) => {
@@ -406,51 +328,19 @@ export default function Page({ params }: { params: { id: string } }) {
         navigator.clipboard.writeText(text)
     }
 
-    async function getGroupInfo(id: string) {
-        const _GROUP_OPEN = 2;
-
-        try {
-            const groupInfo = await contract.methods.getGroupInfoById(id).call()
-            const unit = groupInfo[2] ? 6 : 18
-
-
-            const participants: Participant[] = await Promise.all<Participant>(groupInfo[10].map(async (participantsAddress: string): Promise<Participant> => {
-                const participant = await contract.methods.getParticipantDetails(groupInfo[0], participantsAddress).call();
-                return {
-                    nickname: participant.nickname,
-                    lastDeposited: participant.lastDeposited,
-                    participantAddress: participantsAddress,
-                    totalDeposits: Number.parseInt(participant.totalDeposits) / 10 ** unit
-                };
-            }))
-
-            setGroup({
-                groupId: groupInfo[0],
-                groupName: groupInfo[1],
-                isUSDC: groupInfo[2],
-                owner: groupInfo[3],
-                ownerNickname: groupInfo[4],
-                creationTime: groupInfo[5],
-                status: Number.parseInt(groupInfo[6]) === _GROUP_OPEN,
-                balance: Number.parseInt(groupInfo[7]) / 10 ** unit,
-                totalCollected: Number.parseInt(groupInfo[8]) / 10 ** unit,
-                totalWithdrawn: Number.parseInt(groupInfo[9]) / 10 ** unit,
-                participantsAddresses: participants
-            })
-
-            setIsOwner(groupInfo[3] === address);
-            setIsParticipant(groupInfo[4] === address || groupInfo[10].some((participantsAddress: string) => participantsAddress === address));
-
-        } catch (error) {
-            console.log(`Group id: ${id} not found`)
-            setGroup(undefined)
-        } finally {
-            setLoading(false)
-        }
-    }
     useEffect(() => {
-        getGroupInfo(params.id);
-
+        getGroupInfo(params.id)
+            .then((group) => {
+                setGroup(group);
+                setIsOwner(group.owner === address);
+                setIsParticipant(group.owner === address || group.participants.some((participant) => participant.participantAddress === address));
+            })
+            .catch(() => {
+                console.log(`Group id: ${params.id} not found`);
+            })
+            .finally(() => {
+                setLoading(false);
+            })
     }, [params.id, address])
 
     if (loading) {
@@ -570,7 +460,7 @@ export default function Page({ params }: { params: { id: string } }) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {group.participantsAddresses.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
+                                {group.participants.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
                                     <TableRow key={participantAddress}>
                                         <TableCell className="text-xs sm:text-sm md:text-base capitalize">{nickname}</TableCell>
                                         <TableCell className=" text-xs sm:text-sm md:text-base hover:underline focus:underline cursor-pointer" onClick={(e) => copyText(participantAddress)}>{formatAddress(participantAddress)}</TableCell>
