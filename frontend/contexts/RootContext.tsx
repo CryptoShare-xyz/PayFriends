@@ -4,8 +4,7 @@
 // the root layout is a server side. Making the entire root layout
 // a client side component makes NextJS run in to an hydration error.
 import { Toaster } from "@/components/ui/toaster";
-import { ContractProvider } from "@/contexts/ContractProvider";
-import { WalletProvider } from "@/contexts/WalletProvider";
+import { Web3Context } from "@/contexts/Web3Context";
 import Script from "next/script";
 
 const MicrosoftClarity = () => {
@@ -34,11 +33,9 @@ export default function RootContext({
     return (
         <>
             <MicrosoftClarity />
-            <WalletProvider>
-                <ContractProvider>
-                    {children}
-                </ContractProvider>
-            </WalletProvider>
+            <Web3Context>
+                {children}
+            </Web3Context>
             <Toaster />
         </>
     );

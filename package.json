@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "concurrently --kill-others \"npm --prefix frontend/ run dev\" \"(cd backend/ && npx hardhat node)\"",
-    "deploy-dev": "(cd backend/ && rm -rf ignition/deployments/chain-31337 ; npx hardhat run scripts/deploy.ts --network localhost)"
+    "deploy-dev": "(cd frontend/ && npx wagmi generate) && (cd backend/ && rm -rf ignition/deployments/chain-31337 ; npx hardhat run scripts/deploy.ts --network localhost)"
   },
   "devDependencies": {
     "concurrently": "^9.0.1"

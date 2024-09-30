@@ -2,7 +2,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import * as dotenv from 'dotenv';
-import { HardhatUserConfig } from "hardhat/config";
+import type { HardhatUserConfig } from "hardhat/config";
 
 dotenv.config();
 const dummyKey = '0x' + '0'.repeat(32 * 2)
@@ -15,11 +15,6 @@ const config: HardhatUserConfig = {
         enabled: true
       }
     }
-  },
-
-  typechain: {
-    outDir: "../frontend/typechain-types", // Specify the output directory for generated types
-    target: "web3-v1", // Generate types for Ethers.js v5
   },
 
   // This makes sure tests are ran locally
@@ -43,10 +38,6 @@ const config: HardhatUserConfig = {
     },
 
   },
-  paths: {
-    artifacts: '../frontend/artifacts'
-  }
-
 };
 
 export default config;

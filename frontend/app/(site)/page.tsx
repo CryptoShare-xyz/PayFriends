@@ -1,12 +1,7 @@
 'use client'
 
+import { createGroup, useGroupSplitterStats } from "@/actions/GroupSplitter";
 import { Button } from "@/components/ui/button";
-import * as Sentry from "@sentry/browser";
-import Image from "next/image";
-
-
-import { useEffect, useState } from "react";
-
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   Form,
@@ -18,26 +13,23 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { fetchBaseLowGasPrice } from "@/contexts/ContractProvider";
-
-
-
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/components/ui/use-toast";
-import { useContract } from "@/contexts/ContractProvider";
 import { getEthRate } from "@/lib/ethRate";
 import { formatMoney } from "@/lib/utils";
+import Hero2 from "@/public/hero2.png";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useChainModal,
   useConnectModal
 } from '@rainbow-me/rainbowkit';
+import * as Sentry from "@sentry/browser";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAccount, useChainId } from "wagmi";
 import { z } from "zod";
-
-import Hero2 from "@/public/hero2.png";
 
 const createGroupSchema = z.object({
   groupName: z.string().min(1).max(20),
@@ -50,16 +42,13 @@ const createGroupSchema = z.object({
 
 function CreateGroupDialog() {
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
   const { push } = useRouter()
-  const { address, isConnected, chainId } = useAccount();
+  const { isConnected, chainId } = useAccount();
   const { openConnectModal } = useConnectModal();
   const { openChainModal } = useChainModal();
-  const { contract } = useContract()
   const { toast } = useToast()
+  const [isLoading, setLoading] = useState<boolean>();
   const myChain = useChainId()
-
-
 
   const form = useForm<z.infer<typeof createGroupSchema>>({
     resolver: zodResolver(createGroupSchema),
@@ -72,32 +61,25 @@ function CreateGroupDialog() {
 
   async function onSubmit(values: z.infer<typeof createGroupSchema>) {
     const { groupName, ownerNickname, currency } = values
-    setLoading(true)
-
-
     const isUSDC = currency === "USDC"
+    setLoading(true);
 
     try {
-      const lowGasPrice = await fetchBaseLowGasPrice();
-      const gasLimit = await contract.methods.createGroup(groupName, ownerNickname, isUSDC).estimateGas({ from: address });
-      const group = await contract.methods.createGroup(groupName, ownerNickname, isUSDC).send({
-        from: address,
-        gasPrice: lowGasPrice,
-        gas: gasLimit
-      });
-      const groupId = group.events?.logGroupCreated.returnValues.groupId
-      push(`/group/${groupId}`)
+      const groupId = await createGroup(groupName, ownerNickname, isUSDC);
+      push(`/group/${groupId}`);
     } catch (error) {
       if (error instanceof Error) {
         toast({ variant: "destructive", description: error.message })
         Sentry.captureException(error);
       }
+      console.log(error)
     } finally {
-      setOpen(false)
       setLoading(false)
+      setOpen(false)
       form.reset()
     }
   }
+
 
   const onOpenDialog = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault()
@@ -188,7 +170,7 @@ function CreateGroupDialog() {
               )}
             />
             <DialogFooter>
-              <Button variant="outline" className="bg-[#009BEB] text-slate-50" type="submit" disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
+              <Button variant="outline" className="bg-[#009BEB] text-slate-50" type="submit" disabled={isLoading}>{isLoading ? "Creating..." : "Create"}</Button>
             </DialogFooter>
           </form>
         </Form>
@@ -197,39 +179,64 @@ function CreateGroupDialog() {
   )
 }
 
-export default function Home() {
+function StatsSection() {
   const [openedGroups, setOpenedGroups] = useState(0);
   const [collected, setCollected] = useState(0);
-  const { contract } = useContract()
 
-  async function getContractStats() {
-    const ethRate = await getEthRate();
-    try {
-      let res = await contract.methods.contractOpenedGroupsStat().call()
-      setOpenedGroups(Number.parseInt(res))
-
-      res = await contract.methods.contractTotalCollectedUSDCStat().call()
-      const collectedUSDC = Math.floor(Number.parseInt(res) / 10 ** 6)
-
-      res = await contract.methods.contractTotalCollectedEthStat().call()
-      const collectedEth = Math.floor((Number.parseInt(res) / 10 ** 18) * ethRate)
-
-      setCollected(collectedUSDC + collectedEth);
-
-    } catch (error) {
-      alert("Failed loading contract")
-      Sentry.captureException(error);
-
-    }
-
-  }
-
+  const { data, isSuccess, error, isError } = useGroupSplitterStats()
 
   useEffect(() => {
-    getContractStats();
-  }, [])
+    const getStats = async () => {
+      const ethRate = await getEthRate();
 
+      setOpenedGroups(data.openedGroups);
 
+      const collectedUSDC = Math.floor(data.totalCollectedUSDC / 10 ** 6)
+      const collectedEth = Math.floor((data.totalCollectedEth / 10 ** 18) * ethRate)
+
+      setCollected(collectedUSDC + collectedEth);
+    }
+
+    if (isSuccess) {
+      getStats().catch(error => {
+        alert("Failed loading contract")
+        Sentry.captureException(error);
+      })
+    }
+
+    if (isError) {
+      alert("Failed loading contract")
+      Sentry.captureException(error);
+    }
+
+  }, [isSuccess, isError, error, data])
+
+  return (
+    <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
+      <article className="flex justify-center items-center gap-4">
+        <div className="max-w-[6rem]">
+          <Image src="/group.svg" width={128} height={128} alt=" group" />
+        </div>
+        <aside className="flex flex-col items-start">
+          <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{openedGroups}</h1>
+          <small className="text-[#B2B2B2] text-base text-left">Opened Groups</small>
+        </aside>
+      </article>
+      <hr className="w-[60%] mx-auto border-dashed border-[#D9D9D9]" />
+      <article className="flex justify-center items-center gap-4">
+        <div className="max-w-[6rem]">
+          <Image src="/collected.svg" width={128} height={128} alt=" group" />
+        </div>
+        <aside className="flex flex-col items-start">
+          <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{formatMoney(collected)}$</h1>
+          <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
+        </aside>
+      </article>
+    </section>
+  );
+}
+
+export default function Home() {
   return (
     <div>
       <section id="hero" className="p-2 2xl:p-4 lg:rounded-2xl">
@@ -247,27 +254,7 @@ export default function Home() {
           <Image className="object-cover" src={Hero2} alt="friends" />
         </figure>
 
-        <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
-          <article className="flex justify-center items-center gap-4">
-            <div className="max-w-[6rem]">
-              <Image src="/group.svg" width={128} height={128} alt=" group" />
-            </div>
-            <aside className="flex flex-col items-start">
-              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{openedGroups}</h1>
-              <small className="text-[#B2B2B2] text-base text-left">Opened Groups</small>
-            </aside>
-          </article>
-          <hr className="w-[60%] mx-auto border-dashed border-[#D9D9D9]" />
-          <article className="flex justify-center items-center gap-4">
-            <div className="max-w-[6rem]">
-              <Image src="/collected.svg" width={128} height={128} alt=" group" />
-            </div>
-            <aside className="flex flex-col items-start">
-              <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{formatMoney(collected)}$</h1>
-              <small className="text-[#B2B2B2] text-base text-left">Collected Volume</small>
-            </aside>
-          </article>
-        </section>
+        <StatsSection />
 
       </div>
     </div>
