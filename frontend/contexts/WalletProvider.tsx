@@ -25,7 +25,10 @@ const config = getDefaultConfig({
         ),
     },
     projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string,
-    appName: "PayFriends"
+    appName: "PayFriends",
+    appIcon: "/og_image.jpg",
+    appUrl: "https://payfriends.xyz",
+    appDescription: "Share Expenses, Save on Fees - Powered by Crypto",
 });
 
 const Disclaimer: DisclaimerComponent = ({ Text, Link }) => (
