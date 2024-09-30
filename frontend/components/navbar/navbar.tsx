@@ -30,6 +30,7 @@ export function Navbar() {
             <NavMenu isMobile={isMobile}>
                 {!isHome && <ListItem href="/" title="Home" />}
                 <ListItem href="/about" title="About" />
+                <ListItem href="https://t.me/+Z09kZl7OiPtmNjBk" title="Feedback" target="_blank" />
             </NavMenu>
             <div className="ml-auto">
                 <Wallet />
