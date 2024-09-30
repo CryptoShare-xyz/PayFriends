@@ -24,9 +24,8 @@ const config = getDefaultConfig({
             `https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
         ),
     },
-    projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
-    appName: "PayFriends",
-    ssr: true
+    projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string,
+    appName: "PayFriends"
 });
 
 const Disclaimer: DisclaimerComponent = ({ Text, Link }) => (
