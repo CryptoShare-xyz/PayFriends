@@ -38,7 +38,7 @@ export default function SiteLayout({
                             <Image src="/github.svg" width={128} height={128} alt="github" />
                         </div>
                     </Link>
-                    <Link href="https://t.me/danieli4444" target="_blank">
+                    <Link href="https://t.me/+Z09kZl7OiPtmNjBk" target="_blank">
                         <div className="max-w-[48px] w-[8vw]">
                             <Image src="/telegram.svg" width={128} height={128} alt="telegram" />
                         </div>
