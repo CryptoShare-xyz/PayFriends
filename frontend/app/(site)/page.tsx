@@ -183,7 +183,7 @@ function StatsSection() {
   const [openedGroups, setOpenedGroups] = useState(0);
   const [collected, setCollected] = useState(0);
 
-  const { data, isSuccess, error, isError } = useGroupSplitterStats()
+  const { data, isSuccess } = useGroupSplitterStats()
 
   useEffect(() => {
     const getStats = async () => {
@@ -204,12 +204,7 @@ function StatsSection() {
       })
     }
 
-    if (isError) {
-      alert("Failed loading contract")
-      Sentry.captureException(error);
-    }
-
-  }, [isSuccess, isError, error, data])
+  }, [isSuccess, data])
 
   return (
     <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
