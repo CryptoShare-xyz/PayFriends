@@ -1,5 +1,4 @@
 "use client"
-import * as React from "react"
 
 import {
     NavigationMenu,
@@ -7,35 +6,27 @@ import {
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
-    NavigationMenuTrigger
+    NavigationMenuTrigger,
+    navigationMenuTriggerStyle
 } from "@/components/ui/navigation-menu"
-import { cn } from "@/lib/utils"
 import { Menu } from "lucide-react"
+import Link, { LinkProps } from "next/link"
+import React, { HTMLAttributeAnchorTarget } from "react"
 import { useMediaQuery } from "react-responsive"
 import Wallet from "../ui/wallet"
 
-export const ListItem = React.forwardRef<
-    React.ElementRef<"a">,
-    React.ComponentPropsWithoutRef<"a">
->(({ className, title, ...props }, ref) => {
+
+export const ListItem: React.FC<{ title: string, target?: HTMLAttributeAnchorTarget } & LinkProps> = ({ title, target, ...props }) => {
     return (
         <li>
-            <NavigationMenuLink asChild>
-                <a
-                    ref={ref}
-                    className={cn(
-                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                        className
-                    )}
-                    {...props}
-                >
+            <Link {...props} legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()} target={target}>
                     <div className="text-sm font-medium leading-none lg:text-2xl md:text-lg text-muted-foreground hover:text-[#009BEB] focus:text-[#009BEB]">{title}</div>
-                </a>
-            </NavigationMenuLink>
+                </NavigationMenuLink>
+            </Link>
         </li>
     )
-})
-ListItem.displayName = "ListItem"
+}
 
 export function Navbar({
     children,
