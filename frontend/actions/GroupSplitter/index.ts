@@ -1,8 +1,8 @@
 import { erc20Abi, groupSplitAbi } from '@/abi/generated';
 import { config } from '@/config';
-import { estimateGas, getAccount, getBalance, getGasPrice, readContract, waitForTransactionReceipt, writeContract } from "@wagmi/core";
+import { getAccount, getBalance, readContract, waitForTransactionReceipt, writeContract } from "@wagmi/core";
 import type { Abi, ContractFunctionArgs, ContractFunctionName } from 'viem';
-import { encodeFunctionData, parseEventLogs } from 'viem';
+import { parseEventLogs } from 'viem';
 import { useReadContracts } from "wagmi";
 
 export type Group = {
@@ -36,13 +36,6 @@ const usdcContract = {
     abi: erc20Abi
 } as const
 
-import { } from '@wagmi/core';
-
-async function getLowGasPrice() {
-    const currentGasPrice = Number(await getGasPrice(config));
-    return BigInt(Math.floor(currentGasPrice * 0.8));  // Estimate a lower gas price, e.g., 80% of the average
-}
-
 type sendContractParameters<
     ABI extends Abi,
     FN extends ContractFunctionName<ABI, 'nonpayable' | 'payable'>
@@ -60,17 +53,6 @@ async function sendContract<
 >
     (parameters: sendContractParameters<ABI, FN>) {
     const { address, abi, functionName, args, value } = parameters;
-    const gasPrice = await getLowGasPrice();
-    const gas = await estimateGas(config, {
-        to: address,
-        /* @ts-ignore */
-        data: encodeFunctionData({
-            abi: abi,
-            functionName,
-            args
-        }),
-        value
-    });
 
     /* @ts-ignore */
     const hash = await writeContract(config, {
@@ -78,8 +60,6 @@ async function sendContract<
         abi: abi,
         functionName,
         args,
-        gasPrice,
-        gas,
         value
     });
 
