@@ -1,5 +1,4 @@
 "use client"
-
 import * as React from "react"
 
 import {
@@ -12,25 +11,45 @@ import {
 } from "@/components/ui/navigation-menu"
 import { cn } from "@/lib/utils"
 import { Menu } from "lucide-react"
-import { usePathname } from "next/navigation"
 import { useMediaQuery } from "react-responsive"
 import Wallet from "../ui/wallet"
 
+export const ListItem = React.forwardRef<
+    React.ElementRef<"a">,
+    React.ComponentPropsWithoutRef<"a">
+>(({ className, title, ...props }, ref) => {
+    return (
+        <li>
+            <NavigationMenuLink asChild>
+                <a
+                    ref={ref}
+                    className={cn(
+                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                        className
+                    )}
+                    {...props}
+                >
+                    <div className="text-sm font-medium leading-none lg:text-2xl md:text-lg text-muted-foreground hover:text-[#009BEB] focus:text-[#009BEB]">{title}</div>
+                </a>
+            </NavigationMenuLink>
+        </li>
+    )
+})
+ListItem.displayName = "ListItem"
 
-export function Navbar() {
+export function Navbar({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const isMobile = !useMediaQuery({
         query: '(min-width: 640px)'
     })
 
-    const pathname = usePathname();
-    const isHome = pathname === "/";
-
     return (
         <nav className="w-full flex flex-row p-4 items-center">
             <NavMenu isMobile={isMobile}>
-                {!isHome && <ListItem href="/" title="Home" />}
-                <ListItem href="/about" title="About" />
-                <ListItem href="https://t.me/+Z09kZl7OiPtmNjBk" title="Feedback" target="_blank" />
+                {children}
             </NavMenu>
             <div className="ml-auto">
                 <Wallet />
@@ -65,28 +84,3 @@ function NavMenu({ isMobile, children }: { isMobile: boolean, children: React.Re
     )
 }
 
-
-
-
-const ListItem = React.forwardRef<
-    React.ElementRef<"a">,
-    React.ComponentPropsWithoutRef<"a">
->(({ className, title, ...props }, ref) => {
-    return (
-        <li>
-            <NavigationMenuLink asChild>
-                <a
-                    ref={ref}
-                    className={cn(
-                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                        className
-                    )}
-                    {...props}
-                >
-                    <div className="text-sm font-medium leading-none lg:text-2xl md:text-lg text-muted-foreground hover:text-[#009BEB] focus:text-[#009BEB]">{title}</div>
-                </a>
-            </NavigationMenuLink>
-        </li>
-    )
-})
-ListItem.displayName = "ListItem"
