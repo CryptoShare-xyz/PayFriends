@@ -40,7 +40,7 @@ function StatsSection() {
     <section id="stats" className="flex flex-col text-center justify-evenly mx-auto gap-4 mb-8 md:w-[30%]">
       <article className="flex justify-center items-center gap-4">
         <div className="max-w-[6rem]">
-          <Image src="/group.svg" width={128} height={128} alt=" group" />
+          <Image src="/group.svg" width={128} height={128} alt="group" />
         </div>
         <aside className="flex flex-col items-start">
           <h1 className="lg:text-4xl text-3xl text-[#1F92CE]">{openedGroups}</h1>
