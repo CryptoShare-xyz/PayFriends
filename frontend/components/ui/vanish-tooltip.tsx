@@ -7,11 +7,11 @@ export function VanishTooltip({ content, children, onClick, timeout = 1000 }: { 
     useEffect(() => {
         let timer: NodeJS.Timeout
         if (showTooltip) {
+            onClick && onClick();
             timer = setTimeout(() => {
                 setShowTooltip(false)
             }, timeout)
         }
-        onClick && onClick();
         return () => clearTimeout(timer)
     }, [showTooltip, timeout, onClick])
 
