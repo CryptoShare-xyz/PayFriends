@@ -23,9 +23,9 @@
             "label": "groups",
             "offset": 0,
             "slot": "0",
-            "type": "t_array(t_struct(Group)381_storage)dyn_storage",
+            "type": "t_array(t_struct(Group)1089_storage)dyn_storage",
             "contract": "GroupSplit",
-            "src": "contracts/GroupSplit.sol:44"
+            "src": "contracts/GroupSplit.sol:35"
           },
           {
             "label": "groupIds",
@@ -33,7 +33,7 @@
             "slot": "1",
             "type": "t_array(t_uint256)dyn_storage",
             "contract": "GroupSplit",
-            "src": "contracts/GroupSplit.sol:45"
+            "src": "contracts/GroupSplit.sol:36"
           },
           {
             "label": "groupIndexById",
@@ -41,7 +41,7 @@
             "slot": "2",
             "type": "t_mapping(t_uint256,t_uint256)",
             "contract": "GroupSplit",
-            "src": "contracts/GroupSplit.sol:46"
+            "src": "contracts/GroupSplit.sol:37"
           },
           {
             "label": "contractOpenedGroupsStat",
@@ -49,7 +49,7 @@
             "slot": "3",
             "type": "t_uint256",
             "contract": "GroupSplit",
-            "src": "contracts/GroupSplit.sol:49"
+            "src": "contracts/GroupSplit.sol:40"
           },
           {
             "label": "contractTotalCollectedEthStat",
@@ -57,7 +57,7 @@
             "slot": "4",
             "type": "t_uint256",
             "contract": "GroupSplit",
-            "src": "contracts/GroupSplit.sol:50"
+            "src": "contracts/GroupSplit.sol:41"
           },
           {
             "label": "contractTotalCollectedUSDCStat",
@@ -65,7 +65,264 @@
             "slot": "5",
             "type": "t_uint256",
             "contract": "GroupSplit",
-            "src": "contracts/GroupSplit.sol:51"
+            "src": "contracts/GroupSplit.sol:42"
+          },
+          {
+            "label": "USDC",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_contract(IERC20)983",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:44"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)7_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Group)1089_storage)dyn_storage": {
+            "label": "struct GroupSplit.Group[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC20)983": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_struct(Participant)1060_storage)": {
+            "label": "mapping(address => struct GroupSplit.Participant)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Group)1089_storage": {
+            "label": "struct GroupSplit.Group",
+            "members": [
+              {
+                "label": "groupId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "groupName",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "isUSDC",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "creationTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "ownerNickname",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "balance",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "7"
+              },
+              {
+                "label": "totalCollected",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "8"
+              },
+              {
+                "label": "totalWithdrawn",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "9"
+              },
+              {
+                "label": "participantsAddresses",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "10"
+              },
+              {
+                "label": "participantDetails",
+                "type": "t_mapping(t_address,t_struct(Participant)1060_storage)",
+                "offset": 0,
+                "slot": "11"
+              }
+            ],
+            "numberOfBytes": "384"
+          },
+          "t_struct(Participant)1060_storage": {
+            "label": "struct GroupSplit.Participant",
+            "members": [
+              {
+                "label": "participantAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "nickname",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "totalDeposits",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "lastDeposited",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "90c108cb93b3b919c87622df445856f96e68b9f415d589bd2c338b8c384029d6": {
+      "address": "0x69eca07D555DE29d728E9de2e4f251092F11DA1B",
+      "txHash": "0x7124dd450f6acf1a48d6a1c62a92768babd7cc9b995695200795b49c51f69403",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "groups",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_array(t_struct(Group)381_storage)dyn_storage",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:35"
+          },
+          {
+            "label": "groupIds",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)dyn_storage",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:36"
+          },
+          {
+            "label": "groupIndexById",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:37"
+          },
+          {
+            "label": "contractOpenedGroupsStat",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:40"
+          },
+          {
+            "label": "contractTotalCollectedEthStat",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:41"
+          },
+          {
+            "label": "contractTotalCollectedUSDCStat",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256",
+            "contract": "GroupSplit",
+            "src": "contracts/GroupSplit.sol:42"
           },
           {
             "label": "USDC",
@@ -73,7 +330,7 @@
             "slot": "6",
             "type": "t_contract(IERC20)331",
             "contract": "GroupSplit",
-            "src": "contracts/GroupSplit.sol:53"
+            "src": "contracts/GroupSplit.sol:44"
           }
         ],
         "types": {

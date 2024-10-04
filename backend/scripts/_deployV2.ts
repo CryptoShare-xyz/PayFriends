@@ -1,10 +1,10 @@
 import { ethers, upgrades } from "hardhat";
 
-const PROXY_ADDRESS = "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1"
+const PROXY_ADDRESS = "0x2ebcfE92bf4935172581be5148c160FEB47f7B76"
 
 async function deployV2() {
-    const GroupSplitV2 = await ethers.getContractFactory("GroupSplitV2")
-    const groupSplit = await upgrades.upgradeProxy(PROXY_ADDRESS, GroupSplitV2);
+    const GroupSplit = await ethers.getContractFactory("GroupSplit")
+    const groupSplit = await upgrades.upgradeProxy(PROXY_ADDRESS, GroupSplit);
     const deployedAddress = await groupSplit.getAddress();
     console.log(`Proxy Address to ${deployedAddress}`);
     console.log(
