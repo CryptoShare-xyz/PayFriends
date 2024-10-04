@@ -1,4 +1,5 @@
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-verify";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import * as dotenv from 'dotenv';
@@ -28,16 +29,23 @@ const config: HardhatUserConfig = {
     },
 
     base_sepolia: {
-      accounts: [`${process.env.PRIVATE_KEY || dummyKey}`],
+      accounts: [`${process.env.BASE_SEPOLIA_PRIVATE_KEY || dummyKey}`],
       url: `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
     },
 
     base: {
-      accounts: [`${process.env.PRIVATE_KEY || dummyKey}`],
+      accounts: [`${process.env.BASE_PRIVATE_KEY || dummyKey}`],
       url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
     },
-
   },
+
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
+  },
+
+  sourcify: {
+    enabled: true
+  }
 };
 
 export default config;
