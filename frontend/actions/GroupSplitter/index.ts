@@ -1,9 +1,11 @@
-import { erc20Abi, groupSplitAbi } from '@/abi/generated';
+import { groupSplitAbi, erc20Abi as usdcAbi } from '@/abi/generated';
 import { config } from '@/config';
-import { getAccount, getBalance, readContract, waitForTransactionReceipt, writeContract } from "@wagmi/core";
+import { getAccount, getBalance, getChainId, readContract, waitForTransactionReceipt, writeContract } from "@wagmi/core";
+import { base, baseSepolia, hardhat } from "wagmi/chains";
+
 import type { Abi, ContractFunctionArgs, ContractFunctionName } from 'viem';
 import { parseEventLogs } from 'viem';
-import { useReadContracts } from "wagmi";
+import { useChainId, useReadContracts } from "wagmi";
 
 export type Group = {
     groupId: string,
@@ -26,15 +28,28 @@ export type Participant = {
     lastDeposited: string
 }
 
-const groupSplitterContract = {
-    address: process.env.NEXT_PUBLIC_CONTACT_ADDRESS as `0x${string}`,
-    abi: groupSplitAbi
-} as const
 
-const usdcContract = {
-    address: process.env.NEXT_PUBLIC_USDC_CONTACT_ADDRESS as `0x${string}`,
-    abi: erc20Abi
-} as const
+function getContractAddress(chainId: number) {
+    switch (chainId) {
+        case base.id:
+            return {
+                contractAddress: process.env.NEXT_PUBLIC_BASE_CONTACT_ADDRESS as `0x${string}`,
+                usdcAddress: process.env.NEXT_PUBLIC_BASE_USDC_CONTACT_ADDRESS as `0x${string}`,
+            };
+        case baseSepolia.id:
+            return {
+                contractAddress: process.env.NEXT_PUBLIC_BASE_SEPOLIA_CONTACT_ADDRESS as `0x${string}`,
+                usdcAddress: process.env.NEXT_PUBLIC_BASE_SEPOLIA_USDC_CONTACT_ADDRESS as `0x${string}`,
+            };
+        case hardhat.id:
+            return {
+                contractAddress: process.env.NEXT_PUBLIC_HARDHAT_CONTACT_ADDRESS as `0x${string}`,
+                usdcAddress: process.env.NEXT_PUBLIC_HARDHAT_USDC_CONTACT_ADDRESS as `0x${string}`,
+            };
+        default:
+            throw new Error(`chain ${chainId} not supported`);
+    }
+}
 
 type sendContractParameters<
     ABI extends Abi,
@@ -57,7 +72,7 @@ async function sendContract<
     /* @ts-ignore */
     const hash = await writeContract(config, {
         address,
-        abi: abi,
+        abi,
         functionName,
         args,
         value
@@ -65,24 +80,30 @@ async function sendContract<
 
     const transactionReceipt = await waitForTransactionReceipt(config, { hash });
     return parseEventLogs({
-        abi: groupSplitterContract.abi,
+        abi,
         logs: transactionReceipt.logs
     })
 }
 
 export function useGroupSplitterStats() {
+    const chainId = useChainId()
+    const { contractAddress: address } = getContractAddress(chainId);
+
     const { data, ...other } = useReadContracts({
         contracts: [
             {
-                ...groupSplitterContract,
+                address,
+                abi: groupSplitAbi,
                 functionName: "contractOpenedGroupsStat"
             },
             {
-                ...groupSplitterContract,
+                address,
+                abi: groupSplitAbi,
                 functionName: "contractTotalCollectedEthStat"
             },
             {
-                ...groupSplitterContract,
+                address,
+                abi: groupSplitAbi,
                 functionName: "contractTotalCollectedUSDCStat"
             }
         ]
@@ -97,10 +118,13 @@ export function useGroupSplitterStats() {
     }
 }
 
-export async function getGroupInfo(groupId: string): Promise<Group> {
+export async function getGroupInfo(chainId: number, groupId: string): Promise<Group> {
     const _GROUP_OPEN = 2;
+    const { contractAddress: address } = getContractAddress(chainId);
+
     const group = await readContract(config, {
-        ...groupSplitterContract,
+        address,
+        abi: groupSplitAbi,
         functionName: "getGroupInfoById",
         args: [BigInt(groupId)],
     })
@@ -109,7 +133,8 @@ export async function getGroupInfo(groupId: string): Promise<Group> {
 
     const participants: Participant[] = await Promise.all<Participant>(group[10].map(async (participantsAddress: string): Promise<Participant> => {
         const participant = await readContract(config, {
-            ...groupSplitterContract,
+            address,
+            abi: groupSplitAbi,
             functionName: "getParticipantDetails",
             args: [BigInt(groupId), participantsAddress as `0x${string}`],
         })
@@ -137,8 +162,12 @@ export async function getGroupInfo(groupId: string): Promise<Group> {
 }
 
 export async function createGroup(groupName: string, ownerNickname: string, isUSDC: boolean) {
+    const chainId = getChainId(config);
+    const { contractAddress: address } = getContractAddress(chainId);
+
     const parsed = await sendContract({
-        ...groupSplitterContract,
+        address,
+        abi: groupSplitAbi,
         functionName: 'createGroup',
         args: [groupName, ownerNickname, isUSDC]
     });
@@ -152,6 +181,9 @@ export async function createGroup(groupName: string, ownerNickname: string, isUS
 
 
 export async function depositUSDC(groupId: string, nickname: string, amount: number) {
+    const chainId = getChainId(config);
+    const { contractAddress, usdcAddress } = getContractAddress(chainId);
+
     const usdc = amount * (10 ** 6); // usdc decimal is 6 
     const account = getAccount(config);
     if (account.address === undefined) {
@@ -159,7 +191,8 @@ export async function depositUSDC(groupId: string, nickname: string, amount: num
     }
 
     const balance = Number(await readContract(config, {
-        ...usdcContract,
+        address: usdcAddress,
+        abi: usdcAbi,
         functionName: "balanceOf",
         args: [
             account.address,
@@ -171,31 +204,37 @@ export async function depositUSDC(groupId: string, nickname: string, amount: num
     }
 
     const allowance = Number(await readContract(config, {
-        ...usdcContract,
+        address: usdcAddress,
+        abi: usdcAbi,
         functionName: "allowance",
         args: [
             account.address,
-            groupSplitterContract.address
+            contractAddress
         ]
     }));
 
     // if missing allowance ask for more
     if (allowance < usdc) {
         await sendContract({
-            ...usdcContract,
+            address: usdcAddress,
+            abi: usdcAbi,
             functionName: 'approve',
-            args: [groupSplitterContract.address, BigInt(usdc - allowance)]
+            args: [contractAddress, BigInt(usdc - allowance)]
         });
     }
 
     await sendContract({
-        ...groupSplitterContract,
+        address: contractAddress,
+        abi: groupSplitAbi,
         functionName: "depositToGroup",
         args: [BigInt(groupId), nickname, true, BigInt(usdc)]
     });
 }
 
 export async function depositEth(groupId: string, nickname: string, amount: number) {
+    const chainId = getChainId(config);
+    const { contractAddress: address } = getContractAddress(chainId);
+
     const wei = amount * (10 ** 18); // eth decimal is 18
     const account = getAccount(config);
     if (account.address === undefined) {
@@ -213,7 +252,8 @@ export async function depositEth(groupId: string, nickname: string, amount: numb
     }
 
     await sendContract({
-        ...groupSplitterContract,
+        address,
+        abi: groupSplitAbi,
         functionName: "depositToGroup",
         args: [BigInt(groupId), nickname, false, BigInt(0)],
         value: BigInt(wei)
@@ -221,8 +261,12 @@ export async function depositEth(groupId: string, nickname: string, amount: numb
 }
 
 export async function withdrawFromGroup(groupId: string) {
+    const chainId = getChainId(config);
+    const { contractAddress: address } = getContractAddress(chainId);
+
     await sendContract({
-        ...groupSplitterContract,
+        address,
+        abi: groupSplitAbi,
         functionName: "withdrawFromGroup",
         args: [BigInt(groupId)]
     })

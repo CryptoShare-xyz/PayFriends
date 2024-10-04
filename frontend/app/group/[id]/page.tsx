@@ -23,7 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAddress } from "@/lib/utils";
 import React, { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 
 function LoadingGroup() {
     return (
@@ -43,6 +43,7 @@ export default function GroupPage({ params }: { params: { id: string } }) {
     const [loading, setLoading] = useState(true)
     const { address } = useAccount();
     const [copiedOwner, setCopiedOwner] = useState(false)
+    const chainId = useChainId();
 
     const copyOwnerAddress = (address: string) => {
         return (e: React.MouseEvent<HTMLElement>) => {
@@ -57,7 +58,7 @@ export default function GroupPage({ params }: { params: { id: string } }) {
     }
 
     useEffect(() => {
-        getGroupInfo(params.id)
+        getGroupInfo(chainId, params.id)
             .then((group) => {
                 setGroup(group);
                 setIsOwner(group.owner === address);
@@ -65,11 +66,12 @@ export default function GroupPage({ params }: { params: { id: string } }) {
             })
             .catch(() => {
                 console.log(`Group id: ${params.id} not found`);
+                setGroup(undefined);
             })
             .finally(() => {
                 setLoading(false);
             })
-    }, [params.id, address])
+    }, [chainId, params.id, address])
 
     if (loading) {
         return <LoadingGroup />
@@ -88,7 +90,9 @@ export default function GroupPage({ params }: { params: { id: string } }) {
                         <Wallet />
                     </div>
                 </nav>
-                <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 text-muted-foreground opacity-60 h-full">Group not found</h2>
+                <h2 className="text-4xl font-bold tracking-tight flex justify-center items-center gap-4 text-muted-foreground opacity-60 h-full">
+                    {`Group not found on chain (${chainId}), maybe try different chain.`}
+                </h2>
             </div>
         );
     }
