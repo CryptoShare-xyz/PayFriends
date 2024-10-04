@@ -6,8 +6,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const ETHERSCAN_URL = `https://basescan.org/address/${process.env.NEXT_PUBLIC_CONTACT_ADDRESS}`
-
 function Footer() {
     return (
         <footer className="flex flex-col justify-center items-center gap-2 p-4 max-h-[20vh]">
@@ -27,10 +25,7 @@ function Footer() {
                 <Link href="/terms">
                     <h1 className="text-muted-foreground cursor-pointer hover:underline focus:underline">Terms of Service</h1>
                 </Link>
-                <div className="w-px h-4 bg-gray-300" aria-hidden="true" />
-                <Link href={ETHERSCAN_URL} target="_blank">
-                    <h1 className="text-muted-foreground cursor-pointer hover:underline focus:underline">Contract</h1>
-                </Link>
+                {/* <div className="w-px h-4 bg-gray-300" aria-hidden="true" /> */}
             </div>
         </footer>
     );
