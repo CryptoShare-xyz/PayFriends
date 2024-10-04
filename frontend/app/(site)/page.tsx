@@ -13,7 +13,7 @@ function StatsSection() {
   const [openedGroups, setOpenedGroups] = useState(0);
   const [collected, setCollected] = useState(0);
 
-  const { data, isSuccess } = useGroupSplitterStats()
+  const { data, isSuccess } = useGroupSplitterStats();
 
   useEffect(() => {
     const getStats = async () => {

@@ -1,4 +1,5 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import Image from 'next/image';
 
 const Wallet = () => {
     return (
@@ -43,9 +44,32 @@ const Wallet = () => {
                                 );
                             }
                             return (
-                                <button onClick={openAccountModal} type="button" className="flex flex-row items-center justify-center gap-2 bg-[#F0F2F5] p-2 rounded-2xl">
-                                    <span className="text-xs md:text-base font-semibold">{account.displayName}</span>
-                                </button>
+                                <div className='flex flex-row gap-4'>
+                                    <button
+                                        className='flex items-center hover:underline focus:underline'
+                                        onClick={openChainModal}
+                                        type="button"
+                                    >
+                                        {chain.hasIcon && (
+                                            <div
+                                                className={`rounded-full overflow-hidden mr-1 bg-[${chain.iconBackground}] w-[4vw] max-w-[24px]`}
+                                            >
+                                                {chain.iconUrl && (
+                                                    <Image
+                                                        alt={chain.name ?? 'Chain icon'}
+                                                        src={chain.iconUrl}
+                                                        width={48}
+                                                        height={48}
+                                                    />
+                                                )}
+                                            </div>
+                                        )}
+                                        <span className="text-xs md:text-base font-semibold">{chain.name}</span>
+                                    </button>
+                                    <button onClick={openAccountModal} type="button" className="flex flex-row items-center justify-center gap-2 bg-[#F0F2F5] p-2 rounded-2xl">
+                                        <span className="text-xs md:text-base font-semibold">{account.displayName}</span>
+                                    </button>
+                                </div>
                             );
                         })()}
                     </div>

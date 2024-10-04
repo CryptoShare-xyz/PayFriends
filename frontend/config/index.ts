@@ -5,22 +5,24 @@ import { http } from "wagmi";
 import { base, baseSepolia, hardhat } from "wagmi/chains";
 
 export const isDevelopment = process.env.NODE_ENV === 'development';
-export const isTestnet = process.env.NEXT_PUBLIC_TESTNET === 'true'
 
 let networks = {};
 
 if (isDevelopment) {
     networks = {
-        chains: [hardhat],
+        chains: [hardhat, baseSepolia],
         transports: {
             [hardhat.id]: http(
                 "http://127.0.0.1:8545",
+            ),
+            [baseSepolia.id]: http(
+                `https://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
             ),
         },
     }
 } else {
     networks = {
-        chains: isTestnet ? [baseSepolia] : [base],
+        chains: [baseSepolia, base],
         transports: {
             [baseSepolia.id]: http(
                 `https://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
