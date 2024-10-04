@@ -6,7 +6,6 @@ import moment from "moment";
 
 import {
     ArrowLeft,
-    CheckIcon,
     ClipboardIcon,
     Lock,
     User
@@ -21,8 +20,9 @@ import ShareGroupDialog from "@/components/dialogs/ShareGroupDialog";
 import WithdrawGroupDialog from "@/components/dialogs/WithdrawGroupDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { VanishTooltip } from "@/components/ui/vanish-tooltip";
 import { formatAddress } from "@/lib/utils";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount, useChainId } from "wagmi";
 
 function LoadingGroup() {
@@ -42,16 +42,7 @@ export default function GroupPage({ params }: { params: { id: string } }) {
     const [group, setGroup] = useState<Group>();
     const [loading, setLoading] = useState(true)
     const { address } = useAccount();
-    const [copiedOwner, setCopiedOwner] = useState(false)
     const chainId = useChainId();
-
-    const copyOwnerAddress = (address: string) => {
-        return (e: React.MouseEvent<HTMLElement>) => {
-            navigator.clipboard.writeText(address)
-            setCopiedOwner(true)
-            setTimeout(() => setCopiedOwner(false), 2000)
-        }
-    }
 
     const copyText = (text: string) => {
         navigator.clipboard.writeText(text)
@@ -125,21 +116,19 @@ export default function GroupPage({ params }: { params: { id: string } }) {
                     <ShareGroupDialog />
                 </div>
                 <p className="text-muted-foreground md:text-base text-xs">Group owner: {group.ownerNickname}</p>
+
                 <p className="text-muted-foreground md:text-base text-xs">
                     Owner address: {formatAddress(group.owner)}
-                    <Button
-                        variant="ghost"
-                        className="p-1 text-muted-foreground h-fit"
-                        size="sm"
-                        onClick={copyOwnerAddress(group.owner)}
-                        aria-label="Copy owner address"
-                    >
-                        {copiedOwner ? (
-                            <CheckIcon className="md:h-4 md:w-4 h-3 w-3 text-[#009BEB]" />
-                        ) : (
+                    <VanishTooltip content="Copied" onClick={() => copyText(group.owner)}>
+                        <Button
+                            variant="ghost"
+                            className="p-1 text-muted-foreground h-fit"
+                            size="sm"
+                            aria-label="Copy owner address"
+                        >
                             <ClipboardIcon className="md:h-4 md:w-4 h-3 w-3" />
-                        )}
-                    </Button>
+                        </Button>
+                    </VanishTooltip>
                 </p>
             </header>
 
@@ -195,7 +184,11 @@ export default function GroupPage({ params }: { params: { id: string } }) {
                                 {group.participants.map(({ nickname, totalDeposits, participantAddress, lastDeposited }) => (
                                     <TableRow key={participantAddress}>
                                         <TableCell className="text-xs sm:text-sm md:text-base capitalize">{nickname}</TableCell>
-                                        <TableCell className=" text-xs sm:text-sm md:text-base hover:underline focus:underline cursor-pointer" onClick={(e) => copyText(participantAddress)}>{formatAddress(participantAddress)}</TableCell>
+                                        <TableCell className=" text-xs sm:text-sm md:text-base hover:underline focus:underline cursor-pointer">
+                                            <VanishTooltip content="Copied" onClick={() => copyText(participantAddress)}>
+                                                <span>{formatAddress(participantAddress)}</span>
+                                            </VanishTooltip>
+                                        </TableCell>
                                         <TableCell className="text-xs sm:text-sm md:text-base">{totalDeposits}</TableCell>
                                         <TableCell className="text-xs sm:text-sm md:text-base">{moment.unix(Number(lastDeposited)).calendar()}</TableCell>
                                     </TableRow>
