@@ -173,7 +173,7 @@ export async function createGroup(groupName: string, ownerNickname: string, isUS
     });
 
     if (!('groupId' in parsed[0].args)) {
-        throw Error("No groupId in event")
+        throw new Error("No groupId in event")
     }
 
     return parsed[0].args.groupId;
