@@ -22,7 +22,7 @@ if (isDevelopment) {
     }
 } else {
     networks = {
-        chains: [baseSepolia, base],
+        chains: [base, baseSepolia],
         transports: {
             [baseSepolia.id]: http(
                 `https://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
@@ -31,6 +31,7 @@ if (isDevelopment) {
                 `https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
             ),
         },
+
     }
 }
 
