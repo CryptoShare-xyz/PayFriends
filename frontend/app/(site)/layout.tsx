@@ -20,6 +20,11 @@ function Footer() {
                         <Image src="/telegram.svg" width={128} height={128} alt="telegram" />
                     </div>
                 </Link>
+                <Link href="https://x.com/payfriendsxyz" target="_blank">
+                    <div className="max-w-[48px] w-[8vw]">
+                        <Image src="/twitter.svg" width={128} height={128} alt="twitter" />
+                    </div>
+                </Link>
             </section>
             <div className="flex flex-row justify-center items-center space-x-4">
                 <Link href="/terms">
