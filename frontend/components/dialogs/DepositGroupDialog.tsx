@@ -131,7 +131,7 @@ const DepositGroupDialog: React.FC<{ groupId: string, isParticipant: boolean, is
                                 <FormItem>
                                     <FormLabel>Amount to deposit</FormLabel>
                                     <FormDescription>
-                                        This is the amount of eth to deposit to the group.
+                                        This is the amount of {isUSDC ? "usdc" : "eth"} to deposit to the group.
                                     </FormDescription>
                                     <FormControl >
                                         <div className="relative">
