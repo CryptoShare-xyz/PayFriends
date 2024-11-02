@@ -2,7 +2,7 @@ import {
     getDefaultConfig,
 } from '@rainbow-me/rainbowkit';
 import { http } from "wagmi";
-import { base, baseSepolia, hardhat } from "wagmi/chains";
+import { base, baseSepolia, hardhat, kakarotStarknetSepolia } from "wagmi/chains";
 
 export const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -22,7 +22,7 @@ if (isDevelopment) {
     }
 } else {
     networks = {
-        chains: [base, baseSepolia],
+        chains: [base, baseSepolia, kakarotStarknetSepolia],
         transports: {
             [baseSepolia.id]: http(
                 `https://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
@@ -30,6 +30,9 @@ if (isDevelopment) {
             [base.id]: http(
                 `https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
             ),
+            [kakarotStarknetSepolia.id]: http(
+                "https://sepolia-rpc.kakarot.org",
+            )
         },
 
     }

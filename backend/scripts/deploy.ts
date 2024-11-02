@@ -2,6 +2,7 @@ import { ethers, network, upgrades } from "hardhat";
 
 const BASE_USDC_CONTRACT_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 const BASE_SEPOLIA_USDC_CONTRACT_ADDRESS = "0xB209bf575b13072195173619e95c1346497E98C3"
+const KAKAROT_SEPOLIA_USDC_CONTRACT_ADDRESS = "0xdc10471e56D6a75FeBb540eB87865e586b03cA22"
 
 async function deployDevUSDC() {
     const signers = await ethers.getSigners();
@@ -55,6 +56,9 @@ async function main() {
             break
         case "base":
             await deployGroupSplitter(BASE_USDC_CONTRACT_ADDRESS)
+            break
+        case "kakarot_sepolia":
+            await deployGroupSplitter(KAKAROT_SEPOLIA_USDC_CONTRACT_ADDRESS)
             break
         default:
             break;
