@@ -1,7 +1,7 @@
 import { groupSplitAbi, erc20Abi as usdcAbi } from '@/abi/generated';
 import { config } from '@/config';
 import { getAccount, getBalance, getChainId, readContract, waitForTransactionReceipt, writeContract } from "@wagmi/core";
-import { base, baseSepolia, hardhat } from "wagmi/chains";
+import { base, baseSepolia, hardhat, kakarotStarknetSepolia } from "wagmi/chains";
 
 import type { Abi, ContractFunctionArgs, ContractFunctionName } from 'viem';
 import { parseEventLogs } from 'viem';
@@ -45,6 +45,11 @@ function getContractAddress(chainId: number) {
             return {
                 contractAddress: process.env.NEXT_PUBLIC_HARDHAT_CONTACT_ADDRESS as `0x${string}`,
                 usdcAddress: process.env.NEXT_PUBLIC_HARDHAT_USDC_CONTACT_ADDRESS as `0x${string}`,
+            };
+        case kakarotStarknetSepolia.id:
+            return {
+                contractAddress: process.env.NEXT_PUBLIC_KAKAROT_SEPOLIA_CONTACT_ADDRESS as `0x${string}`,
+                usdcAddress: process.env.NEXT_PUBLIC_KAKAROT_SEPOLIA_USDC_CONTACT_ADDRESS as `0x${string}`,
             };
         default:
             throw new Error(`chain ${chainId} not supported`);

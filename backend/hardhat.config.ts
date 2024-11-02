@@ -37,6 +37,11 @@ const config: HardhatUserConfig = {
       accounts: [`${process.env.BASE_PRIVATE_KEY || dummyKey}`],
       url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
     },
+
+    kakarot_sepolia: {
+      accounts: [`${process.env.KAKAROT_SEPOLIA_PRIVATE_KEY || dummyKey}`],
+      url: "https://sepolia-rpc.kakarot.org"
+    }
   },
 
   etherscan: {
